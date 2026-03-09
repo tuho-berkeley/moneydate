@@ -457,7 +457,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
               } animate-fade-in-message`}
             >
-              <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
+              <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" ? (
                   labelType && <AIMessageLabel type={labelType} askedName={labelType === "question" ? msg.askedName ?? undefined : undefined} />
                 ) : (
