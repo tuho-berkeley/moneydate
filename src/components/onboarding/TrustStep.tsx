@@ -7,8 +7,8 @@ const TrustStep = ({ onFinish }: { onFinish: () => void }) => (
       <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto">
         <ShieldCheck className="w-8 h-8 text-primary" />
       </div>
-      <h2 className="font-display text-2xl font-bold text-foreground">Your trust matters</h2>
-      <p className="text-muted-foreground text-sm leading-relaxed">
+      <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Your trust matters</h2>
+      <p className="text-muted-foreground text-sm leading-relaxed text-pretty">
         MoneyDate helps guide conversations and financial planning.
         It does not provide investment, tax, or legal advice.
         When needed, we'll suggest speaking with a professional.
