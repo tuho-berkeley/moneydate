@@ -153,7 +153,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       return;
     }
 
-    setSeeded(false);
+    seedingRef.current = false;
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient]);
