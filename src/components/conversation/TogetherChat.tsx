@@ -286,6 +286,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       const startIndex = justStreamedRef.current ? 1 : 0;
       if (justStreamedRef.current && newAiMsgs[0]) {
         setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
       }
       justStreamedRef.current = false;
 
@@ -307,11 +308,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         newNonAiMsgs.forEach(m => next.add(m.id));
         return next;
       });
-    }
-
-    if (justStreamedRef.current && newAiMsgs[0]) {
-      setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
-    }
     }
 
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
