@@ -285,7 +285,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             summarySegments.map((segment, idx) => (
               <div
                 key={idx}
-                className="animate-fade-in-message"
+                className={idx >= prevSegmentCountRef.current ? "animate-fade-in-message" : ""}
               >
                 {idx === 0 && <AIMessageLabel type="insight" />}
                 <div className="bg-secondary/50 rounded-2xl p-4">

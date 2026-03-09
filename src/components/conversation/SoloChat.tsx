@@ -392,7 +392,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           return (
             <div
               key={msg.id}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-message`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}${freshIds.has(msg.id) || msg.id === "streaming" ? " animate-fade-in-message" : ""}`}
+              onAnimationEnd={() => setFreshIds(prev => { const next = new Set(prev); next.delete(msg.id); return next; })}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}
