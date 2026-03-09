@@ -406,7 +406,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
                 {msg.role === "ai" ? (
-                  labelType && <AIMessageLabel type={labelType} />
+                  labelType && <AIMessageLabel type={labelType} askedName={labelType === "question" ? msg.askedName ?? undefined : undefined} />
                 ) : (
                   <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 ${
                     msg.isMe ? "text-right text-primary/60" : "text-muted-foreground"
