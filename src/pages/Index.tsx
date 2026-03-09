@@ -1,11 +1,23 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import UpNextCard from "@/components/UpNextCard";
+import ProgressCards from "@/components/ProgressCards";
+import ActivityPath from "@/components/ActivityPath";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background pb-28">
+      {/* Header */}
+      <div className="px-6 pt-14 pb-6">
+        <p className="text-sm text-muted-foreground font-medium">Good evening ✨</p>
+        <h1 className="font-display text-2xl font-bold text-foreground mt-1">
+          Sarah & James
+        </h1>
+      </div>
+
+      {/* Content */}
+      <div className="px-6 space-y-5">
+        <UpNextCard />
+        <ProgressCards />
+        <ActivityPath />
       </div>
     </div>
   );
