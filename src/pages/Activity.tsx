@@ -153,7 +153,7 @@ const Activity = () => {
                         <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                       )}
                       <p className="font-semibold text-foreground">Solo Chat</p>
-                      <p className="text-xs text-muted-foreground">Reflect on your own first</p>
+                      <p className="text-xs text-muted-foreground text-pretty">Reflect on your own first</p>
                     </div>
                   </Button>
 
