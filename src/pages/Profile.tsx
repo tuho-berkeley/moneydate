@@ -74,6 +74,27 @@ const Profile = () => {
     navigate("/login");
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${currentSession?.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to delete account");
+      await signOut();
+      navigate("/onboarding");
+    } catch {
+      toast.error("Could not delete account. Please try again.");
+    }
+  };
+
   const copyInviteCode = () => {
     navigator.clipboard.writeText(inviteCode);
     toast.success("Invite code copied!");
