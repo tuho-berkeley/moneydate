@@ -206,7 +206,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
         {subStep > 0 ? (
           <Button
             onClick={() => setSubStep(subStep - 1)}
-            variant="ghost"
+            variant="outline"
             className="rounded-full text-muted-foreground"
             size="lg"
           >
