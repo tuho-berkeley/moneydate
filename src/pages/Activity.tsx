@@ -82,6 +82,22 @@ const Activity = () => {
     enabled: !!id && !!user,
   });
 
+  const { data: lessonCompleted } = useQuery({
+    queryKey: ["lesson-completed", id, user?.id],
+    queryFn: async () => {
+      if (!id || !user) return false;
+      const { data } = await supabase
+        .from("user_activities")
+        .select("status")
+        .eq("activity_id", id)
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!id && !!user,
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -205,7 +221,7 @@ const Activity = () => {
                 {activity.description || "This lesson will teach you important concepts about managing finances as a couple."}
               </p>
               <Button className="w-full rounded-xl" onClick={() => navigate(`/lesson/${id}`)}>
-                Start Lesson
+                {lessonCompleted ? "Review Lesson" : "Start Lesson"}
               </Button>
             </div>
           )}
