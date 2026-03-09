@@ -6,7 +6,7 @@ const ProgressCards = () => {
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
+      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-center text-center">
         <div className="flex items-center gap-1.5 mb-1">
           <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
             <Flame className="w-3.5 h-3.5 text-secondary-foreground" />
@@ -15,7 +15,7 @@ const ProgressCards = () => {
         </div>
         <p className="text-[10px] text-muted-foreground">Week Streak</p>
       </div>
-      <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
+      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-center text-center">
         <div className="flex items-center gap-1.5 mb-1">
           <div className="w-7 h-7 rounded-lg bg-success-light flex items-center justify-center">
             <MessageCircle className="w-3.5 h-3.5 text-success" />
@@ -24,7 +24,7 @@ const ProgressCards = () => {
         </div>
         <p className="text-[10px] text-muted-foreground">Activities</p>
       </div>
-      <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
+      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-center text-center">
         <div className="flex items-center gap-1.5 mb-1">
           <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
             <Heart className="w-3.5 h-3.5 text-secondary-foreground" />
