@@ -110,7 +110,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       );
     }
 
-    if (subStep === 1) {
+    if (subStep === 2) {
       return (
         <div className="space-y-6 animate-fade-in" key="q2">
           <div className="text-center space-y-2">
