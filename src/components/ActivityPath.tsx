@@ -253,13 +253,13 @@ const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
         
         {showStartButton && (
           <button 
-            className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
+            className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0"
             onClick={(e) => {
               e.stopPropagation();
               onClick();
             }}
           >
-            {activity.userStatus === "in_progress" ? "Continue" : "Start"}
+            <ChevronRight className="w-4 h-4" />
           </button>
         )}
       </div>
