@@ -413,9 +413,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {isLoadingStart && (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        {/* Show thinking bubble during initial load/seeding */}
+        {dbMessages.length === 0 && !streamingMessage && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Guide
+            </p>
+            <AIThinkingBubble />
           </div>
         )}
 
