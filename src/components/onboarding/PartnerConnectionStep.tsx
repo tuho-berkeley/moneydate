@@ -101,8 +101,8 @@ const PartnerConnectionStep = ({ onNext, onSkip }: Props) => {
     return (
       <div className="w-full max-w-sm space-y-6 animate-fade-in">
         <div className="text-center space-y-3">
-          <h2 className="font-display text-2xl font-bold text-foreground">Join your partner</h2>
-          <p className="text-muted-foreground text-sm">
+          <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Join your partner</h2>
+          <p className="text-muted-foreground text-sm text-pretty">
             Enter the code your partner shared with you.
           </p>
         </div>
