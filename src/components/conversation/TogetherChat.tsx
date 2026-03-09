@@ -232,7 +232,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     aiTriggerRef.current = true;
 
     let fullResponse = "";
-    setStreamingMessage("");
 
     await streamChat({
       messages: historyForAI,
