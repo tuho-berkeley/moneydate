@@ -243,12 +243,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       onDone: async () => {
         setStreamingMessage(null);
         if (fullResponse) {
-          await supabase.from("messages").insert({
-            conversation_id: conversation.id,
-            sender_id: null,
-            role: "ai",
-            content: fullResponse,
-          });
+          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          for (const segment of segments) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: segment,
+            });
+          }
         }
         setIsAIResponding(false);
         aiTriggerRef.current = false;
