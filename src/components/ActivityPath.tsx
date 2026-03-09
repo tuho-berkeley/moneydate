@@ -229,7 +229,7 @@ const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
         <div
           className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
             activity.userStatus === "completed"
-              ? "bg-green-100 text-green-600"
+              ? "bg-success-light text-success"
               : activity.userStatus === "available" || activity.userStatus === "in_progress"
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground"
