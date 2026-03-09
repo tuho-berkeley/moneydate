@@ -145,12 +145,15 @@ const Activity = () => {
                   onClick={() => handleStartConversation("solo")}
                 >
                   <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center mr-3">
-                    <MessageCircle className="w-5 h-5 text-primary" />
+                    {completedTypes?.has("solo") ? <Check className="w-5 h-5 text-secondary-foreground" /> : <MessageCircle className="w-5 h-5 text-primary" />}
                   </div>
-                  <div className="text-left">
+                  <div className="text-left flex-1">
                     <p className="font-semibold text-foreground">Solo Chat</p>
                     <p className="text-xs text-muted-foreground">Reflect on your own first</p>
                   </div>
+                  {completedTypes?.has("solo") && (
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-1 rounded-full">Completed</span>
+                  )}
                 </Button>
 
                 <Button
@@ -159,12 +162,15 @@ const Activity = () => {
                   onClick={() => handleStartConversation("together")}
                 >
                   <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mr-3">
-                    <span className="text-lg">👥</span>
+                    {completedTypes?.has("together") ? <Check className="w-5 h-5 text-secondary-foreground" /> : <span className="text-lg">👥</span>}
                   </div>
-                  <div className="text-left">
+                  <div className="text-left flex-1">
                     <p className="font-semibold text-foreground">Together Chat</p>
                     <p className="text-xs text-muted-foreground">Chat with your partner & guided by AI</p>
                   </div>
+                  {completedTypes?.has("together") && (
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-1 rounded-full">Completed</span>
+                  )}
                 </Button>
 
                 <Button
@@ -173,12 +179,15 @@ const Activity = () => {
                   onClick={() => handleStartConversation("face_to_face")}
                 >
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3">
-                    <span className="text-lg">💬</span>
+                    {completedTypes?.has("face_to_face") ? <Check className="w-5 h-5 text-secondary-foreground" /> : <span className="text-lg">💬</span>}
                   </div>
-                  <div className="text-left">
+                  <div className="text-left flex-1">
                     <p className="font-semibold text-foreground">Face-to-Face</p>
                     <p className="text-xs text-muted-foreground">In-person with voice recording</p>
                   </div>
+                  {completedTypes?.has("face_to_face") && (
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-1 rounded-full">Completed</span>
+                  )}
                 </Button>
               </div>
             </div>
