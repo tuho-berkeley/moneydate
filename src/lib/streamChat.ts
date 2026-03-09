@@ -7,6 +7,8 @@ export async function streamChat({
   activityTitle,
   activityDescription,
   conversationType,
+  userName,
+  partnerName,
   onDelta,
   onDone,
   onError,
@@ -16,6 +18,8 @@ export async function streamChat({
   activityTitle: string;
   activityDescription: string;
   conversationType: string;
+  userName?: string;
+  partnerName?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
@@ -35,6 +39,8 @@ export async function streamChat({
       activityTitle,
       activityDescription,
       conversationType,
+      userName,
+      partnerName,
     }),
     signal,
   });
