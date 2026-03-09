@@ -26,7 +26,7 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-0.5 px-5 py-2 rounded-full transition-all duration-200 ${
+              className={`flex flex-col items-center gap-0 px-4 py-1.5 rounded-full transition-all duration-200 ${
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
