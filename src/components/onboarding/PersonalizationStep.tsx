@@ -56,7 +56,10 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               return (
                 <button
                   key={opt.value}
-                  onClick={() => onChange({ usageIntent: opt.value })}
+                  onClick={() => {
+                    onChange({ usageIntent: opt.value });
+                    setTimeout(() => setSubStep(1), 300);
+                  }}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
                     selected
                       ? "border-primary bg-secondary"
