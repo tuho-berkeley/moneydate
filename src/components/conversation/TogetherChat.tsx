@@ -154,6 +154,26 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     }
   }, [input]);
 
+  const handleRestart = useCallback(async () => {
+    if (!conversation || isSending) return;
+    setStreamingMessage(null);
+    setIsSending(false);
+    setIsRequestingAI(false);
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversation.id);
+
+    if (error) {
+      toast.error("Failed to restart chat");
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    toast.success("Chat restarted");
+  }, [conversation, isSending, queryClient]);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user) return;
 
