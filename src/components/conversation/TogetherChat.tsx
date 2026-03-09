@@ -484,7 +484,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               onKeyDown={handleKeyDown}
               placeholder={
                 isAIResponding
-                  ? "Guide is speaking…"
+487:                   ? "Hold on a moment…"
                   : isMyTurn
                     ? `${myName}, it's your turn to share!`
                     : "Share your thoughts…"
