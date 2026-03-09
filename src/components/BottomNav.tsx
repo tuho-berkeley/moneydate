@@ -17,7 +17,7 @@ const BottomNav = () => {
   const navRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
 
-  useLayoutEffect(() => {
+  const updateIndicator = () => {
     if (!navRef.current) return;
     const activeIndex = tabs.findIndex((t) => t.path === location.pathname);
     if (activeIndex === -1) {
@@ -29,6 +29,20 @@ const BottomNav = () => {
     if (btn) {
       setIndicator({ left: btn.offsetLeft, width: btn.offsetWidth });
     }
+  };
+
+  useLayoutEffect(() => {
+    updateIndicator();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    // Recalculate after fonts/layout settle
+    const raf = requestAnimationFrame(updateIndicator);
+    window.addEventListener("resize", updateIndicator);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updateIndicator);
+    };
   }, [location.pathname]);
 
   if (!session) return null;
