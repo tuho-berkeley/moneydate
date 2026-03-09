@@ -393,7 +393,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             (idx === displayMessages.length - 1 || displayMessages[idx + 1]?.role !== "ai");
           const isFirstAI = msg.role === "ai" && idx === 0;
           const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
-          const isQuestionHighlight = isLastAI && labelType === "question";
           const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
 
           return (
@@ -421,7 +420,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                       : msg.isMe
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary/50 text-foreground"
-                  } ${isQuestionHighlight ? "question-highlight animate-pulse-subtle" : ""}`}
+                  }`}
                 >
                   {msg.role === "ai" ? (
                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">

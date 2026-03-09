@@ -294,7 +294,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
             !(idx === messages.length - 1 && streamingMessage !== null);
           const isFirstAI = msg.role === "ai" && idx === 0;
           const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
-          const isQuestionHighlight = isLastAI && labelType === "question";
           const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
 
           return (
@@ -310,7 +309,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary/50 text-foreground"
-                  } ${isQuestionHighlight ? "question-highlight" : ""}`}
+                  }`}
                 >
                   {msg.role === "ai" ? (
                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
