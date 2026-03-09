@@ -11,7 +11,7 @@ const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
         Before forever,<br />talk about money.
       </h1>
       <p className="text-muted-foreground text-sm leading-relaxed">
-        Money conversations don't have to feel awkward. Start exploring your financial values and future plans together.
+        Money conversations don't have to feel awkward. Start exploring your shared values and plan the future together.
       </p>
     </div>
     <Button onClick={onNext} className="w-full rounded-full" size="lg">
