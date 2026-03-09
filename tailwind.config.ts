@@ -124,7 +124,7 @@ export default {
         "fade-in-message": "fade-in-message 0.5s cubic-bezier(0.16,1,0.3,1) forwards",
         "thinking-wave": "thinking-wave 1.2s ease-in-out infinite",
         "pulse-subtle": "pulse-subtle 2.5s ease-in-out infinite",
-      },
+        "message-appear": "message-appear 0.4s ease-out forwards",
     },
   },
   plugins: [require("tailwindcss-animate")],
