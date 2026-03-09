@@ -92,6 +92,29 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
+  // Seed starter AI message when conversation has no messages yet
+  const [seeded, setSeeded] = useState(false);
+  useEffect(() => {
+    if (!conversation || seeded || dbMessages.length > 0) return;
+    setSeeded(true);
+
+    const starterContent = `Hi! I'm here to guide you through a personal reflection about **${activityTitle.toLowerCase()}**.\n\nTake your time — there are no right or wrong answers. What comes to mind first?`;
+
+    supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversation.id,
+        sender_id: null,
+        role: "ai",
+        content: starterContent,
+      })
+      .then(({ error }) => {
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+        }
+      });
+  }, [conversation, dbMessages.length, seeded, activityTitle, queryClient]);
+
   const messages: ChatMessage[] = [
     ...dbMessages.map((m: DBMessage) => ({
       id: m.id,
