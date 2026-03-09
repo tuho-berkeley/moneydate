@@ -309,10 +309,14 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     );
   }
 
+  const handleRecordAgain = useCallback(() => {
+    setResponses((prev) => prev.filter((r) => !(r.promptIndex === currentPrompt && r.partner === activePartner)));
+  }, [currentPrompt, activePartner]);
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+      <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 shrink-0">
         <button onClick={() => navigate(-1)} className="text-muted-foreground">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -344,14 +348,13 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         </span>
       </div>
 
-      {/* Flash Card + Controls */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
-        {/* Flippable Flash Card */}
+      {/* Scrollable content area: flashcard + transcript */}
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 flex flex-col items-center">
+        {/* Flippable Flash Card — top aligned */}
         <div
           className="w-full max-w-sm cursor-pointer [perspective:1000px]"
           onClick={() => setIsFlipped((f) => !f)}
         >
-          {/* Invisible sizer: both sides overlap via grid so the taller one sets height */}
           <div className="relative w-full grid">
             <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
@@ -369,15 +372,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </div>
           </div>
 
-          {/* Actual 3D flip card overlaid on sizer */}
           <div
             className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d]"
             style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
           >
-            {/* Front — Question */}
-            <div
-              className="absolute inset-0 bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden]"
-            >
+            <div className="absolute inset-0 bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden]">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Discuss Together
               </p>
@@ -393,10 +392,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               </button>
             </div>
 
-            {/* Back — Hint */}
-            <div
-              className="absolute inset-0 bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden] [transform:rotateY(180deg)]"
-            >
+            <div className="absolute inset-0 bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
                 <Lightbulb className="w-3.5 h-3.5" />
                 Hint
@@ -409,83 +405,85 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           </div>
         </div>
 
-        {/* Partner tabs + Recording — outside the card */}
-        <div className="w-full max-w-sm mt-5 space-y-4">
-          {/* Partner tabs */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActivePartner("partner_a")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
-                activePartner === "partner_a"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              Partner A {hasResponse(currentPrompt, "partner_a") && "✓"}
-            </button>
-            <button
-              onClick={() => setActivePartner("partner_b")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
-                activePartner === "partner_b"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              Partner B {hasResponse(currentPrompt, "partner_b") && "✓"}
-            </button>
+        {/* Transcript area */}
+        {hasResponse(currentPrompt, activePartner) && (
+          <div className="w-full max-w-sm mt-4 bg-secondary/50 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              {activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response
+            </p>
+            <p className="text-sm text-foreground">
+              {getResponse(currentPrompt, activePartner)?.transcript}
+            </p>
           </div>
+        )}
+      </div>
 
-          {/* Recording controls */}
-          {hasResponse(currentPrompt, activePartner) ? (
-            <div className="bg-secondary/50 rounded-xl p-3 text-left animate-fade-in">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                {activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response
-              </p>
-              <p className="text-sm text-foreground">
-                {getResponse(currentPrompt, activePartner)?.transcript}
-              </p>
-            </div>
-          ) : (
+      {/* Fixed bottom controls */}
+      <div className="shrink-0 px-6 pb-6 pt-3 space-y-3 bg-background border-t border-border">
+        {/* Recording controls */}
+        <div className="w-full max-w-sm mx-auto">
+          {recordingState === "idle" && (
+            <Button
+              onClick={hasResponse(currentPrompt, activePartner) ? handleRecordAgain : startRecording}
+              size="lg"
+              variant={hasResponse(currentPrompt, activePartner) ? "outline" : "default"}
+              className="w-full rounded-xl gap-2"
+            >
+              <Mic className="w-5 h-5" />
+              {hasResponse(currentPrompt, activePartner) ? "Record Again" : "Start Recording"}
+            </Button>
+          )}
+          {recordingState === "recording" && (
             <div className="space-y-3">
-              {recordingState === "idle" && (
-                <Button
-                  onClick={startRecording}
-                  size="lg"
-                  className="w-full rounded-xl gap-2"
-                >
-                  <Mic className="w-5 h-5" />
-                  Start Recording
-                </Button>
-              )}
-              {recordingState === "recording" && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                    <span className="text-sm text-destructive font-medium">Recording...</span>
-                  </div>
-                  <Button
-                    onClick={stopRecording}
-                    variant="destructive"
-                    size="lg"
-                    className="w-full rounded-xl gap-2"
-                  >
-                    <Square className="w-4 h-4" />
-                    Stop Recording
-                  </Button>
-                </div>
-              )}
-              {recordingState === "transcribing" && (
-                <div className="flex items-center justify-center gap-2 py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">Transcribing...</span>
-                </div>
-              )}
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                <span className="text-sm text-destructive font-medium">Recording...</span>
+              </div>
+              <Button
+                onClick={stopRecording}
+                variant="destructive"
+                size="lg"
+                className="w-full rounded-xl gap-2"
+              >
+                <Square className="w-4 h-4" />
+                Stop Recording
+              </Button>
+            </div>
+          )}
+          {recordingState === "transcribing" && (
+            <div className="flex items-center justify-center gap-2 py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Transcribing...</span>
             </div>
           )}
         </div>
 
+        {/* Sliding Partner Tab */}
+        <div className="w-full max-w-sm mx-auto relative bg-muted rounded-xl p-1 flex">
+          <div
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-lg transition-transform duration-300 ease-out"
+            style={{ transform: activePartner === "partner_b" ? "translateX(calc(100% + 8px))" : "translateX(0)" }}
+          />
+          <button
+            onClick={() => setActivePartner("partner_a")}
+            className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
+              activePartner === "partner_a" ? "text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Partner A {hasResponse(currentPrompt, "partner_a") && "✓"}
+          </button>
+          <button
+            onClick={() => setActivePartner("partner_b")}
+            className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
+              activePartner === "partner_b" ? "text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Partner B {hasResponse(currentPrompt, "partner_b") && "✓"}
+          </button>
+        </div>
+
         {/* Navigation */}
-        <div className="flex items-center justify-between w-full max-w-sm mt-6">
+        <div className="flex items-center justify-between w-full max-w-sm mx-auto">
           <Button
             variant="ghost"
             size="sm"
