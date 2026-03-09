@@ -94,16 +94,9 @@ export function useStagesWithActivities() {
             userStatus = "locked";
           } else if (userActivity) {
             userStatus = userActivity.status;
-          } else if (activityIndex === 0) {
-            // First activity in an unlocked stage is available
-            userStatus = "available";
           } else {
-            // Check if previous activity in this stage is completed
-            const prevActivity = stageActivities[activityIndex - 1];
-            const prevUserActivity = progressMap.get(prevActivity.id);
-            if (prevUserActivity?.status === "completed") {
-              userStatus = "available";
-            }
+            // All activities within an unlocked stage are available
+            userStatus = "available";
           }
 
           return {
