@@ -198,9 +198,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   };
 
   const bothResponded = hasResponse(currentPrompt, "partner_a") && hasResponse(currentPrompt, "partner_b");
-  const allPromptsComplete = defaultPrompts.every(
-    (_, i) => hasResponse(i, "partner_a") && hasResponse(i, "partner_b")
-  );
+  const canGenerateInsights =
+    responses.some((r) => r.partner === "partner_a") &&
+    responses.some((r) => r.partner === "partner_b");
 
   const generateSummary = useCallback(async () => {
     if (!conversation || !user) return;
