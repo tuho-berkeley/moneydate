@@ -30,6 +30,21 @@ const Profile = () => {
   const [profile, setProfile] = useState<{ display_name: string; couple_id: string | null } | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [goals, setGoals] = useState<{ icon: string; title: string; progress: number }[]>([]);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  const toggleDarkMode = (checked: boolean) => {
+    setIsDark(checked);
+    document.documentElement.classList.toggle("dark", checked);
+    localStorage.setItem("theme", checked ? "dark" : "light");
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
