@@ -1,6 +1,7 @@
 import { Home, BarChart3, Target, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 
 const tabs = [
   { path: "/", label: "Home", icon: Home },
@@ -13,12 +14,32 @@ const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const navRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    if (!navRef.current) return;
+    const activeIndex = tabs.findIndex((t) => t.path === location.pathname);
+    if (activeIndex === -1) return;
+    const buttons = navRef.current.querySelectorAll<HTMLButtonElement>("button");
+    const btn = buttons[activeIndex];
+    if (btn) {
+      setIndicator({ left: btn.offsetLeft, width: btn.offsetWidth });
+    }
+  }, [location.pathname]);
 
   if (!session) return null;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-      <nav className="flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50">
+      <nav
+        ref={navRef}
+        className="relative flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50"
+      >
+        <div
+          className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
+          style={{ left: indicator.left, width: indicator.width }}
+        />
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           const Icon = tab.icon;
@@ -26,9 +47,9 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-0 px-4 py-1.5 rounded-full transition-all duration-200 ${
+              className={`relative z-10 flex flex-col items-center gap-0 px-4 py-1.5 rounded-full transition-colors duration-200 ${
                 isActive
-                  ? "bg-primary text-primary-foreground"
+                  ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
