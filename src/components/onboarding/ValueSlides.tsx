@@ -8,21 +8,18 @@ const slides = [
     title: "Talk about money without awkwardness",
     description: "Thoughtful questions to guide honest, meaningful conversations together.",
     color: "bg-secondary",
-    iconColor: "text-primary",
   },
   {
     icon: Target,
     title: "Turn conversations into real plans",
     description: "Build shared goals, budgets, and financial plans for your future.",
-    color: "bg-accent",
-    iconColor: "text-accent-foreground",
+    color: "bg-secondary",
   },
   {
     icon: Shield,
     title: "No more financial surprises",
     description: "Understand each other's habits and expectations early.",
-    color: "bg-muted",
-    iconColor: "text-foreground",
+    color: "bg-secondary",
   },
 ];
 
@@ -51,7 +48,7 @@ const ValueSlides = ({ onGoogleAuth, authLoading }: Props) => {
     <div className="w-full max-w-sm text-center space-y-8">
       <div key={current} className="space-y-6 animate-fade-in">
         <div className={`w-24 h-24 rounded-2xl ${slide.color} flex items-center justify-center mx-auto`}>
-          <Icon className={`w-12 h-12 ${slide.iconColor}`} />
+          <Icon className="w-12 h-12 text-primary" />
         </div>
 
         <div className="space-y-3">
