@@ -95,7 +95,10 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
             {durationOptions.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => onChange({ relationshipDuration: opt.value })}
+                onClick={() => {
+                  onChange({ relationshipDuration: opt.value });
+                  setTimeout(() => setSubStep(2), 300);
+                }}
                 className={`w-full p-4 rounded-2xl border-2 text-sm font-medium text-left transition-all duration-200 ${
                   data.relationshipDuration === opt.value
                     ? "border-primary bg-secondary text-foreground"
