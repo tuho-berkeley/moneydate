@@ -208,7 +208,7 @@ const PersonalizationStep = ({ data, onChange, onNext, onSkip }: Props) => {
       </div>
 
       {/* Scrollable question content */}
-      <div className="flex-1 overflow-y-auto pt-4">
+      <div className="flex-1 overflow-y-auto pt-10">
         {renderQuestionContent()}
       </div>
 
