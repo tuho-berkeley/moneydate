@@ -60,7 +60,7 @@ const Profile = () => {
         </div>
 
         {/* Preferences */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <div>
           <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
           <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
             {settings.map((setting, i) => {
