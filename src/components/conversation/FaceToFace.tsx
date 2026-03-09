@@ -478,9 +478,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       </div>
 
       {/* Fixed bottom controls */}
-      <div className="shrink-0 px-6 pb-6 pt-3 space-y-3 bg-background border-t border-border">
-        {/* Recording controls */}
-        <div className="w-full max-w-sm mx-auto">
+      <div className="shrink-0 px-6 pb-6 pt-3 bg-background border-t border-border">
+        <div className="w-full max-w-sm mx-auto space-y-3">
+          {/* Recording controls */}
           {recordingState === "idle" && (
             <Button
               onClick={hasResponse(currentPrompt, activePartner) ? handleRecordAgain : startRecording}
@@ -515,42 +515,42 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               <span className="text-sm text-muted-foreground">Transcribing...</span>
             </div>
           )}
-        </div>
 
-        {/* Partner Toggle */}
-        <div className="w-full max-w-sm mx-auto relative bg-muted rounded-xl p-1 flex">
-          <div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-card rounded-lg shadow-sm border border-border transition-transform duration-300 ease-out"
-            style={{ transform: activePartner === "partner_b" ? "translateX(calc(100% + 8px))" : "translateX(0)" }}
-          />
-          <button
-            onClick={() => setActivePartner("partner_a")}
-            className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-              activePartner === "partner_a" ? "text-foreground" : "text-muted-foreground"
-            }`}
-          >
-            Partner A {hasResponse(currentPrompt, "partner_a") && "✓"}
-          </button>
-          <button
-            onClick={() => setActivePartner("partner_b")}
-            className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-              activePartner === "partner_b" ? "text-foreground" : "text-muted-foreground"
-            }`}
-          >
-            Partner B {hasResponse(currentPrompt, "partner_b") && "✓"}
-          </button>
-        </div>
+          {/* Partner Toggle */}
+          <div className="relative bg-muted rounded-xl p-1 flex">
+            <div
+              className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-card rounded-lg shadow-sm border border-border transition-transform duration-300 ease-out"
+              style={{ transform: activePartner === "partner_b" ? "translateX(calc(100% + 8px))" : "translateX(0)" }}
+            />
+            <button
+              onClick={() => setActivePartner("partner_a")}
+              className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
+                activePartner === "partner_a" ? "text-foreground" : "text-muted-foreground"
+              }`}
+            >
+              Partner A {hasResponse(currentPrompt, "partner_a") && "✓"}
+            </button>
+            <button
+              onClick={() => setActivePartner("partner_b")}
+              className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
+                activePartner === "partner_b" ? "text-foreground" : "text-muted-foreground"
+              }`}
+            >
+              Partner B {hasResponse(currentPrompt, "partner_b") && "✓"}
+            </button>
+          </div>
 
-        {/* Get Insights */}
-        {canGenerateInsights && (
-          <Button
-            onClick={generateSummary}
-            disabled={isGeneratingSummary}
-            className="w-full max-w-sm mx-auto gap-2 rounded-xl"
-          >
-            <Sparkles className="w-4 h-4" /> Get Insights
-          </Button>
-        )}
+          {/* Get Insights */}
+          {canGenerateInsights && (
+            <Button
+              onClick={generateSummary}
+              disabled={isGeneratingSummary}
+              className="w-full gap-2 rounded-xl"
+            >
+              <Sparkles className="w-4 h-4" /> Get Insights
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
