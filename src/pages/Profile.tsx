@@ -41,7 +41,7 @@ const Profile = () => {
 
       <div className="px-6 space-y-5">
         {/* Shared Goals */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div>
           <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Shared Goals</h3>
           <div className="space-y-2">
             {goals.map((goal, i) => (
