@@ -290,7 +290,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             summarySegments.map((segment, idx) => (
               <div
                 key={idx}
-                className={idx >= animateFromIdx ? "animate-fade-in-message" : ""}
               >
                 {idx === 0 && <AIMessageLabel type="insight" />}
                 <div className="bg-secondary/50 rounded-2xl p-4">
@@ -310,7 +309,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </div>
           )}
           {!isGeneratingSummary && summarySegments.length > 0 && (
-            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4 animate-fade-in-message">
+            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
               Done
             </Button>
           )}
