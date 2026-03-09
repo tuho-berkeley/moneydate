@@ -90,7 +90,7 @@ const UpNextCard = () => {
       </div>
       <button
         onClick={handleStart}
-        className="mt-4 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] py-3">
+        className="mt-4 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] py-3 rounded-2xl">
         {current.userStatus === "in_progress" ? "Continue" : "Start"}
         <ArrowRight className="w-4 h-4" />
       </button>
