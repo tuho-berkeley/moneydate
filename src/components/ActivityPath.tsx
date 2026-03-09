@@ -1,75 +1,80 @@
-import { MessageCircle, BookOpen, PiggyBank, Lock, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MessageCircle, BookOpen, PiggyBank, Lock, Check, Loader2 } from "lucide-react";
+import { useActivities, useStartActivity, type ActivityWithProgress } from "@/hooks/useActivities";
+import type { Database } from "@/integrations/supabase/types";
 
-type ActivityStatus = "completed" | "current" | "locked" | "in-progress";
-type ActivityType = "conversation" | "lesson" | "plan";
-
-interface Activity {
-  id: string;
-  title: string;
-  description: string;
-  type: ActivityType;
-  status: ActivityStatus;
-}
-
-const activities: Activity[] = [
-  {
-    id: "1",
-    title: "Your Money Story",
-    description: "Share your earliest money memories",
-    type: "conversation",
-    status: "completed",
-  },
-  {
-    id: "2",
-    title: "Money Scripts 101",
-    description: "Learn about the beliefs that shape your finances",
-    type: "lesson",
-    status: "completed",
-  },
-  {
-    id: "3",
-    title: "Money Values Talk",
-    description: "Discover what money means to each of you",
-    type: "conversation",
-    status: "current",
-  },
-  {
-    id: "4",
-    title: "Joint Budget Basics",
-    description: "Learn how couples manage money together",
-    type: "lesson",
-    status: "locked",
-  },
-  {
-    id: "5",
-    title: "Build Your First Budget",
-    description: "Create a spending plan that works for both of you",
-    type: "plan",
-    status: "locked",
-  },
-  {
-    id: "6",
-    title: "Debt & Obligations",
-    description: "Have an honest talk about what you each owe",
-    type: "conversation",
-    status: "locked",
-  },
-];
+type ActivityType = Database["public"]["Enums"]["activity_type"];
+type ActivityStatus = Database["public"]["Enums"]["activity_status"];
 
 const typeConfig: Record<ActivityType, { label: string; icon: typeof MessageCircle }> = {
   conversation: { label: "Conversation", icon: MessageCircle },
   lesson: { label: "Lesson", icon: BookOpen },
-  plan: { label: "Plan", icon: PiggyBank },
+  planning: { label: "Plan", icon: PiggyBank },
 };
 
 const statusStyles: Record<ActivityStatus, string> = {
   completed: "bg-card border-border shadow-card",
-  current: "bg-card border-primary/30 shadow-soft",
-  "in-progress": "bg-card border-primary/20 shadow-card",
+  available: "bg-card border-primary/30 shadow-soft",
+  in_progress: "bg-card border-primary/20 shadow-card",
   locked: "bg-muted/50 border-border/50 opacity-60",
 };
 
 const ActivityPath = () => {
+  const navigate = useNavigate();
+  const { data: activities, isLoading, error } = useActivities();
+  const startActivity = useStartActivity();
+
+  const handleStartActivity = (activity: ActivityWithProgress) => {
+    if (activity.userStatus === "locked") return;
+
+    // Start the activity if not already started
+    if (activity.userStatus === "available") {
+      startActivity.mutate(activity.id);
+    }
+
+    // Navigate to activity based on type
+    navigate(`/activity/${activity.id}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <h2 className="font-display text-xl font-semibold text-foreground px-1">
+          Your Journey
+        </h2>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-3">
+        <h2 className="font-display text-xl font-semibold text-foreground px-1">
+          Your Journey
+        </h2>
+        <p className="text-sm text-destructive px-1">Failed to load activities</p>
+      </div>
+    );
+  }
+
+  if (!activities || activities.length === 0) {
+    return (
+      <div className="space-y-3">
+        <h2 className="font-display text-xl font-semibold text-foreground px-1">
+          Your Journey
+        </h2>
+        <div className="bg-card rounded-2xl border border-border p-6 text-center">
+          <p className="text-muted-foreground text-sm">
+            No activities available yet. Check back soon!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <h2 className="font-display text-xl font-semibold text-foreground px-1">
@@ -78,23 +83,31 @@ const ActivityPath = () => {
       <div className="space-y-3">
         {activities.map((activity) => {
           const config = typeConfig[activity.type];
-          const Icon = activity.status === "completed" ? Check : activity.status === "locked" ? Lock : config.icon;
+          const Icon = activity.userStatus === "completed" 
+            ? Check 
+            : activity.userStatus === "locked" 
+              ? Lock 
+              : config.icon;
+
+          const isClickable = activity.userStatus !== "locked";
+          const showStartButton = activity.userStatus === "available" || activity.userStatus === "in_progress";
 
           return (
             <div
               key={activity.id}
-              className={`rounded-2xl border p-4 transition-all duration-200 ${statusStyles[activity.status]} ${
-                activity.status === "current" ? "" : ""
+              onClick={() => isClickable && handleStartActivity(activity)}
+              className={`rounded-2xl border p-4 transition-all duration-200 ${statusStyles[activity.userStatus]} ${
+                isClickable ? "cursor-pointer hover:shadow-soft active:scale-[0.99]" : ""
               }`}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    activity.status === "completed"
+                    activity.userStatus === "completed"
                       ? "bg-secondary text-secondary-foreground"
-                      : activity.status === "current"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                      : activity.userStatus === "available" || activity.userStatus === "in_progress"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -103,7 +116,7 @@ const ActivityPath = () => {
                   <div className="flex items-center gap-2 mb-0.5">
                     <span
                       className={`text-[10px] font-semibold uppercase tracking-wider ${
-                        activity.status === "locked" ? "text-muted-foreground" : "text-secondary-foreground"
+                        activity.userStatus === "locked" ? "text-muted-foreground" : "text-secondary-foreground"
                       }`}
                     >
                       {config.label}
@@ -112,9 +125,15 @@ const ActivityPath = () => {
                   <h4 className="font-semibold text-sm text-foreground">{activity.title}</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>
                 </div>
-                {activity.status === "current" && (
-                  <button className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl flex-shrink-0">
-                    Start
+                {showStartButton && (
+                  <button 
+                    className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartActivity(activity);
+                    }}
+                  >
+                    {activity.userStatus === "in_progress" ? "Continue" : "Start"}
                   </button>
                 )}
               </div>

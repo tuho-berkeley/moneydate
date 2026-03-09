@@ -1,28 +1,101 @@
-import { MessageCircle, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MessageCircle, BookOpen, PiggyBank, ArrowRight, Loader2 } from "lucide-react";
+import { useActivityStats, useStartActivity } from "@/hooks/useActivities";
+import type { Database } from "@/integrations/supabase/types";
+
+type ActivityType = Database["public"]["Enums"]["activity_type"];
+
+const typeIcons: Record<ActivityType, typeof MessageCircle> = {
+  conversation: MessageCircle,
+  lesson: BookOpen,
+  planning: PiggyBank,
+};
+
+const typeLabels: Record<ActivityType, string> = {
+  conversation: "Start Conversation",
+  lesson: "Start Lesson",
+  planning: "Start Planning",
+};
 
 const UpNextCard = () => {
+  const navigate = useNavigate();
+  const { current, completed, total } = useActivityStats();
+  const startActivity = useStartActivity();
+
+  const handleStart = () => {
+    if (!current) return;
+    
+    if (current.userStatus === "available") {
+      startActivity.mutate(current.id);
+    }
+    
+    navigate(`/activity/${current.id}`);
+  };
+
+  // All activities completed
+  if (!current && completed === total && total > 0) {
+    return (
+      <div className="bg-card rounded-3xl p-6 shadow-soft">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
+            🎉 Complete
+          </span>
+        </div>
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl">🏆</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-lg font-semibold text-foreground mb-1">
+              Journey Complete!
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              You've completed all available activities. Check back soon for new content!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No activities available
+  if (!current) {
+    return (
+      <div className="bg-card rounded-3xl p-6 shadow-soft">
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  const Icon = typeIcons[current.type];
+
   return (
     <div className="bg-card rounded-3xl p-6 shadow-soft">
       <div className="flex items-center gap-2 mb-4">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
-          Up Next
+          {current.userStatus === "in_progress" ? "Continue" : "Up Next"}
         </span>
       </div>
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center flex-shrink-0">
-          <MessageCircle className="w-6 h-6 text-primary" />
+          <Icon className="w-6 h-6 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-lg font-semibold text-foreground mb-1">
-            Money Values Talk
+            {current.title}
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Discover what money really means to each of you and explore your core financial values together.
+            {current.description}
           </p>
         </div>
       </div>
-      <button className="mt-5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3.5 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]">
-        Start Conversation
+      <button 
+        onClick={handleStart}
+        className="mt-5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3.5 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
+      >
+        {current.userStatus === "in_progress" ? "Continue" : typeLabels[current.type]}
         <ArrowRight className="w-4 h-4" />
       </button>
     </div>
