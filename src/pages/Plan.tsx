@@ -46,7 +46,7 @@ const Plan = () => {
 
         <div className="px-6 space-y-3">
           {/* Total Progress */}
-          <div className="bg-card rounded-3xl p-6 shadow-soft">
+          <div className="bg-card rounded-xl p-6 shadow-soft">
             <h3 className="font-display text-lg font-semibold text-foreground mb-1">Total Saved</h3>
             <p className="text-3xl font-bold text-primary">$16,000</p>
             <p className="text-xs text-muted-foreground mt-1">across all goals</p>
