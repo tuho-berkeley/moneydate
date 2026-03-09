@@ -25,19 +25,12 @@ const ActivityPath = () => {
   const navigate = useNavigate();
   const { data: stages, isLoading, error } = useStagesWithActivities();
   const startActivity = useStartActivity();
-  const [openStages, setOpenStages] = useState<Set<string>>(new Set());
+  // Auto-expand the current (first incomplete unlocked) stage
+  const currentStageId = stages?.find(
+    (s) => s.isUnlocked && s.completedCount < s.totalCount
+  )?.id || stages?.[0]?.id;
 
-  // Auto-open first unlocked stage that has incomplete activities
-  useState(() => {
-    if (stages && stages.length > 0) {
-      const firstIncomplete = stages.find(
-        (s) => s.isUnlocked && s.completedCount < s.totalCount
-      );
-      if (firstIncomplete) {
-        setOpenStages(new Set([firstIncomplete.id]));
-      }
-    }
-  });
+  const [openStages, setOpenStages] = useState<Set<string>>(new Set());
 
   const toggleStage = (stageId: string) => {
     setOpenStages((prev) => {
