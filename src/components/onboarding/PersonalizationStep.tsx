@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { User, Heart, Gem } from "lucide-react";
 import type { OnboardingData } from "@/pages/Onboarding";
+
+const intentOptions = [
+  { value: "exploring_alone", label: "Exploring on my own", icon: User },
+  { value: "in_relationship", label: "In a relationship", icon: Heart },
+  { value: "engaged", label: "Engaged or planning marriage", icon: Gem },
+  { value: "newly_married", label: "Newly married", icon: Heart },
+  { value: "married_long", label: "Married for a while", icon: Heart },
+];
 
 const durationOptions = [
   { value: "less_1", label: "Less than 1 year" },
