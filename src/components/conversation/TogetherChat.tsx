@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, Users, Sparkles, RotateCcw } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Users, Sparkles, RotateCcw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -37,9 +37,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [input, setInput] = useState("");
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [isRequestingAI, setIsRequestingAI] = useState(false);
+  const [isAIResponding, setIsAIResponding] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const seedingRef = useRef(false);
+  const aiTriggerRef = useRef(false);
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({
@@ -54,6 +56,22 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       return data;
     },
     enabled: !!user,
+  });
+
+  // Get partner profile
+  const { data: partnerProfile } = useQuery({
+    queryKey: ["partner-profile", profile?.couple_id],
+    queryFn: async () => {
+      if (!profile?.couple_id || !user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("couple_id", profile.couple_id)
+        .neq("id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!profile?.couple_id && !!user,
   });
 
   // Get or create conversation (linked to couple)
@@ -90,7 +108,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   });
 
   // Fetch messages
-  const { data: dbMessages = [] } = useQuery({
+  const { data: dbMessages = [], isSuccess: messagesLoaded } = useQuery({
     queryKey: ["messages", conversation?.id],
     queryFn: async () => {
       if (!conversation) return [];
@@ -130,81 +148,60 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     };
   }, [conversation?.id, queryClient]);
 
-  // Build display messages
-  const displayMessages = [
-    ...dbMessages.map((m: DBMessage) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content,
-      isMe: m.sender_id === user?.id,
-    })),
-    ...(streamingMessage !== null
-      ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isMe: false }]
-      : []),
-  ];
+  // Determine turn state
+  const partnerId = partnerProfile?.id;
+  const partnerName = partnerProfile?.display_name || "Partner";
+  const myName = profile?.display_name || "You";
 
+  // Find last AI message index and check who has responded since
+  const lastAIIndex = (() => {
+    for (let i = dbMessages.length - 1; i >= 0; i--) {
+      if (dbMessages[i].role === "ai") return i;
+    }
+    return -1;
+  })();
+
+  const messagesSinceLastAI = lastAIIndex >= 0
+    ? dbMessages.slice(lastAIIndex + 1)
+    : dbMessages.filter((m) => m.role !== "ai");
+
+  const myResponseSent = messagesSinceLastAI.some((m) => m.sender_id === user?.id);
+  const partnerResponseSent = partnerId
+    ? messagesSinceLastAI.some((m) => m.sender_id === partnerId)
+    : false;
+  const bothResponded = myResponseSent && partnerResponseSent;
+  const waitingForPartner = myResponseSent && !partnerResponseSent;
+  const waitingForMe = !myResponseSent && partnerResponseSent;
+
+  // AI should respond: when the last message is NOT from AI and both have responded, or at start
+  const lastMessage = dbMessages[dbMessages.length - 1];
+  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && bothResponded;
+
+  // Auto-seed AI starter message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [displayMessages]);
+    if (!conversation || !messagesLoaded || seedingRef.current || dbMessages.length > 0) return;
+    seedingRef.current = true;
+    triggerAI([]);
+  }, [conversation, messagesLoaded, dbMessages.length]);
 
+  // Auto-trigger AI after both partners respond
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-    }
-  }, [input]);
-
-  const handleRestart = useCallback(async () => {
-    if (!conversation || isSending) return;
-    setStreamingMessage(null);
-    setIsSending(false);
-    setIsRequestingAI(false);
-
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("conversation_id", conversation.id);
-
-    if (error) {
-      toast.error("Failed to restart chat");
-      return;
-    }
-
-    queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
-    toast.success("Chat restarted");
-  }, [conversation, isSending, queryClient]);
-
-  const handleSend = useCallback(async () => {
-    if (!input.trim() || isSending || !conversation || !user) return;
-
-    const text = input.trim();
-    setInput("");
-    setIsSending(true);
-
-    const { error } = await supabase.from("messages").insert({
-      conversation_id: conversation.id,
-      sender_id: user.id,
-      role: "user",
-      content: text,
-    });
-
-    if (error) {
-      toast.error("Failed to send message");
-    }
-    setIsSending(false);
-  }, [input, isSending, conversation, user]);
-
-  const handleRequestAI = useCallback(async () => {
-    if (isRequestingAI || !conversation || !user) return;
-    setIsRequestingAI(true);
+    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current) return;
+    aiTriggerRef.current = true;
 
     const historyForAI = dbMessages.map((m: DBMessage) => ({
-      role: (m.role === "ai" ? "assistant" : m.sender_id === user.id ? "user" : "partner") as
-        | "user"
-        | "assistant"
-        | "partner",
-      content: m.content,
+      role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
+      content: m.role === "ai"
+        ? m.content
+        : `[${m.sender_id === user?.id ? myName : partnerName}]: ${m.content}`,
     }));
+
+    triggerAI(historyForAI);
+  }, [aiShouldRespond, isAIResponding]);
+
+  const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
+    if (!conversation) return;
+    setIsAIResponding(true);
 
     let fullResponse = "";
     setStreamingMessage("");
@@ -228,15 +225,84 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             content: fullResponse,
           });
         }
-        setIsRequestingAI(false);
+        setIsAIResponding(false);
+        aiTriggerRef.current = false;
       },
       onError: (error) => {
         toast.error(error);
         setStreamingMessage(null);
-        setIsRequestingAI(false);
+        setIsAIResponding(false);
+        aiTriggerRef.current = false;
       },
     });
-  }, [isRequestingAI, conversation, user, dbMessages, activityTitle, activityDescription]);
+  }, [conversation, activityTitle, activityDescription]);
+
+  // Build display messages
+  const displayMessages = [
+    ...dbMessages.map((m: DBMessage) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      isMe: m.sender_id === user?.id,
+      senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
+    })),
+    ...(streamingMessage !== null
+      ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isMe: false, senderName: "Guide" }]
+      : []),
+  ];
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [displayMessages]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [input]);
+
+  const handleRestart = useCallback(async () => {
+    if (!conversation || isSending) return;
+    setStreamingMessage(null);
+    setIsSending(false);
+    setIsAIResponding(false);
+    seedingRef.current = false;
+    aiTriggerRef.current = false;
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversation.id);
+
+    if (error) {
+      toast.error("Failed to restart chat");
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    toast.success("Chat restarted");
+  }, [conversation, isSending, queryClient]);
+
+  const handleSend = useCallback(async () => {
+    if (!input.trim() || isSending || !conversation || !user || myResponseSent) return;
+
+    const text = input.trim();
+    setInput("");
+    setIsSending(true);
+
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: conversation.id,
+      sender_id: user.id,
+      role: "user",
+      content: text,
+    });
+
+    if (error) {
+      toast.error("Failed to send message");
+    }
+    setIsSending(false);
+  }, [input, isSending, conversation, user, myResponseSent]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -244,6 +310,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       handleSend();
     }
   };
+
+  // Determine if input should be disabled
+  const inputDisabled = isAIResponding || myResponseSent || dbMessages.length === 0 && !streamingMessage;
+  const isLoadingStart = dbMessages.length === 0 && streamingMessage === null && !isAIResponding;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -282,14 +352,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {displayMessages.length === 0 && (
-          <div className="bg-secondary/50 rounded-2xl p-4 max-w-[85%]">
-            <p className="text-sm text-foreground">
-              Welcome to your couple conversation about <strong>{activityTitle.toLowerCase()}</strong>!
-            </p>
-            <p className="text-sm text-foreground mt-2">
-              Both of you can share your thoughts here. Tap the ✨ button anytime to ask the AI facilitator to guide the conversation.
-            </p>
+        {isLoadingStart && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         )}
 
@@ -300,21 +365,20 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
             }`}
           >
-            <div>
-              {msg.role !== "ai" && (
+            <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
+              {msg.role === "ai" ? (
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Guide
+                </p>
+              ) : (
                 <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 ${
                   msg.isMe ? "text-right text-primary/60" : "text-muted-foreground"
                 }`}>
-                  {msg.isMe ? "You" : "Partner"}
-                </p>
-              )}
-              {msg.role === "ai" && (
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-secondary-foreground flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> AI Facilitator
+                  {msg.senderName}
                 </p>
               )}
               <div
-                className={`max-w-[85%] rounded-2xl p-4 ${
+                className={`rounded-2xl p-4 ${
                   msg.role === "ai"
                     ? "bg-accent/50 text-foreground border border-accent"
                     : msg.isMe
@@ -334,44 +398,67 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           </div>
         ))}
 
+        {/* Waiting indicator */}
+        {waitingForPartner && !isAIResponding && (
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
+              <Clock className="w-3.5 h-3.5" />
+              Waiting for {partnerName} to respond…
+            </div>
+          </div>
+        )}
+
+        {/* AI is thinking */}
+        {isAIResponding && streamingMessage === null && (
+          <div className="flex justify-start">
+            <div className="max-w-[90%]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Guide
+              </p>
+              <div className="bg-accent/50 border border-accent rounded-2xl p-4">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
       <div className="bg-card border-t border-border p-4 sticky bottom-0">
-        <div className="flex items-end gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-11 w-11 rounded-xl flex-shrink-0 border-accent"
-            onClick={handleRequestAI}
-            disabled={isRequestingAI}
-            title="Ask AI to facilitate"
-          >
-            {isRequestingAI ? (
-              <Loader2 className="w-5 h-5 animate-spin text-primary" />
-            ) : (
-              <Sparkles className="w-5 h-5 text-primary" />
-            )}
-          </Button>
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Share your thoughts..."
-            className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
-            rows={1}
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isSending}
-            size="icon"
-            className="h-11 w-11 rounded-xl flex-shrink-0"
-          >
-            {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-          </Button>
-        </div>
+        {waitingForPartner ? (
+          <div className="text-center text-sm text-muted-foreground py-2">
+            Your response has been sent. Waiting for {partnerName}…
+          </div>
+        ) : (
+          <div className="flex items-end gap-2">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                isAIResponding
+                  ? "Guide is speaking…"
+                  : waitingForMe
+                    ? "Your partner has answered — your turn!"
+                    : "Share your thoughts…"
+              }
+              className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
+              rows={1}
+              disabled={inputDisabled}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isSending || inputDisabled}
+              size="icon"
+              className="h-11 w-11 rounded-xl flex-shrink-0"
+            >
+              {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
