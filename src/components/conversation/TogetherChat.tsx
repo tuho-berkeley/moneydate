@@ -321,6 +321,14 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [displayMessages]);
 
+  const handleTypewriterComplete = useCallback((msgId: string) => {
+    setFreshIds(prev => {
+      const next = new Set(prev);
+      next.delete(msgId);
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
