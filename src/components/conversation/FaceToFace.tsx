@@ -336,10 +336,13 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
             }}
           >
-            {/* Front — Question */}
+            {/* Front — Question (visible when not flipped) */}
             <div
               className="bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center space-y-4"
-              style={{ backfaceVisibility: "hidden" }}
+              style={{
+                backfaceVisibility: "hidden",
+                visibility: isFlipped ? "hidden" : "visible",
+              }}
             >
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Discuss Together
@@ -356,10 +359,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               </button>
             </div>
 
-            {/* Back — Guidance / Hint */}
+            {/* Back — Guidance / Hint (visible when flipped) */}
             <div
-              className="bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center space-y-4 absolute inset-0"
-              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+              className="bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center space-y-4"
+              style={{
+                backfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
+                visibility: isFlipped ? "visible" : "hidden",
+                position: isFlipped ? "relative" : "absolute",
+                inset: isFlipped ? undefined : 0,
+              }}
             >
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
                 <Lightbulb className="w-3.5 h-3.5" />
