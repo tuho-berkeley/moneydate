@@ -456,7 +456,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               variant="ghost"
               size="sm"
               onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
-              disabled={!bothResponded}
               className="gap-1"
             >
               Next <ChevronRight className="w-4 h-4" />
