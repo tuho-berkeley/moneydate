@@ -29,6 +29,7 @@ const BottomNav = () => {
   }, [location.pathname]);
 
   if (!session) return null;
+  if (location.pathname === "/onboarding") return null;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
