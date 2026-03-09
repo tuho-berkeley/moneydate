@@ -174,9 +174,12 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
             );
           })}
         </div>
-        <Button onClick={onNext} className="w-full rounded-full" size="lg">
-          Continue
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => setSubStep(2)} variant="secondary" className="rounded-full" size="lg">Back</Button>
+          <Button onClick={onNext} className="flex-1 rounded-full" size="lg">
+            Continue
+          </Button>
+        </div>
       </div>
     );
   };
