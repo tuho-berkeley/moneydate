@@ -167,9 +167,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       : []),
   ];
 
-  // Show thinking bubble: during send (before stream starts) OR while unrevealed AI messages exist
+  // Show thinking bubble: only when waiting for AI (after user msg is visible) OR while unrevealed AI messages exist
   const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
-  const showThinking = (isSending && !streamingMessage) || hasUnrevealedAI;
+  const [isWaitingForAI, setIsWaitingForAI] = useState(false);
+  const showThinking = (isWaitingForAI && !streamingMessage) || hasUnrevealedAI;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
