@@ -92,9 +92,21 @@
   }
 
   .thinking-dot {
-    @apply w-1.5 h-1.5 rounded-full bg-primary/50;
-    animation: thinking-wave 1.2s ease-in-out infinite;
+    @apply w-2 h-2 rounded-full bg-primary/60;
+    animation: thinking-bounce 1.4s ease-in-out infinite;
   }
+}
+
+@keyframes thinking-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
 
   .question-highlight {
     @apply border-l-[3px] border-primary bg-primary/5;
