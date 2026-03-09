@@ -201,7 +201,7 @@ const Activity = () => {
                 <BookOpen className="w-6 h-6 text-secondary-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Lesson Content</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4 text-pretty">
                 This lesson will teach you important concepts about managing finances as a couple.
               </p>
               <Button className="w-full rounded-xl">Start Lesson</Button>
