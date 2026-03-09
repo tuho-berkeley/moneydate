@@ -272,18 +272,22 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [revealedSegments, setRevealedSegments] = useState<Set<number>>(new Set());
   const [freshSegments, setFreshSegments] = useState<Set<number>>(new Set());
 
-  // Stagger reveal segments when summary completes
+  // Reveal first segment when summary completes; subsequent ones after typewriter finishes
+  const revealQueueRef = useRef<number[]>([]);
+
   useEffect(() => {
     if (isGeneratingSummary || summarySegments.length === 0) return;
-    // Reveal segments that haven't been revealed yet
-    summarySegments.forEach((_, idx) => {
-      if (!revealedSegments.has(idx)) {
-        setTimeout(() => {
-          setRevealedSegments(prev => new Set([...prev, idx]));
-          setFreshSegments(prev => new Set([...prev, idx]));
-        }, idx * 400);
-      }
-    });
+    // Find unrevealed segments
+    const unrevealed = summarySegments
+      .map((_, idx) => idx)
+      .filter(idx => !revealedSegments.has(idx));
+    if (unrevealed.length === 0) return;
+
+    revealQueueRef.current = unrevealed;
+    // Reveal the first one
+    const firstIdx = revealQueueRef.current[0];
+    setRevealedSegments(prev => new Set([...prev, firstIdx]));
+    setFreshSegments(prev => new Set([...prev, firstIdx]));
   }, [isGeneratingSummary, summarySegments.length]);
 
   const handleSegmentTypewriterComplete = useCallback((idx: number) => {
@@ -292,6 +296,20 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       next.delete(idx);
       return next;
     });
+
+    // Reveal next segment in queue
+    const queue = revealQueueRef.current;
+    const pos = queue.indexOf(idx);
+    if (pos >= 0) {
+      revealQueueRef.current = queue.slice(pos + 1);
+      if (revealQueueRef.current.length > 0) {
+        const nextIdx = revealQueueRef.current[0];
+        setTimeout(() => {
+          setRevealedSegments(prev => new Set([...prev, nextIdx]));
+          setFreshSegments(prev => new Set([...prev, nextIdx]));
+        }, 300);
+      }
+    }
   }, []);
 
   if (showSummary) {
