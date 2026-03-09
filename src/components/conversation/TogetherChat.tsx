@@ -272,6 +272,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
   // Stagger reveal of new AI messages
+  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -279,20 +280,28 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
+      const startIndex = justStreamedRef.current ? 1 : 0;
+      if (justStreamedRef.current && newAiMsgs[0]) {
+        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+      }
+      justStreamedRef.current = false;
+
+      newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
-        }, i * 600);
+        }, (i + 1) * 700);
       });
     }
 
-    // On first load, reveal all existing messages immediately
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
 
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
+
+  // Show thinking bubble while unrevealed AI messages are pending
+  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
 
   // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [

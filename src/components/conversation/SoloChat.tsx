@@ -247,8 +247,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           setStreamingMessage(prev => (prev ?? "") + chunk);
         },
         onDone: async () => {
-          setStreamingMessage(null);
           if (fullResponse) {
+            justStreamedRef.current = true;
             const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
             for (const segment of segments) {
               await supabase.from("messages").insert({
@@ -258,8 +258,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                 content: segment,
               });
             }
-            queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+            await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
           }
+          setStreamingMessage(null);
           setIsSending(false);
         },
         onError: (error) => {
