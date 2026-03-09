@@ -95,7 +95,7 @@ const UpNextCard = () => {
         onClick={handleStart}
         className="mt-5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3.5 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
       >
-        {current.userStatus === "in_progress" ? "Continue" : typeLabels[current.type]}
+        {current.userStatus === "in_progress" ? "Continue" : "Start"}
         <ArrowRight className="w-4 h-4" />
       </button>
     </div>
