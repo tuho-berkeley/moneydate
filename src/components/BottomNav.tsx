@@ -1,7 +1,7 @@
 import { Home, BarChart3, Target, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import { useRef, useState, useEffect, useLayoutEffect, useCallback } from "react";
 
 const tabs = [
   { path: "/", label: "Home", icon: Home },
