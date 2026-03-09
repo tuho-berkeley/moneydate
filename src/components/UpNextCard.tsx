@@ -12,9 +12,9 @@ const typeIcons: Record<ActivityType, typeof MessageCircle> = {
 };
 
 const typeLabels: Record<ActivityType, string> = {
-  conversation: "Start Conversation",
-  lesson: "Start Lesson",
-  planning: "Start Planning",
+  conversation: "Conversation",
+  lesson: "Lesson",
+  planning: "Planning",
 };
 
 const UpNextCard = () => {
@@ -75,7 +75,7 @@ const UpNextCard = () => {
     <div className="bg-card rounded-3xl p-6 shadow-soft">
       <div className="flex items-center gap-2 mb-4">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
-          {current.userStatus === "in_progress" ? "Continue" : "Up Next"}
+          {typeLabels[current.type]}
         </span>
       </div>
       <div className="flex items-start gap-4">
@@ -95,7 +95,7 @@ const UpNextCard = () => {
         onClick={handleStart}
         className="mt-5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3.5 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
       >
-        {current.userStatus === "in_progress" ? "Continue" : typeLabels[current.type]}
+        {current.userStatus === "in_progress" ? "Continue" : "Start"}
         <ArrowRight className="w-4 h-4" />
       </button>
     </div>
