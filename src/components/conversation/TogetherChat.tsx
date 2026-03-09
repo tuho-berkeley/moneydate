@@ -303,6 +303,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   // Show thinking bubble while unrevealed AI messages are pending
   const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
 
+  // Only show the first segment of streaming content (before ---) 
+  const streamingDisplayContent = streamingMessage
+    ? stripAskingTag(streamingMessage.split(/\n---\n/)[0].trim())
+    : null;
+
   // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
     ...dbMessages
@@ -315,8 +320,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
       askedName: m.role === "ai" ? parseAsking(m.content) : null,
     })),
-    ...(streamingMessage
-      ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage) }]
+    ...(streamingDisplayContent
+      ? [{ id: "streaming", role: "ai" as const, content: streamingDisplayContent, isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage || "") }]
       : []),
   ];
 

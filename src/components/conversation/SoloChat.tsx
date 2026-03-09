@@ -149,6 +149,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
+  // Only show the first segment of streaming content (before ---) to avoid showing a giant mixed bubble
+  const streamingDisplayContent = streamingMessage
+    ? streamingMessage.split(/\n---\n/)[0].trim()
+    : null;
+
   const messages: ChatMessage[] = [
     ...dbMessages
       .filter(m => m.role !== "ai" || revealedIds.has(m.id))
@@ -157,8 +162,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         role: m.role as "user" | "ai",
         content: m.content,
       })),
-    ...(streamingMessage
-      ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isStreaming: true }]
+    ...(streamingDisplayContent
+      ? [{ id: "streaming", role: "ai" as const, content: streamingDisplayContent, isStreaming: true }]
       : []),
   ];
 
