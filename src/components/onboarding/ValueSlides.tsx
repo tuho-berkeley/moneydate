@@ -48,7 +48,7 @@ const ValueSlides = ({ onGoogleAuth, authLoading }: Props) => {
     <div className="w-full max-w-sm text-center space-y-8">
       <div key={current} className="space-y-6 animate-fade-in">
         <div className={`w-24 h-24 rounded-2xl ${slide.color} flex items-center justify-center mx-auto`}>
-          <Icon className={`w-12 h-12 ${slide.iconColor}`} />
+          <Icon className="w-12 h-12 text-primary" />
         </div>
 
         <div className="space-y-3">
