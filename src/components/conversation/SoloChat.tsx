@@ -3,9 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import ReactMarkdown from "react-markdown";
@@ -103,6 +114,26 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
   }, [input]);
 
+  const handleRestart = useCallback(async () => {
+    if (!conversation || isSending) return;
+    abortRef.current?.abort();
+    setStreamingMessage(null);
+    setIsSending(false);
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversation.id);
+
+    if (error) {
+      toast.error("Failed to restart chat");
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    toast.success("Chat restarted");
+  }, [conversation, isSending, queryClient]);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user) return;
 
@@ -192,6 +223,25 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
           <p className="text-xs text-muted-foreground">Solo Chat</p>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground transition-colors" disabled={isSending || messages.length === 0}>
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restart conversation?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will clear all messages and start fresh. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRestart}>Restart</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Messages */}
