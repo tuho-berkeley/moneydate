@@ -148,12 +148,14 @@ const Activity = () => {
                     {completedTypes?.has("solo") ? <Check className="w-5 h-5 text-primary" /> : <MessageCircle className="w-5 h-5 text-primary" />}
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="font-semibold text-foreground">Solo Chat</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground">Solo Chat</p>
+                      {completedTypes?.has("solo") && (
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Done</span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">Reflect on your own first</p>
                   </div>
-                  {completedTypes?.has("solo") && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-1 rounded-full flex-shrink-0">Completed</span>
-                  )}
                 </Button>
 
                 <Button
