@@ -25,7 +25,7 @@ const ProgressCards = () => {
           <Heart className="w-4 h-4 text-secondary-foreground" />
         </div>
         <p className="text-xl font-bold text-foreground">78%</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5">Alignment</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">Compatibility</p>
       </div>
     </div>
   );
