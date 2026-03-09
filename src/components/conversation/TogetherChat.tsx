@@ -40,10 +40,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isAIResponding, setIsAIResponding] = useState(false);
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const seedingRef = useRef(false);
   const aiTriggerRef = useRef(false);
+  const prevMessageIdsRef = useRef<Set<string>>(new Set());
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({
