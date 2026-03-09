@@ -234,6 +234,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       activityTitle,
       activityDescription: activityDescription || "",
       conversationType: "together",
+      userName: myName,
+      partnerName,
       onDelta: (chunk) => {
         fullResponse += chunk;
         setStreamingMessage(fullResponse);
@@ -258,7 +260,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         aiTriggerRef.current = false;
       },
     });
-  }, [conversation, activityTitle, activityDescription]);
+  }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
   // Build display messages
   const displayMessages = [
