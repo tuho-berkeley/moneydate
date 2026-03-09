@@ -153,7 +153,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setCurrentPrompt(0);
     setIsFlipped(false);
     setShowSummary(false);
-    setSummaryText("");
+    setSummaryText(null);
+    setRevealedSegments(new Set());
+    setFreshSegments(new Set());
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, queryClient]);
