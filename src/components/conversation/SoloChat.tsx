@@ -53,6 +53,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
+  const revealQueueRef = useRef<string[]>([]);
   const { markCompleted } = useConversationCompletion(activityId);
 
   // Get or create conversation
@@ -139,7 +140,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     });
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, activityDescription, queryClient]);
 
-  // Stagger reveal of new AI messages
+  // Sequential reveal of new AI messages (one at a time, after typewriter completes)
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -147,12 +148,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
-        setTimeout(() => {
-          setRevealedIds(prev => new Set([...prev, msg.id]));
-          setFreshIds(prev => new Set([...prev, msg.id]));
-        }, i * 400);
-      });
+      const newIds = newAiMsgs.map(m => m.id);
+      revealQueueRef.current = [...revealQueueRef.current, ...newIds];
+
+      // If nothing is currently being typewritten, reveal the first one
+      if (revealQueueRef.current.length === newIds.length) {
+        const firstId = revealQueueRef.current[0];
+        setRevealedIds(prev => new Set([...prev, firstId]));
+        setFreshIds(prev => new Set([...prev, firstId]));
+      }
     }
 
     // Mark user messages as fresh if new
@@ -203,6 +207,20 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       next.delete(msgId);
       return next;
     });
+
+    // Reveal next segment in queue
+    const queue = revealQueueRef.current;
+    const idx = queue.indexOf(msgId);
+    if (idx >= 0) {
+      revealQueueRef.current = queue.slice(idx + 1);
+      if (revealQueueRef.current.length > 0) {
+        const nextId = revealQueueRef.current[0];
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, nextId]));
+          setFreshIds(prev => new Set([...prev, nextId]));
+        }, 300);
+      }
+    }
   }, []);
 
   const handleRestart = useCallback(async () => {

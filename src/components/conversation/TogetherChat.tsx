@@ -48,6 +48,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const seedingRef = useRef(false);
   const aiTriggerRef = useRef(false);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
+  const revealQueueRef = useRef<string[]>([]);
   const { markCompleted } = useConversationCompletion(activityId);
 
   // Get user profile for couple_id
@@ -270,7 +271,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     });
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
-  // Stagger reveal of new AI messages
+  // Sequential reveal of new AI messages (one at a time, after typewriter completes)
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -278,12 +279,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
-        setTimeout(() => {
-          setRevealedIds(prev => new Set([...prev, msg.id]));
-          setFreshIds(prev => new Set([...prev, msg.id]));
-        }, i * 400);
-      });
+      const newIds = newAiMsgs.map(m => m.id);
+      revealQueueRef.current = [...revealQueueRef.current, ...newIds];
+
+      // If nothing is currently being typewritten, reveal the first one
+      if (revealQueueRef.current.length === newIds.length) {
+        const firstId = revealQueueRef.current[0];
+        setRevealedIds(prev => new Set([...prev, firstId]));
+        setFreshIds(prev => new Set([...prev, firstId]));
+      }
     }
 
     // Mark user/partner messages as fresh if new
@@ -327,6 +331,20 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       next.delete(msgId);
       return next;
     });
+
+    // Reveal next segment in queue
+    const queue = revealQueueRef.current;
+    const idx = queue.indexOf(msgId);
+    if (idx >= 0) {
+      revealQueueRef.current = queue.slice(idx + 1);
+      if (revealQueueRef.current.length > 0) {
+        const nextId = revealQueueRef.current[0];
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, nextId]));
+          setFreshIds(prev => new Set([...prev, nextId]));
+        }, 300);
+      }
+    }
   }, []);
 
   useEffect(() => {
