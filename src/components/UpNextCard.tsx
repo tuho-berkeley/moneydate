@@ -72,7 +72,7 @@ const UpNextCard = () => {
   const Icon = typeIcons[current.type];
 
   return (
-    <div className="bg-card rounded-3xl p-5 shadow-soft">
+    <div className="bg-card rounded-xl p-5 shadow-soft">
       <div className="flex items-center gap-2 mb-2.5">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
           {typeLabels[current.type]}
