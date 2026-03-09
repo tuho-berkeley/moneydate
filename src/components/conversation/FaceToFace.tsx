@@ -267,6 +267,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const summarySegments = summaryText
     ? summaryText.split(/\n---\n/).map(s => s.trim()).filter(Boolean)
     : [];
+  const prevSegmentCountRef = useRef(0);
+  useEffect(() => {
+    // Update after render so current render knows which segments are "new"
+    prevSegmentCountRef.current = summarySegments.length;
+  });
 
   if (showSummary) {
     return (
