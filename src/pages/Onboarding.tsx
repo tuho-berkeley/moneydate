@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import WelcomeStep from "@/components/onboarding/WelcomeStep";
 import ValueSlides from "@/components/onboarding/ValueSlides";
-import UserIntentStep from "@/components/onboarding/UserIntentStep";
 import AuthStep from "@/components/onboarding/AuthStep";
 import PartnerConnectionStep from "@/components/onboarding/PartnerConnectionStep";
 import PersonalizationStep from "@/components/onboarding/PersonalizationStep";
