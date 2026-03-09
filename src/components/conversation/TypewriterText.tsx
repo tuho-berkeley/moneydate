@@ -7,6 +7,37 @@ interface TypewriterTextProps {
   onComplete?: () => void;
 }
 
+/**
+ * Close any unclosed markdown formatting tokens so partial text renders correctly.
+ * Handles **, *, ~~, and ` markers.
+ */
+function closeMarkdown(text: string): string {
+  let result = text;
+
+  // Count occurrences of ** (bold) — must check before single *
+  const boldCount = (result.match(/\*\*/g) || []).length;
+  if (boldCount % 2 !== 0) result += "**";
+
+  // Count single * not part of ** (italic)
+  const allStars = (result.match(/\*/g) || []).length;
+  const singleStars = allStars - boldCount * 2;
+  // After closing bold above, recount
+  const recountBold = (result.match(/\*\*/g) || []).length;
+  const recountAll = (result.match(/\*/g) || []).length;
+  const recountSingle = recountAll - recountBold * 2;
+  if (recountSingle % 2 !== 0) result += "*";
+
+  // Strikethrough ~~
+  const tildeCount = (result.match(/~~/g) || []).length;
+  if (tildeCount % 2 !== 0) result += "~~";
+
+  // Inline code `
+  const backtickCount = (result.match(/`/g) || []).length;
+  if (backtickCount % 2 !== 0) result += "`";
+
+  return result;
+}
+
 const TypewriterText = ({ content, speed = 30, onComplete }: TypewriterTextProps) => {
   const words = content.split(/(\s+)/); // preserve whitespace
   const [visibleCount, setVisibleCount] = useState(0);
@@ -28,7 +59,7 @@ const TypewriterText = ({ content, speed = 30, onComplete }: TypewriterTextProps
     return () => clearTimeout(timer);
   }, [visibleCount, words.length, speed, onComplete]);
 
-  const visibleText = words.slice(0, visibleCount).join("");
+  const visibleText = closeMarkdown(words.slice(0, visibleCount).join(""));
 
   return (
     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
