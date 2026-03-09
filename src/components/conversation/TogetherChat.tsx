@@ -403,7 +403,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
                 {msg.role === "ai" ? (
                   <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Guide
+                    {msg.content.trim().endsWith("?")
+                      ? <><MessageCircleQuestion className="w-3 h-3" /> Question</>
+                      : <><Lightbulb className="w-3 h-3" /> Insight</>
+                    }
                   </p>
                 ) : (
                   <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 ${
