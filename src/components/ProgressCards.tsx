@@ -18,7 +18,7 @@ const ProgressCards = () => {
           <MessageCircle className="w-4 h-4 text-success" />
         </div>
         <p className="text-xl font-bold text-foreground">{completed}/{total}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5">Topics Complete</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">Activities</p>
       </div>
       <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
         <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center mb-2">
