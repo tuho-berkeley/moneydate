@@ -162,8 +162,27 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
+          setFreshIds(prev => new Set([...prev, msg.id]));
         }, (i + 1) * 700);
       });
+    }
+
+    // Also mark user messages as fresh if they're new
+    const newUserMsgs = dbMessages.filter(
+      m => m.role === "user" && !prevMessageIdsRef.current.has(m.id)
+    );
+    if (newUserMsgs.length > 0) {
+      setFreshIds(prev => {
+        const next = new Set(prev);
+        newUserMsgs.forEach(m => next.add(m.id));
+        return next;
+      });
+    }
+
+    // Mark first-streamed message as fresh too
+    if (justStreamedRef.current && newAiMsgs[0]) {
+      setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
+    }
     }
 
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
