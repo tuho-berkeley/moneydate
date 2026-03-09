@@ -262,17 +262,17 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     });
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
-  // Build display messages
+  // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
     ...dbMessages.map((m: DBMessage) => ({
       id: m.id,
       role: m.role,
-      content: m.content,
+      content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
       isMe: m.sender_id === user?.id,
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
     })),
     ...(streamingMessage !== null
-      ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isMe: false, senderName: "Guide" }]
+      ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide" }]
       : []),
   ];
 
