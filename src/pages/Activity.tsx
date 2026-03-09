@@ -186,7 +186,7 @@ const Activity = () => {
                     <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                     }
                       <p className="font-semibold text-foreground">Chat Together</p>
-                      <p className="text-xs text-muted-foreground text-pretty">Chat with your partner & guided by AI</p>
+                      <p className="text-xs text-muted-foreground text-pretty">Have a guided conversation together</p>
                     </div>
                   </Button>
 
