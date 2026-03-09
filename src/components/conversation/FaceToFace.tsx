@@ -70,6 +70,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  const [isFlipped, setIsFlipped] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
