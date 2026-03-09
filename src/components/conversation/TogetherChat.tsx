@@ -242,7 +242,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       partnerName,
       onDelta: (chunk) => {
         fullResponse += chunk;
-        setStreamingMessage(fullResponse);
+        setStreamingMessage(prev => (prev ?? "") + chunk);
       },
       onDone: async () => {
         setStreamingMessage(null);
