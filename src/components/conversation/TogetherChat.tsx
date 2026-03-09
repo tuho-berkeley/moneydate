@@ -259,6 +259,25 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             Together Chat
           </div>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground transition-colors" disabled={isSending || displayMessages.length === 0}>
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restart conversation?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will clear all messages and start fresh. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRestart}>Restart</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Messages */}
