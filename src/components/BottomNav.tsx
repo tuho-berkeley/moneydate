@@ -15,12 +15,15 @@ const BottomNav = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const navRef = useRef<HTMLDivElement>(null);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
 
   useLayoutEffect(() => {
     if (!navRef.current) return;
     const activeIndex = tabs.findIndex((t) => t.path === location.pathname);
-    if (activeIndex === -1) return;
+    if (activeIndex === -1) {
+      setIndicator(null);
+      return;
+    }
     const buttons = navRef.current.querySelectorAll<HTMLButtonElement>("button");
     const btn = buttons[activeIndex];
     if (btn) {
@@ -38,10 +41,12 @@ const BottomNav = () => {
         ref={navRef}
         className="relative flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50"
       >
-        <div
-          className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
-          style={{ left: indicator.left, width: indicator.width }}
-        />
+        {indicator && (
+          <div
+            className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
+            style={{ left: indicator.left, width: indicator.width }}
+          />
+        )}
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           const Icon = tab.icon;
