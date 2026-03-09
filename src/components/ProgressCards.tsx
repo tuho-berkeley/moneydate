@@ -5,33 +5,27 @@ const ProgressCards = () => {
   const { completed, total } = useActivityStats();
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
-        <div className="flex items-center gap-1.5 mb-1">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
-            <Flame className="w-3.5 h-3.5 text-secondary-foreground" />
-          </div>
-          <p className="text-xl font-bold text-foreground">1</p>
+    <div className="grid grid-cols-3 gap-2.5">
+      <div className="bg-card rounded-2xl px-3 py-3.5 shadow-card flex flex-col items-start">
+        <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center mb-2.5">
+          <Flame className="w-4 h-4 text-secondary-foreground" />
         </div>
-        <p className="text-[10px] text-muted-foreground">Week Streak</p>
+        <p className="text-2xl font-bold text-foreground leading-none">1</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">Week Streak</p>
       </div>
-      <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
-        <div className="flex items-center gap-1.5 mb-1">
-          <div className="w-7 h-7 rounded-lg bg-success-light flex items-center justify-center">
-            <MessageCircle className="w-3.5 h-3.5 text-success" />
-          </div>
-          <p className="text-xl font-bold text-foreground">{completed}<span className="text-xs font-medium text-muted-foreground">/{total}</span></p>
+      <div className="bg-card rounded-2xl px-3 py-3.5 shadow-card flex flex-col items-start">
+        <div className="w-8 h-8 rounded-xl bg-success-light flex items-center justify-center mb-2.5">
+          <MessageCircle className="w-4 h-4 text-success" />
         </div>
-        <p className="text-[10px] text-muted-foreground">Activities</p>
+        <p className="text-2xl font-bold text-foreground leading-none">{completed}<span className="text-sm font-medium text-muted-foreground">/{total}</span></p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">Activities</p>
       </div>
-      <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
-        <div className="flex items-center gap-1.5 mb-1">
-          <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
-            <Heart className="w-3.5 h-3.5 text-secondary-foreground" />
-          </div>
-          <p className="text-xl font-bold text-foreground">78%</p>
+      <div className="bg-card rounded-2xl px-3 py-3.5 shadow-card flex flex-col items-start">
+        <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center mb-2.5">
+          <Heart className="w-4 h-4 text-secondary-foreground" />
         </div>
-        <p className="text-[10px] text-muted-foreground">Compatibility</p>
+        <p className="text-2xl font-bold text-foreground leading-none">78%</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">Compatibility</p>
       </div>
     </div>);
 
