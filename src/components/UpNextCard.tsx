@@ -75,7 +75,7 @@ const UpNextCard = () => {
     <div className="bg-card rounded-3xl p-6 shadow-soft">
       <div className="flex items-center gap-2 mb-4">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
-          {current.userStatus === "in_progress" ? "Continue" : "Up Next"}
+          {typeLabels[current.type]}
         </span>
       </div>
       <div className="flex items-start gap-4">
