@@ -130,6 +130,7 @@ const ActivityPath = () => {
 
 interface StageCardProps {
   stage: StageWithActivities;
+  stageNumber: number;
   isOpen: boolean;
   onToggle: () => void;
   onActivityClick: (activity: ActivityWithProgress) => void;
