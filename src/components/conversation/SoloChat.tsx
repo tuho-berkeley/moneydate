@@ -293,7 +293,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setStreamingMessage(null);
       setIsSending(false);
     }
-  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient]);
+  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
