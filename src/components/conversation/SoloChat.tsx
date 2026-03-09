@@ -225,8 +225,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       return;
     }
 
-    // Refetch to show user message immediately
+    // Refetch to show user message immediately, then show thinking
     await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    setIsWaitingForAI(true);
 
     // Stream AI response
     let fullResponse = "";
