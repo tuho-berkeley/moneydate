@@ -80,7 +80,7 @@ const UpNextCard = () => {
       </div>
       <div className="flex items-start gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-display font-semibold text-foreground mb-0.5 text-pretty text-xl">
+          <h3 className="font-display font-semibold text-foreground mb-0.5 text-pretty text-xl mx-[6px] my-[6px]">
             {current.title}
           </h3>
           <p className="text-sm text-muted-foreground leading-snug text-pretty">
