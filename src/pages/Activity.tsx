@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MessageCircle, BookOpen, PiggyBank, Loader2, Check } from "lucide-react";
+import { ArrowLeft, MessageCircle, BookOpen, PiggyBank, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
@@ -145,15 +145,13 @@ const Activity = () => {
                   onClick={() => handleStartConversation("solo")}
                 >
                   <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
-                    {completedTypes?.has("solo") ? <Check className="w-5 h-5 text-primary" /> : <MessageCircle className="w-5 h-5 text-primary" />}
+                    <MessageCircle className="w-5 h-5 text-primary" />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground">Solo Chat</p>
-                      {completedTypes?.has("solo") && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Completed</span>
-                      )}
-                    </div>
+                    {completedTypes?.has("solo") && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    )}
+                    <p className="font-semibold text-foreground">Solo Chat</p>
                     <p className="text-xs text-muted-foreground">Reflect on your own first</p>
                   </div>
                 </Button>
@@ -164,15 +162,13 @@ const Activity = () => {
                   onClick={() => handleStartConversation("together")}
                 >
                   <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
-                    {completedTypes?.has("together") ? <Check className="w-5 h-5 text-primary" /> : <span className="text-lg">👥</span>}
+                    <span className="text-lg">👥</span>
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground">Together Chat</p>
-                      {completedTypes?.has("together") && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Completed</span>
-                      )}
-                    </div>
+                    {completedTypes?.has("together") && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    )}
+                    <p className="font-semibold text-foreground">Together Chat</p>
                     <p className="text-xs text-muted-foreground">Chat with your partner & guided by AI</p>
                   </div>
                 </Button>
@@ -183,15 +179,13 @@ const Activity = () => {
                   onClick={() => handleStartConversation("face_to_face")}
                 >
                   <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
-                    {completedTypes?.has("face_to_face") ? <Check className="w-5 h-5 text-primary" /> : <span className="text-lg">💬</span>}
+                    <span className="text-lg">💬</span>
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground">Face-to-Face</p>
-                      {completedTypes?.has("face_to_face") && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Completed</span>
-                      )}
-                    </div>
+                    {completedTypes?.has("face_to_face") && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    )}
+                    <p className="font-semibold text-foreground">Face-to-Face</p>
                     <p className="text-xs text-muted-foreground">In-person with voice recording</p>
                   </div>
                 </Button>
