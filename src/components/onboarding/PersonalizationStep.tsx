@@ -202,18 +202,20 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       </div>
 
       {/* Fixed bottom buttons */}
-      <div className="shrink-0 py-6 space-y-3">
+      <div className="shrink-0 py-6 flex items-center gap-3">
+        {subStep > 0 ? (
+          <Button
+            onClick={() => setSubStep(subStep - 1)}
+            variant="ghost"
+            className="rounded-full text-muted-foreground"
+            size="lg"
+          >
+            Back
+          </Button>
+        ) : null}
         <Button onClick={handleNext} className="w-full rounded-full" size="lg">
           {subStep === 3 ? "Start Your Journey" : "Next"}
         </Button>
-        {subStep > 0 && (
-          <button
-            onClick={() => setSubStep(subStep - 1)}
-            className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            Back
-          </button>
-        )}
       </div>
     </div>
   );
