@@ -20,6 +20,7 @@ export type Database = {
           icon: string
           id: string
           order_index: number
+          stage_id: string | null
           title: string
           type: Database["public"]["Enums"]["activity_type"]
         }
@@ -28,6 +29,7 @@ export type Database = {
           icon?: string
           id?: string
           order_index?: number
+          stage_id?: string | null
           title: string
           type: Database["public"]["Enums"]["activity_type"]
         }
@@ -36,10 +38,19 @@ export type Database = {
           icon?: string
           id?: string
           order_index?: number
+          stage_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["activity_type"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversations: {
         Row: {
@@ -217,6 +228,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stages: {
+        Row: {
+          description: string | null
+          goal: string | null
+          icon: string
+          id: string
+          order_index: number
+          title: string
+        }
+        Insert: {
+          description?: string | null
+          goal?: string | null
+          icon?: string
+          id?: string
+          order_index?: number
+          title: string
+        }
+        Update: {
+          description?: string | null
+          goal?: string | null
+          icon?: string
+          id?: string
+          order_index?: number
+          title?: string
+        }
+        Relationships: []
       }
       user_activities: {
         Row: {
