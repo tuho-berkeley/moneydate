@@ -186,10 +186,19 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       partner: activePartner,
       transcript,
     };
-    setResponses((prev) => [...prev, newResponse]);
+    setResponses((prev) => {
+      const updated = [...prev, newResponse];
+      // Face-to-face completion: each partner recorded at least 1 response
+      const hasPartnerA = updated.some(r => r.partner === "partner_a");
+      const hasPartnerB = updated.some(r => r.partner === "partner_b");
+      if (hasPartnerA && hasPartnerB) {
+        markCompleted();
+      }
+      return updated;
+    });
     setRecordingState("idle");
     toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
-  }, [currentPrompt, activePartner]);
+  }, [currentPrompt, activePartner, markCompleted]);
 
   const hasResponse = (promptIdx: number, partner: Partner) => {
     return responses.some((r) => r.promptIndex === promptIdx && r.partner === partner);
