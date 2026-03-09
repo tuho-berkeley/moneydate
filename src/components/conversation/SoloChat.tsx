@@ -120,6 +120,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, queryClient]);
 
   // Stagger reveal of new AI messages
+  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -127,10 +128,17 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
+      // If these came from streaming, reveal first immediately (it was already visible)
+      const startIndex = justStreamedRef.current ? 1 : 0;
+      if (justStreamedRef.current && newAiMsgs[0]) {
+        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+      }
+      justStreamedRef.current = false;
+      
+      newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
-        }, i * 600);
+        }, (i + 1) * 700);
       });
     }
 
@@ -153,6 +161,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isStreaming: true }]
       : []),
   ];
+
+  // Show thinking bubble: during send (before stream starts) OR while unrevealed AI messages exist
+  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
+  const showThinking = (isSending && !streamingMessage) || hasUnrevealedAI;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
