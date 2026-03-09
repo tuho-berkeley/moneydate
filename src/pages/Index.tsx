@@ -11,18 +11,18 @@ const Index = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        const name = data?.display_name
-          || user.user_metadata?.full_name
-          || user.user_metadata?.name
-          || "";
-        setDisplayName(name);
-      });
+    supabase.
+    from("profiles").
+    select("display_name").
+    eq("id", user.id).
+    single().
+    then(({ data }) => {
+      const name = data?.display_name ||
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      "";
+      setDisplayName(name);
+    });
   }, [user]);
 
   const greeting = () => {
@@ -37,7 +37,7 @@ const Index = () => {
       <div className="max-w-lg mx-auto">
         <div className="px-6 pt-8 pb-6">
           <p className="text-sm text-muted-foreground font-medium">{greeting()}</p>
-          <h1 className="font-display text-2xl font-bold text-foreground mt-1">
+          <h1 className="font-display font-bold text-foreground mt-1 text-lg">
             {displayName || "Welcome"}
           </h1>
         </div>
@@ -47,8 +47,8 @@ const Index = () => {
           <ActivityPath />
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
