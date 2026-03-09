@@ -104,8 +104,8 @@ export default {
           "30%": { transform: "translateY(-6px)", opacity: "1" },
         },
         "fade-in-message": {
-          from: { opacity: "0", transform: "translateY(8px) scale(0.97)" },
-          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "pulse-subtle": {
           "0%, 100%": { opacity: "1" },
