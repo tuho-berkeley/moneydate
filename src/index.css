@@ -90,4 +90,13 @@
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
+
+  .thinking-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-primary/50;
+    animation: thinking-wave 1.2s ease-in-out infinite;
+  }
+
+  .question-highlight {
+    @apply border-l-[3px] border-primary bg-primary/5;
+  }
 }

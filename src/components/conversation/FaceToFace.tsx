@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Mic, Square, ChevronLeft, ChevronRight, Loader2, Sparkles, RotateCcw, Lightbulb } from "lucide-react";
+import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -275,10 +276,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Generating insights...</span>
-              </div>
+              <AIThinkingBubble />
             )}
           </div>
           <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">

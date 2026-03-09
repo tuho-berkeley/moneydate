@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Send, Loader2, Users, Sparkles, RotateCcw, Clock } from "lucide-react";
+import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -386,45 +387,52 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           </div>
         )}
 
-        {displayMessages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${
-              msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
-              {msg.role === "ai" ? (
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Guide
-                </p>
-              ) : (
-                <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 ${
-                  msg.isMe ? "text-right text-primary/60" : "text-muted-foreground"
-                }`}>
-                  {msg.senderName}
-                </p>
-              )}
-              <div
-                className={`rounded-2xl p-4 ${
-                  msg.role === "ai"
-                    ? "bg-accent/50 text-foreground border border-accent"
-                    : msg.isMe
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary/50 text-foreground"
-                }`}
-              >
+        {displayMessages.map((msg, idx) => {
+          const isLastAI = msg.role === "ai" && msg.id !== "streaming" &&
+            (idx === displayMessages.length - 1 || displayMessages[idx + 1]?.role !== "ai");
+          const isQuestion = isLastAI && msg.content.trim().endsWith("?");
+
+          return (
+            <div
+              key={msg.id}
+              className={`flex ${
+                msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
+              } animate-fade-in-message`}
+              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
+            >
+              <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
                 {msg.role === "ai" ? (
-                  <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Guide
+                  </p>
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 ${
+                    msg.isMe ? "text-right text-primary/60" : "text-muted-foreground"
+                  }`}>
+                    {msg.senderName}
+                  </p>
                 )}
+                <div
+                  className={`rounded-2xl p-4 ${
+                    msg.role === "ai"
+                      ? "bg-accent/50 text-foreground border border-accent"
+                      : msg.isMe
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary/50 text-foreground"
+                  } ${isQuestion ? "question-highlight animate-pulse-subtle" : ""}`}
+                >
+                  {msg.role === "ai" ? (
+                    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Waiting indicator */}
         {waitingForPartner && !isAIResponding && (
@@ -438,15 +446,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
         {/* AI is thinking */}
         {isAIResponding && streamingMessage === null && (
-          <div className="flex justify-start">
-            <div className="max-w-[90%]">
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Guide
-              </p>
-              <div className="bg-accent/50 border border-accent rounded-2xl p-4">
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              </div>
-            </div>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Guide
+            </p>
+            <AIThinkingBubble />
           </div>
         )}
 
