@@ -129,8 +129,8 @@ const PartnerConnectionStep = ({ onNext, onSkip }: Props) => {
         <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto">
           <Users className="w-8 h-8 text-primary" />
         </div>
-        <h2 className="font-display text-2xl font-bold text-foreground">Connect with your partner</h2>
-        <p className="text-muted-foreground text-sm">
+        <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Connect with your partner</h2>
+        <p className="text-muted-foreground text-sm text-pretty">
           MoneyDate works best together, but you can explore solo first.
         </p>
       </div>
