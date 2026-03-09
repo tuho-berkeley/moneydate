@@ -23,6 +23,7 @@ export type Database = {
           stage_id: string | null
           title: string
           type: Database["public"]["Enums"]["activity_type"]
+          video_url: string | null
         }
         Insert: {
           description?: string | null
@@ -32,6 +33,7 @@ export type Database = {
           stage_id?: string | null
           title: string
           type: Database["public"]["Enums"]["activity_type"]
+          video_url?: string | null
         }
         Update: {
           description?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           stage_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["activity_type"]
+          video_url?: string | null
         }
         Relationships: [
           {
