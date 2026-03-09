@@ -196,8 +196,8 @@ const Activity = () => {
           )}
 
           {activity.type === "lesson" && (
-            <div className="bg-card rounded-2xl p-5 border border-border">
-              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
+            <div className="bg-card rounded-2xl p-5 border border-border text-center">
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4 mx-auto">
                 <BookOpen className="w-6 h-6 text-secondary-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Lesson Content</h3>
