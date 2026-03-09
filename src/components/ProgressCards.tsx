@@ -20,7 +20,7 @@ const ProgressCards = () => {
           <div className="w-7 h-7 rounded-lg bg-success-light flex items-center justify-center">
             <MessageCircle className="w-3.5 h-3.5 text-success" />
           </div>
-          <p className="text-xl font-bold text-foreground">{completed}/{total}</p>
+          <p className="text-xl font-bold text-foreground">{completed}<span className="text-xs font-medium text-muted-foreground">/{total}</span></p>
         </div>
         <p className="text-[10px] text-muted-foreground">Activities</p>
       </div>
