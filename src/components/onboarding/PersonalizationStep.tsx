@@ -68,7 +68,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
                   }`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className={`text-sm font-medium ${selected ? "text-foreground" : "text-muted-foreground"}`}>
+                   <span className={`text-sm font-medium text-pretty ${selected ? "text-foreground" : "text-muted-foreground"}`}>
                     {opt.label}
                   </span>
                 </button>
