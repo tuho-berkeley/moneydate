@@ -48,6 +48,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
