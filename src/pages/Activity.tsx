@@ -170,7 +170,7 @@ const Activity = () => {
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-foreground">Together Chat</p>
                       {completedTypes?.has("together") && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Done</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Completed</span>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">Chat with your partner & guided by AI</p>
