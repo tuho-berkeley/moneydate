@@ -36,6 +36,7 @@ interface Props {
   data: OnboardingData;
   onChange: (partial: Partial<OnboardingData>) => void;
   onNext: () => void;
+  onSkip?: () => void;
 }
 
 const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
