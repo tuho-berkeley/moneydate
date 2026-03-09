@@ -271,7 +271,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
   // Stagger reveal of new AI messages
-  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -279,18 +278,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     );
 
     if (newAiMsgs.length > 0) {
-      const startIndex = justStreamedRef.current ? 1 : 0;
-      if (justStreamedRef.current && newAiMsgs[0]) {
-        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
-        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
-      }
-      justStreamedRef.current = false;
-
-      newAiMsgs.slice(startIndex).forEach((msg, i) => {
+      newAiMsgs.forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
           setFreshIds(prev => new Set([...prev, msg.id]));
-        }, (i + 1) * 700);
+        }, i * 400);
       });
     }
 
@@ -313,31 +305,17 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
-  // Only show the first segment of streaming content (before ---) 
-  const streamingDisplayContent = streamingMessage
-    ? stripAskingTag(streamingMessage.split(/\n---\n/)[0].trim())
-    : null;
-
-  // Show thinking bubble while unrevealed AI messages are pending (but not while streaming text is visible)
-  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
-  const hasPendingAIReveal = !streamingDisplayContent && hasUnrevealedAI;
-
   // Build display messages — strip [ASKING:...] tag from AI messages
-  const displayMessages = [
-    ...dbMessages
-      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
-      .map((m: DBMessage) => ({
+  const displayMessages = dbMessages
+    .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+    .map((m: DBMessage) => ({
       id: m.id,
       role: m.role,
       content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
       isMe: m.sender_id === user?.id,
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
       askedName: m.role === "ai" ? parseAsking(m.content) : null,
-    })),
-    ...(streamingDisplayContent
-      ? [{ id: "streaming", role: "ai" as const, content: streamingDisplayContent, isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage || "") }]
-      : []),
-  ];
+    }));
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
