@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
+import TypewriterText from "@/components/conversation/TypewriterText";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -37,7 +38,6 @@ interface ChatMessage {
   id: string;
   role: "user" | "ai";
   content: string;
-  isStreaming?: boolean;
 }
 
 const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatProps) => {
@@ -45,8 +45,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
-  const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isWaitingForAI, setIsWaitingForAI] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -99,7 +99,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
-  // Seed AI starter message via streaming when conversation has no messages yet
+  // Seed AI starter message — buffer silently, then reveal
   const seedingRef = useRef(false);
   useEffect(() => {
     if (!conversation || !messagesLoaded || seedingRef.current || dbMessages.length > 0) return;
@@ -115,11 +115,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       conversationType: "solo",
       onDelta: (chunk) => {
         fullResponse += chunk;
-        setStreamingMessage(prev => (prev ?? "") + chunk);
       },
       onDone: async () => {
         if (fullResponse) {
-          justStreamedRef.current = true;
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
@@ -131,12 +129,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
-        setStreamingMessage(null);
         setIsWaitingForAI(false);
       },
       onError: (error) => {
         toast.error(error);
-        setStreamingMessage(null);
         setIsWaitingForAI(false);
         seedingRef.current = false;
       },
@@ -144,7 +140,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, activityDescription, queryClient]);
 
   // Stagger reveal of new AI messages
-  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -152,23 +147,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     );
 
     if (newAiMsgs.length > 0) {
-      // If these came from streaming, reveal first immediately (it was already visible)
-      const startIndex = justStreamedRef.current ? 1 : 0;
-      if (justStreamedRef.current && newAiMsgs[0]) {
-        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
-        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
-      }
-      justStreamedRef.current = false;
-      
-      newAiMsgs.slice(startIndex).forEach((msg, i) => {
+      newAiMsgs.forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
           setFreshIds(prev => new Set([...prev, msg.id]));
-        }, (i + 1) * 700);
+        }, i * 400);
       });
     }
 
-    // Also mark user messages as fresh if they're new
+    // Mark user messages as fresh if new
     const newUserMsgs = dbMessages.filter(
       m => m.role === "user" && !prevMessageIdsRef.current.has(m.id)
     );
@@ -180,6 +167,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       });
     }
 
+    // On first load, reveal all existing messages immediately (no animation)
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
@@ -187,32 +175,20 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
-  // Only show the first segment of streaming content (before ---) to avoid showing a giant mixed bubble
-  const streamingDisplayContent = streamingMessage
-    ? streamingMessage.split(/\n---\n/)[0].trim()
-    : null;
+  const messages: ChatMessage[] = dbMessages
+    .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+    .map((m: DBMessage) => ({
+      id: m.id,
+      role: m.role as "user" | "ai",
+      content: m.content,
+    }));
 
-  const messages: ChatMessage[] = [
-    ...dbMessages
-      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
-      .map((m: DBMessage) => ({
-        id: m.id,
-        role: m.role as "user" | "ai",
-        content: m.content,
-      })),
-    ...(streamingDisplayContent
-      ? [{ id: "streaming", role: "ai" as const, content: streamingDisplayContent, isStreaming: true }]
-      : []),
-  ];
-
-  // Show thinking bubble: only when waiting for AI (after user msg is visible) OR while unrevealed AI messages exist
-  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
-  const [isWaitingForAI, setIsWaitingForAI] = useState(false);
-  const showThinking = (isWaitingForAI && !streamingMessage) || hasUnrevealedAI;
+  // Show thinking bubble only while waiting for AI (not during staggered reveal)
+  const showThinking = isWaitingForAI;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, showThinking]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -221,11 +197,19 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
   }, [input]);
 
+  const handleTypewriterComplete = useCallback((msgId: string) => {
+    setFreshIds(prev => {
+      const next = new Set(prev);
+      next.delete(msgId);
+      return next;
+    });
+  }, []);
+
   const handleRestart = useCallback(async () => {
     if (!conversation || isSending) return;
     abortRef.current?.abort();
-    setStreamingMessage(null);
     setIsSending(false);
+    setIsWaitingForAI(false);
 
     const { error } = await supabase
       .from("messages")
@@ -238,6 +222,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
 
     seedingRef.current = false;
+    setRevealedIds(new Set());
+    setFreshIds(new Set());
+    prevMessageIdsRef.current = new Set();
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient]);
@@ -267,7 +254,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     setIsWaitingForAI(true);
 
-    // Stream AI response
+    // Buffer AI response silently
     let fullResponse = "";
 
     const abort = new AbortController();
@@ -289,11 +276,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         conversationType: "solo",
         onDelta: (chunk) => {
           fullResponse += chunk;
-          setStreamingMessage(prev => (prev ?? "") + chunk);
         },
         onDone: async () => {
           if (fullResponse) {
-            justStreamedRef.current = true;
             const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
             for (const segment of segments) {
               await supabase.from("messages").insert({
@@ -305,19 +290,17 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
             }
             await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
           }
-          setStreamingMessage(null);
           setIsSending(false);
           setIsWaitingForAI(false);
 
           // Solo completion: user answered at least 3 AI questions
-          const userMessageCount = dbMessages.filter(m => m.role === "user").length + 1; // +1 for the just-sent message
+          const userMessageCount = dbMessages.filter(m => m.role === "user").length + 1;
           if (userMessageCount >= 3) {
             markCompleted();
           }
         },
         onError: (error) => {
           toast.error(error);
-          setStreamingMessage(null);
           setIsSending(false);
           setIsWaitingForAI(false);
         },
@@ -326,8 +309,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     } catch (err) {
       console.error("streamChat error:", err);
       toast.error("Something went wrong. Please try again.");
-      setStreamingMessage(null);
       setIsSending(false);
+      setIsWaitingForAI(false);
     }
   }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted]);
 
@@ -372,22 +355,23 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && !streamingMessage && (
+        {messages.length === 0 && showThinking && (
           <AIThinkingBubble />
         )}
 
         {messages.map((msg, idx) => {
-          const isLastAI = msg.role === "ai" && !msg.isStreaming &&
-            (idx === messages.length - 1 || messages[idx + 1]?.role === "user") &&
-            !(idx === messages.length - 1 && streamingMessage !== null);
           const isFirstAI = msg.role === "ai" && idx === 0;
           const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
           const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
+          const isFresh = freshIds.has(msg.id);
 
           return (
             <div
               key={msg.id}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} ${
+                isFresh && msg.role === "ai" ? "animate-message-appear" : ""
+              }`}
+              style={isFresh && msg.role === "ai" ? { opacity: 0 } : undefined}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}
@@ -399,9 +383,16 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                   }`}
                 >
                   {msg.role === "ai" ? (
-                    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                      <ReactMarkdown>{displayContent}</ReactMarkdown>
-                    </div>
+                    isFresh ? (
+                      <TypewriterText
+                        content={displayContent}
+                        onComplete={() => handleTypewriterComplete(msg.id)}
+                      />
+                    ) : (
+                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                        <ReactMarkdown>{displayContent}</ReactMarkdown>
+                      </div>
+                    )
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
