@@ -232,7 +232,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         conversationType: "solo",
         onDelta: (chunk) => {
           fullResponse += chunk;
-          setStreamingMessage(fullResponse);
+          setStreamingMessage(prev => (prev ?? "") + chunk);
         },
         onDone: async () => {
           setStreamingMessage(null);
