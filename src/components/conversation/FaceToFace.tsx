@@ -492,16 +492,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           )}
         </div>
 
-        {/* Sliding Partner Tab */}
+        {/* Partner Toggle */}
         <div className="w-full max-w-sm mx-auto relative bg-muted rounded-xl p-1 flex">
           <div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-lg transition-transform duration-300 ease-out"
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-card rounded-lg shadow-sm border border-border transition-transform duration-300 ease-out"
             style={{ transform: activePartner === "partner_b" ? "translateX(calc(100% + 8px))" : "translateX(0)" }}
           />
           <button
             onClick={() => setActivePartner("partner_a")}
             className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-              activePartner === "partner_a" ? "text-primary-foreground" : "text-muted-foreground"
+              activePartner === "partner_a" ? "text-foreground" : "text-muted-foreground"
             }`}
           >
             Partner A {hasResponse(currentPrompt, "partner_a") && "✓"}
@@ -509,7 +509,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <button
             onClick={() => setActivePartner("partner_b")}
             className={`relative z-10 flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors duration-200 ${
-              activePartner === "partner_b" ? "text-primary-foreground" : "text-muted-foreground"
+              activePartner === "partner_b" ? "text-foreground" : "text-muted-foreground"
             }`}
           >
             Partner B {hasResponse(currentPrompt, "partner_b") && "✓"}
