@@ -391,7 +391,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         {displayMessages.map((msg, idx) => {
           const isLastAI = msg.role === "ai" && msg.id !== "streaming" &&
             (idx === displayMessages.length - 1 || displayMessages[idx + 1]?.role !== "ai");
-          const isQuestion = isLastAI && msg.content.trim().endsWith("?");
+          const isFirstAI = msg.role === "ai" && idx === 0;
+          const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
+          const isQuestionHighlight = isLastAI && labelType === "question";
+          const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
 
           return (
             <div
@@ -403,12 +406,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
                 {msg.role === "ai" ? (
-                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-                    {msg.content.trim().endsWith("?")
-                      ? <><MessageCircleQuestion className="w-3 h-3" /> Question</>
-                      : <><Lightbulb className="w-3 h-3" /> Insight</>
-                    }
-                  </p>
+                  labelType && <AIMessageLabel type={labelType} />
                 ) : (
                   <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 ${
                     msg.isMe ? "text-right text-primary/60" : "text-muted-foreground"
@@ -423,11 +421,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                       : msg.isMe
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary/50 text-foreground"
-                  } ${isQuestion ? "question-highlight animate-pulse-subtle" : ""}`}
+                  } ${isQuestionHighlight ? "question-highlight animate-pulse-subtle" : ""}`}
                 >
                   {msg.role === "ai" ? (
                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      <ReactMarkdown>{displayContent}</ReactMarkdown>
                     </div>
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
