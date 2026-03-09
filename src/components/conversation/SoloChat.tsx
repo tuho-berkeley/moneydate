@@ -53,6 +53,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
+  const revealQueueRef = useRef<string[]>([]);
   const { markCompleted } = useConversationCompletion(activityId);
 
   // Get or create conversation
