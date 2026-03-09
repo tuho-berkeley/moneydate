@@ -223,6 +223,25 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
           <p className="text-xs text-muted-foreground">Solo Chat</p>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground transition-colors" disabled={isSending || messages.length === 0}>
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restart conversation?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will clear all messages and start fresh. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRestart}>Restart</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Messages */}
