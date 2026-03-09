@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, RotateCcw, Sparkles, MessageCircleQuestion, Lightbulb } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
+import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -290,9 +291,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           // Detect if this is the last AI message in a consecutive AI sequence and ends with ?
           const isLastAI = msg.role === "ai" && !msg.isStreaming &&
             (idx === messages.length - 1 || messages[idx + 1]?.role === "user") &&
-            // check no streaming message follows
             !(idx === messages.length - 1 && streamingMessage !== null);
-          const isQuestion = isLastAI && msg.content.trim().endsWith("?");
+          const isFirstAI = msg.role === "ai" && idx === 0;
+          const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
+          const isQuestionHighlight = isLastAI && labelType === "question";
+          const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
 
           return (
             <div
@@ -301,24 +304,17 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
               style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
-                {msg.role === "ai" && (
-                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-                    {msg.content.trim().endsWith("?")
-                      ? <><MessageCircleQuestion className="w-3 h-3" /> Question</>
-                      : <><Lightbulb className="w-3 h-3" /> Insight</>
-                    }
-                  </p>
-                )}
+                {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}
                 <div
                   className={`rounded-2xl p-4 ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary/50 text-foreground"
-                  } ${isQuestion ? "question-highlight" : ""}`}
+                  } ${isQuestionHighlight ? "question-highlight" : ""}`}
                 >
                   {msg.role === "ai" ? (
                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      <ReactMarkdown>{displayContent}</ReactMarkdown>
                       {msg.isStreaming && (
                         <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
                       )}
