@@ -113,11 +113,12 @@ const ActivityPath = () => {
       </h2>
       
       <div className="space-y-3">
-        {stages.map((stage) => (
+        {stages.map((stage, index) => (
           <StageCard
             key={stage.id}
             stage={stage}
-            isOpen={openStages.has(stage.id)}
+            stageNumber={index + 1}
+            isOpen={isStageOpen(stage.id)}
             onToggle={() => toggleStage(stage.id)}
             onActivityClick={handleStartActivity}
           />
