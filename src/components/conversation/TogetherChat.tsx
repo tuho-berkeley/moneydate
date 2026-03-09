@@ -491,7 +491,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         )}
 
         {/* AI is thinking — show when responding or when unrevealed messages are pending */}
-        {((isAIResponding && !streamingMessage) || hasPendingAIReveal) && dbMessages.length > 0 && (
+        {isAIResponding && dbMessages.length > 0 && (
           <AIThinkingBubble />
         )}
 
