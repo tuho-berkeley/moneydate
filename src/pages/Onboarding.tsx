@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,7 @@ export interface OnboardingData {
 const Onboarding = () => {
   const [step, setStep] = useState(0);
   const [authLoading, setAuthLoading] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(true);
+  const [checkingProfile, setCheckingProfile] = useState(true);
   const [data, setData] = useState<OnboardingData>({
     usageIntent: "",
     relationshipDuration: "",
@@ -29,40 +29,52 @@ const Onboarding = () => {
     helpTopics: [],
     partnerCode: "",
   });
+
   const navigate = useNavigate();
-  const { session } = useAuth();
-  const wasAuthenticatedBeforeSlides = useRef(!!session);
+  const { session, loading } = useAuth();
 
-  // When auth state changes on step 1 (ValueSlides), determine if new user and advance
   useEffect(() => {
-    if (!session?.user || step !== 1) return;
+    if (loading) return;
 
-    const checkAndAdvance = async () => {
-      // If user was already authenticated before reaching slides, they're returning
-      if (wasAuthenticatedBeforeSlides.current) {
-        navigate("/", { replace: true });
-        return;
-      }
+    if (!session?.user) {
+      setCheckingProfile(false);
+      setAuthLoading(false);
+      return;
+    }
 
-      // Check if onboarding was already completed (returning user signing in again)
-      const { data: profile } = await supabase
+    let active = true;
+
+    const syncOnboardingState = async () => {
+      const { data: profile, error } = await supabase
         .from("profiles")
         .select("onboarding_completed")
         .eq("id", session.user.id)
         .single();
 
-      if (profile?.onboarding_completed) {
-        // Returning user — go straight home
-        navigate("/", { replace: true });
-      } else {
-        // New user — continue onboarding
-        setIsNewUser(true);
-        setStep(2);
+      if (!active) return;
+
+      if (error) {
+        toast.error("Could not load onboarding status. Please refresh.");
+        setCheckingProfile(false);
+        return;
       }
+
+      if (profile?.onboarding_completed) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      setStep((currentStep) => (currentStep < 2 ? 2 : currentStep));
+      setCheckingProfile(false);
+      setAuthLoading(false);
     };
 
-    checkAndAdvance();
-  }, [session, step, navigate]);
+    syncOnboardingState();
+
+    return () => {
+      active = false;
+    };
+  }, [loading, navigate, session?.user?.id]);
 
   const next = () => setStep((s) => s + 1);
 
@@ -71,14 +83,15 @@ const Onboarding = () => {
 
   const handleGoogleAuth = async () => {
     setAuthLoading(true);
+
     const { error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + "/onboarding",
     });
+
     if (error) {
       toast.error(error.message);
       setAuthLoading(false);
     }
-    // Auth state change will be handled by the useEffect above
   };
 
   const finishOnboarding = async () => {
@@ -112,12 +125,6 @@ const Onboarding = () => {
     }
   };
 
-  // Flow:
-  // Step 0: Welcome
-  // Step 1: Value Slides + Google Auth
-  // Step 2: Personalization (new users only)
-  // Step 3: Partner Connection (new users only)
-  // Step 4: Trust & Safety (new users only)
   const totalSteps = 5;
 
   const renderStep = () => {
@@ -125,13 +132,7 @@ const Onboarding = () => {
       case 0:
         return <WelcomeStep onNext={next} />;
       case 1:
-        return (
-          <ValueSlides
-            onNext={next}
-            onGoogleAuth={handleGoogleAuth}
-            authLoading={authLoading}
-          />
-        );
+        return <ValueSlides onGoogleAuth={handleGoogleAuth} authLoading={authLoading} />;
       case 2:
         return (
           <PersonalizationStep
@@ -149,9 +150,16 @@ const Onboarding = () => {
     }
   };
 
+  if (loading || checkingProfile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress dots */}
       {step > 0 && step < totalSteps && (
         <div className="flex items-center justify-center gap-1.5 pt-8 pb-4">
           {Array.from({ length: totalSteps }).map((_, i) => (
@@ -164,6 +172,7 @@ const Onboarding = () => {
           ))}
         </div>
       )}
+
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         {renderStep()}
       </div>
