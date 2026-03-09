@@ -35,7 +35,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-28">
       <div className="max-w-lg mx-auto">
-        <div className="px-6 pt-14 pb-6">
+        <div className="px-6 pt-8 pb-6">
           <p className="text-sm text-muted-foreground font-medium">{greeting()}</p>
           <h1 className="font-display text-2xl font-bold text-foreground mt-1">
             {displayName || "Welcome"}
