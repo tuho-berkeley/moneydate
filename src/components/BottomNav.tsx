@@ -80,7 +80,7 @@ const BottomNav = () => {
   return (
     <div className={`fixed bottom-2 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-6 transition-transform ${hidden ? "duration-[600ms] ease-in translate-y-[calc(100%+1rem)]" : "duration-300 ease-out"}`}>
       {/* Fade overlay behind navbar */}
-      <div className="absolute -inset-x-4 -top-16 -bottom-2 bg-gradient-to-t from-background via-background/60 to-transparent rounded-b-3xl pointer-events-none" />
+      <div className="absolute -inset-x-4 -top-16 -bottom-2 bg-gradient-to-t from-background/70 via-background/40 to-transparent rounded-b-3xl pointer-events-none" />
       <nav
         ref={navRef}
         className="relative flex items-center gap-1.5 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
