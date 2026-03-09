@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, BookOpen, PiggyBank, Lock, Check, Loader2 } from "lucide-react";
-import { useActivities, useStartActivity, type ActivityWithProgress } from "@/hooks/useActivities";
+import { MessageCircle, BookOpen, PiggyBank, Lock, Check, Loader2, ChevronDown, ChevronRight } from "lucide-react";
+import { useStagesWithActivities, useStartActivity, type ActivityWithProgress, type StageWithActivities } from "@/hooks/useActivities";
 import type { Database } from "@/integrations/supabase/types";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type ActivityType = Database["public"]["Enums"]["activity_type"];
 type ActivityStatus = Database["public"]["Enums"]["activity_status"];
@@ -21,18 +23,41 @@ const statusStyles: Record<ActivityStatus, string> = {
 
 const ActivityPath = () => {
   const navigate = useNavigate();
-  const { data: activities, isLoading, error } = useActivities();
+  const { data: stages, isLoading, error } = useStagesWithActivities();
   const startActivity = useStartActivity();
+  const [openStages, setOpenStages] = useState<Set<string>>(new Set());
+
+  // Auto-open first unlocked stage that has incomplete activities
+  useState(() => {
+    if (stages && stages.length > 0) {
+      const firstIncomplete = stages.find(
+        (s) => s.isUnlocked && s.completedCount < s.totalCount
+      );
+      if (firstIncomplete) {
+        setOpenStages(new Set([firstIncomplete.id]));
+      }
+    }
+  });
+
+  const toggleStage = (stageId: string) => {
+    setOpenStages((prev) => {
+      const next = new Set(prev);
+      if (next.has(stageId)) {
+        next.delete(stageId);
+      } else {
+        next.add(stageId);
+      }
+      return next;
+    });
+  };
 
   const handleStartActivity = (activity: ActivityWithProgress) => {
     if (activity.userStatus === "locked") return;
 
-    // Start the activity if not already started
     if (activity.userStatus === "available") {
       startActivity.mutate(activity.id);
     }
 
-    // Navigate to activity based on type
     navigate(`/activity/${activity.id}`);
   };
 
@@ -60,7 +85,7 @@ const ActivityPath = () => {
     );
   }
 
-  if (!activities || activities.length === 0) {
+  if (!stages || stages.length === 0) {
     return (
       <div className="space-y-3">
         <h2 className="font-display text-xl font-semibold text-foreground px-1">
@@ -76,70 +101,158 @@ const ActivityPath = () => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <h2 className="font-display text-xl font-semibold text-foreground px-1">
         Your Journey
       </h2>
+      
       <div className="space-y-3">
-        {activities.map((activity) => {
-          const config = typeConfig[activity.type];
-          const Icon = activity.userStatus === "completed" 
-            ? Check 
-            : activity.userStatus === "locked" 
-              ? Lock 
-              : config.icon;
+        {stages.map((stage) => (
+          <StageCard
+            key={stage.id}
+            stage={stage}
+            isOpen={openStages.has(stage.id)}
+            onToggle={() => toggleStage(stage.id)}
+            onActivityClick={handleStartActivity}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
-          const isClickable = activity.userStatus !== "locked";
-          const showStartButton = activity.userStatus === "available" || activity.userStatus === "in_progress";
+interface StageCardProps {
+  stage: StageWithActivities;
+  isOpen: boolean;
+  onToggle: () => void;
+  onActivityClick: (activity: ActivityWithProgress) => void;
+}
 
-          return (
-            <div
-              key={activity.id}
-              onClick={() => isClickable && handleStartActivity(activity)}
-              className={`rounded-2xl border p-4 transition-all duration-200 ${statusStyles[activity.userStatus]} ${
-                isClickable ? "cursor-pointer hover:shadow-soft active:scale-[0.99]" : ""
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    activity.userStatus === "completed"
-                      ? "bg-secondary text-secondary-foreground"
-                      : activity.userStatus === "available" || activity.userStatus === "in_progress"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
+const StageCard = ({ stage, isOpen, onToggle, onActivityClick }: StageCardProps) => {
+  const isComplete = stage.completedCount === stage.totalCount && stage.totalCount > 0;
+  const progressPercent = stage.totalCount > 0 ? (stage.completedCount / stage.totalCount) * 100 : 0;
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={onToggle}>
+      <div className={`rounded-2xl border overflow-hidden transition-all duration-200 ${
+        stage.isUnlocked 
+          ? "bg-card border-border shadow-card" 
+          : "bg-muted/30 border-border/50 opacity-70"
+      }`}>
+        <CollapsibleTrigger className="w-full">
+          <div className="p-4 flex items-center gap-3">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${
+              isComplete 
+                ? "bg-secondary text-secondary-foreground" 
+                : stage.isUnlocked 
+                  ? "bg-primary/10 text-primary" 
+                  : "bg-muted text-muted-foreground"
+            }`}>
+              {isComplete ? <Check className="w-6 h-6" /> : stage.isUnlocked ? stage.icon : <Lock className="w-5 h-5" />}
+            </div>
+            
+            <div className="flex-1 text-left min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-foreground truncate">{stage.title}</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{stage.goal}</p>
+              
+              {/* Progress bar */}
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider ${
-                        activity.userStatus === "locked" ? "text-muted-foreground" : "text-secondary-foreground"
-                      }`}
-                    >
-                      {config.label}
-                    </span>
-                  </div>
-                  <h4 className="font-semibold text-sm text-foreground">{activity.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>
-                </div>
-                {showStartButton && (
-                  <button 
-                    className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl flex-shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleStartActivity(activity);
-                    }}
-                  >
-                    {activity.userStatus === "in_progress" ? "Continue" : "Start"}
-                  </button>
-                )}
+                <span className="text-[10px] text-muted-foreground font-medium">
+                  {stage.completedCount}/{stage.totalCount}
+                </span>
               </div>
             </div>
-          );
-        })}
+
+            <div className="text-muted-foreground flex-shrink-0">
+              {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            </div>
+          </div>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent>
+          <div className="px-4 pb-4 space-y-2">
+            {stage.activities.map((activity) => (
+              <ActivityItem 
+                key={activity.id} 
+                activity={activity} 
+                onClick={() => onActivityClick(activity)}
+              />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+};
+
+interface ActivityItemProps {
+  activity: ActivityWithProgress;
+  onClick: () => void;
+}
+
+const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
+  const config = typeConfig[activity.type];
+  const Icon = activity.userStatus === "completed" 
+    ? Check 
+    : activity.userStatus === "locked" 
+      ? Lock 
+      : config.icon;
+
+  const isClickable = activity.userStatus !== "locked";
+  const showStartButton = activity.userStatus === "available" || activity.userStatus === "in_progress";
+
+  return (
+    <div
+      onClick={() => isClickable && onClick()}
+      className={`rounded-xl border p-3 transition-all duration-200 ${statusStyles[activity.userStatus]} ${
+        isClickable ? "cursor-pointer hover:shadow-soft active:scale-[0.99]" : ""
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+            activity.userStatus === "completed"
+              ? "bg-secondary text-secondary-foreground"
+              : activity.userStatus === "available" || activity.userStatus === "in_progress"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+          }`}
+        >
+          <Icon className="w-4 h-4" />
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-[10px] font-semibold uppercase tracking-wider ${
+                activity.userStatus === "locked" ? "text-muted-foreground" : "text-secondary-foreground"
+              }`}
+            >
+              {config.label}
+            </span>
+          </div>
+          <h4 className="font-medium text-sm text-foreground truncate">{activity.title}</h4>
+        </div>
+        
+        {showStartButton && (
+          <button 
+            className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            {activity.userStatus === "in_progress" ? "Continue" : "Start"}
+          </button>
+        )}
       </div>
     </div>
   );
