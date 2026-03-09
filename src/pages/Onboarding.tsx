@@ -139,6 +139,7 @@ const Onboarding = () => {
             data={data}
             onChange={updateData}
             onNext={next}
+            onSkip={next}
           />
         );
       case 3:
