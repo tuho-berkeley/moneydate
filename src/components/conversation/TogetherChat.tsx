@@ -378,18 +378,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     if (error) {
       toast.error("Failed to send message");
     } else {
-      // Together completion: check if both partners have answered at least 1 question
-      const myMessages = dbMessages.some(m => m.sender_id === user.id);
-      const partnerMessages = partnerId ? dbMessages.some(m => m.sender_id === partnerId) : false;
-      // Current user just sent a message, so they definitely have one
-      if (partnerMessages || (myMessages && !partnerMessages)) {
-        // If partner already has messages and user just sent one, or vice versa
-        if (myMessages && partnerMessages) {
-          markCompleted();
-        } else if (!myMessages && partnerMessages) {
-          // User's first message + partner already has messages
-          markCompleted();
-        }
+      // Together completion: each partner answered at least 1 question
+      // User just sent a message, so check if partner already has one
+      const partnerHasMessages = partnerId ? dbMessages.some(m => m.sender_id === partnerId) : false;
+      const userHadMessages = dbMessages.some(m => m.sender_id === user.id);
+      // Both have now sent at least 1 if partner had messages, OR if user already had messages and this could be partner's turn
+      if (partnerHasMessages && (userHadMessages || true)) {
+        markCompleted();
       }
     }
     setIsSending(false);
