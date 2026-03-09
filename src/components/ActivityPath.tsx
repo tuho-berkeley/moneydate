@@ -32,9 +32,22 @@ const ActivityPath = () => {
 
   const [openStages, setOpenStages] = useState<Set<string>>(new Set());
 
+  const isStageOpen = (stageId: string) => {
+    if (openStages.has(stageId)) return true;
+    // Auto-open current stage if user hasn't manually toggled anything
+    if (openStages.size === 0 && stageId === currentStageId) return true;
+    return false;
+  };
+
   const toggleStage = (stageId: string) => {
     setOpenStages((prev) => {
       const next = new Set(prev);
+      // If it's auto-opened and not in the set yet, add all others' closed state
+      if (next.size === 0 && stageId === currentStageId) {
+        // Closing the auto-opened stage
+        next.add("__toggled__");
+        return next;
+      }
       if (next.has(stageId)) {
         next.delete(stageId);
       } else {
