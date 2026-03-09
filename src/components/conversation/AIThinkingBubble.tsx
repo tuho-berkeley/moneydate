@@ -18,7 +18,7 @@ const AIThinkingBubble = () => {
   }, []);
 
   return (
-    <div className="flex justify-start animate-fade-in-message">
+    <div className="flex justify-start">
       <div className="bg-secondary/50 rounded-2xl px-5 py-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
