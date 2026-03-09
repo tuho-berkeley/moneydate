@@ -324,7 +324,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         )}
 
         {messages.map((msg, idx) => {
-          // Detect if this is the last AI message in a consecutive AI sequence and ends with ?
           const isLastAI = msg.role === "ai" && !msg.isStreaming &&
             (idx === messages.length - 1 || messages[idx + 1]?.role === "user") &&
             !(idx === messages.length - 1 && streamingMessage !== null);
@@ -336,7 +335,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
             <div
               key={msg.id}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-message`}
-              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}
@@ -363,7 +361,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           );
         })}
 
-        {isSending && !streamingMessage && <AIThinkingBubble />}
+        {showThinking && messages.length > 0 && <AIThinkingBubble />}
 
         <div ref={messagesEndRef} />
       </div>

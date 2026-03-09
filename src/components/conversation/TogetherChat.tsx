@@ -444,7 +444,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               className={`flex ${
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
               } animate-fade-in-message`}
-              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
                 {msg.role === "ai" ? (
@@ -479,7 +478,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         })}
 
         {/* Waiting indicator */}
-        {waitingForPartner && !isAIResponding && (
+        {waitingForPartner && !isAIResponding && !hasUnrevealedAI && (
           <div className="flex justify-center">
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
               <Clock className="w-3.5 h-3.5" />
@@ -488,8 +487,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           </div>
         )}
 
-        {/* AI is thinking */}
-        {isAIResponding && !streamingMessage && dbMessages.length > 0 && (
+        {/* AI is thinking — show when responding or when unrevealed messages are pending */}
+        {((isAIResponding && !streamingMessage) || hasUnrevealedAI) && dbMessages.length > 0 && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Guide
