@@ -16,6 +16,8 @@ const BottomNav = () => {
   const { session } = useAuth();
   const navRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
 
   const updateIndicator = () => {
     if (!navRef.current) return;
@@ -47,7 +49,6 @@ const BottomNav = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    // Recalculate after fonts/layout settle
     const raf = requestAnimationFrame(updateIndicator);
     window.addEventListener("resize", updateIndicator);
     return () => {
@@ -55,6 +56,20 @@ const BottomNav = () => {
       window.removeEventListener("resize", updateIndicator);
     };
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY > 80 && currentY > lastScrollY.current) {
+        setHidden(true);
+      } else if (currentY < lastScrollY.current) {
+        setHidden(false);
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   if (!session) return null;
   if (location.pathname === "/onboarding") return null;
