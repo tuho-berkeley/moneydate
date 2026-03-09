@@ -185,8 +185,7 @@ const Activity = () => {
                       {completedTypes?.has("together") &&
                     <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                     }
-                      <p className="font-semibold text-foreground">
-</p>
+                      <p className="font-semibold text-foreground">Chat Together</p>
                       <p className="text-xs text-muted-foreground text-pretty">Chat with your partner & guided by AI</p>
                     </div>
                   </Button>
