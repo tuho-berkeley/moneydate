@@ -493,7 +493,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             <ChevronLeft className="w-4 h-4" /> Previous
           </Button>
 
-          {currentPrompt < defaultPrompts.length - 1 ? (
+          {currentPrompt < defaultPrompts.length - 1 && (
             <Button
               variant="ghost"
               size="sm"
@@ -502,11 +502,21 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             >
               Next <ChevronRight className="w-4 h-4" />
             </Button>
-          ) : (
+          )}
+          {canGenerateInsights && (
             <Button
               size="sm"
               onClick={generateSummary}
-              disabled={!allPromptsComplete || isGeneratingSummary}
+              disabled={isGeneratingSummary}
+              className="gap-1 rounded-xl"
+            >
+              <Sparkles className="w-4 h-4" /> Get Insights
+            </Button>
+          )}
+          {!canGenerateInsights && currentPrompt === defaultPrompts.length - 1 && (
+            <Button
+              size="sm"
+              disabled
               className="gap-1 rounded-xl"
             >
               <Sparkles className="w-4 h-4" /> Get Insights
