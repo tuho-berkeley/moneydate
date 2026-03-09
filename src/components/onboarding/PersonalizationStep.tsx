@@ -41,7 +41,9 @@ interface Props {
 const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
   const [subStep, setSubStep] = useState(0);
 
-  const renderQuestion = () => {
+  const totalQuestions = 4;
+
+  const renderQuestionContent = () => {
     if (subStep === 0) {
       return (
         <div className="space-y-6 animate-fade-in" key="q0">
@@ -78,9 +80,6 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               );
             })}
           </div>
-          <Button onClick={() => setSubStep(1)} className="w-full rounded-full" size="lg">
-            Next
-          </Button>
         </div>
       );
     }
@@ -109,12 +108,6 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               </button>
             ))}
           </div>
-          <div className="space-y-3">
-            <Button onClick={() => setSubStep(2)} className="w-full rounded-full" size="lg">
-              Next
-            </Button>
-            <button onClick={() => setSubStep(0)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
-          </div>
         </div>
       );
     }
@@ -142,12 +135,6 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
                 {opt.label}
               </button>
             ))}
-          </div>
-          <div className="space-y-3">
-            <Button onClick={() => setSubStep(3)} className="w-full rounded-full" size="lg">
-              Next
-            </Button>
-            <button onClick={() => setSubStep(1)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
           </div>
         </div>
       );
@@ -183,20 +170,21 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
             );
           })}
         </div>
-        <div className="space-y-3">
-          <Button onClick={onNext} className="w-full rounded-full" size="lg">
-            Start Your Journey
-          </Button>
-          <button onClick={() => setSubStep(2)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
-        </div>
       </div>
     );
   };
 
-  const totalQuestions = 4;
+  const handleNext = () => {
+    if (subStep === 3) {
+      onNext();
+    } else {
+      setSubStep(subStep + 1);
+    }
+  };
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="w-full max-w-sm flex flex-col min-h-[calc(100dvh-3rem)]">
+      {/* Progress dots */}
       <div className="fixed top-6 left-0 right-0 z-50 flex items-center justify-center gap-1.5">
         {Array.from({ length: totalQuestions }).map((_, i) => (
           <div
@@ -207,7 +195,26 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
           />
         ))}
       </div>
-      {renderQuestion()}
+
+      {/* Scrollable question content */}
+      <div className="flex-1 overflow-y-auto pt-4">
+        {renderQuestionContent()}
+      </div>
+
+      {/* Fixed bottom buttons */}
+      <div className="py-6 space-y-3">
+        <Button onClick={handleNext} className="w-full rounded-full" size="lg">
+          {subStep === 3 ? "Start Your Journey" : "Next"}
+        </Button>
+        {subStep > 0 && (
+          <button
+            onClick={() => setSubStep(subStep - 1)}
+            className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            Back
+          </button>
+        )}
+      </div>
     </div>
   );
 };
