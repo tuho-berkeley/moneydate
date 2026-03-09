@@ -38,13 +38,6 @@ const Profile = () => {
     localStorage.setItem("theme", checked ? "dark" : "light");
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark") {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (!user) return;

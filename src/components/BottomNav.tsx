@@ -46,7 +46,7 @@ const BottomNav = () => {
 
   useLayoutEffect(() => {
     updateIndicator();
-  }, [location.pathname]);
+  }, [location.pathname, session]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(updateIndicator);
@@ -55,7 +55,7 @@ const BottomNav = () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", updateIndicator);
     };
-  }, [location.pathname]);
+  }, [location.pathname, session]);
 
   useEffect(() => {
     const handleScroll = () => {
