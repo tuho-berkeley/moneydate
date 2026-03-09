@@ -28,15 +28,16 @@ export function AIMessageLabel({ type }: { type: AILabelType }) {
  * For question-type messages, wraps sentences ending with ? in <strong> tags.
  */
 export function highlightQuestions(content: string): string {
-  // Split into sentences, bold only those ending with ?
-  // First strip any existing ** around question sentences to avoid double-bold
+  // Bold only the first sentence that ends with "?"
   const stripped = content.replace(/\*\*([^*]*\?)\*\*/g, '$1');
+  let found = false;
   return stripped.replace(
-    /([^.!?\n]*\?)/g,
+    /([^.!?\n]*\?)/,
     (match) => {
+      if (found) return match;
+      found = true;
       const trimmed = match.trim();
       if (!trimmed) return match;
-      // Preserve leading whitespace
       const leading = match.match(/^(\s*)/)?.[1] || '';
       return `${leading}**${trimmed}**`;
     }
