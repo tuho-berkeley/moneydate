@@ -15,7 +15,7 @@ const ProgressCards = () => {
           <p className="text-xl font-bold text-foreground">1</p>
         </div>
       </div>
-      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-start">
+      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-center">
         <p className="text-[10px] text-muted-foreground mb-1">Activities</p>
         <div className="flex items-center gap-1.5">
           <div className="w-7 h-7 rounded-lg bg-success-light flex items-center justify-center">
