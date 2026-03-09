@@ -443,18 +443,18 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         )}
 
         {displayMessages.map((msg, idx) => {
-          const isLastAI = msg.role === "ai" && msg.id !== "streaming" &&
-            (idx === displayMessages.length - 1 || displayMessages[idx + 1]?.role !== "ai");
           const isFirstAI = msg.role === "ai" && idx === 0;
           const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
           const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
+          const isFresh = freshIds.has(msg.id);
 
           return (
             <div
               key={msg.id}
               className={`flex ${
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
-              }`}
+              } ${isFresh && msg.role === "ai" ? "animate-message-appear" : ""}`}
+              style={isFresh && msg.role === "ai" ? { opacity: 0 } : undefined}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" ? (
@@ -476,15 +476,23 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                   }`}
                 >
                   {msg.role === "ai" ? (
-                    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                      <ReactMarkdown>{displayContent}</ReactMarkdown>
-                    </div>
+                    isFresh ? (
+                      <TypewriterText
+                        content={displayContent}
+                        onComplete={() => handleTypewriterComplete(msg.id)}
+                      />
+                    ) : (
+                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                        <ReactMarkdown>{displayContent}</ReactMarkdown>
+                      </div>
+                    )
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
               </div>
             </div>
+          ;
           );
         })}
 
