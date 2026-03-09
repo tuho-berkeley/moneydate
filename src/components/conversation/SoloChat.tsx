@@ -272,6 +272,12 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           setStreamingMessage(null);
           setIsSending(false);
           setIsWaitingForAI(false);
+
+          // Solo completion: user answered at least 3 AI questions
+          const userMessageCount = dbMessages.filter(m => m.role === "user").length + 1; // +1 for the just-sent message
+          if (userMessageCount >= 3) {
+            markCompleted();
+          }
         },
         onError: (error) => {
           toast.error(error);
