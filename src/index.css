@@ -89,7 +89,8 @@
     --input: 345 15% 20%;
     --ring: 347 52% 52%;
 
-    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --success: 160 40% 38%;
+    --success-light: 160 25% 18%;
     --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.2);
 
     --sidebar-background: 345 15% 12%;
