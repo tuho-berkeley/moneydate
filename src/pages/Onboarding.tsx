@@ -79,8 +79,6 @@ const Onboarding = () => {
       case 1:
         return <ValueSlides onNext={next} />;
       case 2:
-        return <UserIntentStep value={data.usageIntent} onChange={(v) => updateData({ usageIntent: v })} onNext={next} />;
-      case 3:
         return (
           <PersonalizationStep
             data={data}
@@ -88,15 +86,15 @@ const Onboarding = () => {
             onNext={next}
           />
         );
-      case 4:
+      case 3:
         if (isAuthenticated) {
-          setStep(5);
+          setStep(4);
           return null;
         }
-        return <AuthStep onNext={() => setStep(5)} />;
-      case 5:
+        return <AuthStep onNext={() => setStep(4)} />;
+      case 4:
         return <PartnerConnectionStep onNext={next} onSkip={next} />;
-      case 6:
+      case 5:
         return <TrustStep onFinish={finishOnboarding} />;
       default:
         return null;
@@ -106,9 +104,9 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Progress dots */}
-      {step > 0 && step < 7 && (
+      {step > 0 && step < 6 && (
         <div className="flex items-center justify-center gap-1.5 pt-8 pb-4">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
