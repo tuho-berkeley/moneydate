@@ -117,7 +117,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out forwards",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "fade-in-message": "fade-in-message 0.45s cubic-bezier(0.16,1,0.3,1) forwards",
+        "fade-in-message": "fade-in-message 0.7s cubic-bezier(0.16,1,0.3,1) forwards",
         "thinking-wave": "thinking-wave 1.2s ease-in-out infinite",
         "pulse-subtle": "pulse-subtle 2.5s ease-in-out infinite",
       },
