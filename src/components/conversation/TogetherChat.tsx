@@ -153,29 +153,52 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const partnerName = partnerProfile?.display_name || "Partner";
   const myName = profile?.display_name || "You";
 
-  // Find last AI message index and check who has responded since
-  const lastAIIndex = (() => {
+  // Parse [ASKING:name] tag from last AI message
+  const askingTagRegex = /\[ASKING:([^\]]+)\]\s*$/;
+
+  const parseAsking = (content: string): string | null => {
+    const match = content.match(askingTagRegex);
+    return match ? match[1].trim() : null;
+  };
+
+  const stripAskingTag = (content: string): string => {
+    return content.replace(askingTagRegex, "").trimEnd();
+  };
+
+  // Find the last AI message and who it's asking
+  const lastAIMessage = (() => {
     for (let i = dbMessages.length - 1; i >= 0; i--) {
-      if (dbMessages[i].role === "ai") return i;
+      if (dbMessages[i].role === "ai") return dbMessages[i];
     }
-    return -1;
+    return null;
   })();
 
+  const lastAIIndex = lastAIMessage
+    ? dbMessages.findIndex((m) => m.id === lastAIMessage.id)
+    : -1;
+
+  const askedPartnerName = lastAIMessage ? parseAsking(lastAIMessage.content) : null;
+  const isMyTurn = askedPartnerName === myName;
+  const isPartnerTurn = askedPartnerName === partnerName;
+
+  // Check if the asked partner has responded since the last AI message
   const messagesSinceLastAI = lastAIIndex >= 0
     ? dbMessages.slice(lastAIIndex + 1)
-    : dbMessages.filter((m) => m.role !== "ai");
+    : [];
 
-  const myResponseSent = messagesSinceLastAI.some((m) => m.sender_id === user?.id);
-  const partnerResponseSent = partnerId
-    ? messagesSinceLastAI.some((m) => m.sender_id === partnerId)
-    : false;
-  const bothResponded = myResponseSent && partnerResponseSent;
-  const waitingForPartner = myResponseSent && !partnerResponseSent;
-  const waitingForMe = !myResponseSent && partnerResponseSent;
+  const askedPartnerResponded = (() => {
+    if (isMyTurn) return messagesSinceLastAI.some((m) => m.sender_id === user?.id);
+    if (isPartnerTurn) return partnerId ? messagesSinceLastAI.some((m) => m.sender_id === partnerId) : false;
+    return false;
+  })();
 
-  // AI should respond: when the last message is NOT from AI and both have responded, or at start
+  // Current user already answered this turn
+  const myResponseSent = isMyTurn && messagesSinceLastAI.some((m) => m.sender_id === user?.id);
+  const waitingForPartner = isPartnerTurn && !askedPartnerResponded;
+
+  // AI should respond after the asked partner answers
   const lastMessage = dbMessages[dbMessages.length - 1];
-  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && bothResponded;
+  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded;
 
   // Auto-seed AI starter message
   useEffect(() => {
@@ -184,7 +207,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     triggerAI([]);
   }, [conversation, messagesLoaded, dbMessages.length]);
 
-  // Auto-trigger AI after both partners respond
+  // Auto-trigger AI after the asked partner responds
   useEffect(() => {
     if (!aiShouldRespond || isAIResponding || aiTriggerRef.current) return;
     aiTriggerRef.current = true;
@@ -211,6 +234,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       activityTitle,
       activityDescription: activityDescription || "",
       conversationType: "together",
+      userName: myName,
+      partnerName,
       onDelta: (chunk) => {
         fullResponse += chunk;
         setStreamingMessage(fullResponse);
@@ -235,19 +260,19 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         aiTriggerRef.current = false;
       },
     });
-  }, [conversation, activityTitle, activityDescription]);
+  }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
-  // Build display messages
+  // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
     ...dbMessages.map((m: DBMessage) => ({
       id: m.id,
       role: m.role,
-      content: m.content,
+      content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
       isMe: m.sender_id === user?.id,
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
     })),
     ...(streamingMessage !== null
-      ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isMe: false, senderName: "Guide" }]
+      ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide" }]
       : []),
   ];
 
@@ -312,7 +337,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   };
 
   // Determine if input should be disabled
-  const inputDisabled = isAIResponding || myResponseSent || dbMessages.length === 0 && !streamingMessage;
+  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || (dbMessages.length === 0 && !streamingMessage);
   const isLoadingStart = dbMessages.length === 0 && streamingMessage === null && !isAIResponding;
 
   return (
@@ -427,9 +452,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
       {/* Input */}
       <div className="bg-card border-t border-border p-4 sticky bottom-0">
-        {waitingForPartner ? (
+        {myResponseSent || waitingForPartner ? (
           <div className="text-center text-sm text-muted-foreground py-2">
-            Your response has been sent. Waiting for {partnerName}…
+            {myResponseSent
+              ? `Your response has been sent. Waiting for the guide…`
+              : `Waiting for ${partnerName} to respond…`}
+          </div>
+        ) : isPartnerTurn && !askedPartnerResponded ? (
+          <div className="text-center text-sm text-muted-foreground py-2">
+            Waiting for {partnerName} to respond…
           </div>
         ) : (
           <div className="flex items-end gap-2">
@@ -441,8 +472,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               placeholder={
                 isAIResponding
                   ? "Guide is speaking…"
-                  : waitingForMe
-                    ? "Your partner has answered — your turn!"
+                  : isMyTurn
+                    ? `${myName}, it's your turn to share!`
                     : "Share your thoughts…"
               }
               className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
