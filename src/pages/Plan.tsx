@@ -58,7 +58,7 @@ const Plan = () => {
           return (
             <div
               key={i}
-              className="bg-card rounded-2xl p-4 shadow-card">
+              className="bg-card rounded-2xl p-4 shadow-card"
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${plan.color}`}>
