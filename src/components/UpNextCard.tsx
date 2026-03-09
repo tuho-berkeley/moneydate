@@ -8,13 +8,13 @@ type ActivityType = Database["public"]["Enums"]["activity_type"];
 const typeIcons: Record<ActivityType, typeof MessageCircle> = {
   conversation: MessageCircle,
   lesson: BookOpen,
-  planning: PiggyBank,
+  planning: PiggyBank
 };
 
 const typeLabels: Record<ActivityType, string> = {
   conversation: "Conversation",
   lesson: "Lesson",
-  planning: "Planning",
+  planning: "Planning"
 };
 
 const UpNextCard = () => {
@@ -24,11 +24,11 @@ const UpNextCard = () => {
 
   const handleStart = () => {
     if (!current) return;
-    
+
     if (current.userStatus === "available") {
       startActivity.mutate(current.id);
     }
-    
+
     navigate(`/activity/${current.id}`);
   };
 
@@ -54,8 +54,8 @@ const UpNextCard = () => {
             </p>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // No activities available
@@ -65,8 +65,8 @@ const UpNextCard = () => {
         <div className="flex items-center justify-center py-4">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const Icon = typeIcons[current.type];
@@ -80,7 +80,7 @@ const UpNextCard = () => {
       </div>
       <div className="flex items-start gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-base font-semibold text-foreground mb-0.5 text-pretty">
+          <h3 className="font-display font-semibold text-foreground mb-0.5 text-pretty text-xl">
             {current.title}
           </h3>
           <p className="text-sm text-muted-foreground leading-snug text-pretty">
@@ -88,15 +88,15 @@ const UpNextCard = () => {
           </p>
         </div>
       </div>
-      <button 
+      <button
         onClick={handleStart}
-        className="mt-3.5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
-      >
+        className="mt-3.5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]">
+        
         {current.userStatus === "in_progress" ? "Continue" : "Start"}
         <ArrowRight className="w-4 h-4" />
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 export default UpNextCard;
