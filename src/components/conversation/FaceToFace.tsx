@@ -110,6 +110,35 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     enabled: !!user,
   });
 
+  // Load existing AI messages (saved summary) on mount
+  const { data: savedMessages = [] } = useQuery({
+    queryKey: ["messages", conversation?.id],
+    queryFn: async () => {
+      if (!conversation) return [];
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", conversation.id)
+        .eq("role", "ai")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!conversation,
+  });
+
+  // If returning to a completed conversation, show the saved summary
+  useEffect(() => {
+    if (savedMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
+      const combined = savedMessages.map(m => m.content).join("\n---\n");
+      setSummaryText(combined);
+      setShowSummary(true);
+      // Reveal all segments instantly (no typewriter for past summaries)
+      const segments = combined.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+      setRevealedSegments(new Set(segments.map((_, i) => i)));
+    }
+  }, [savedMessages]);
+
   const handleRestart = useCallback(async () => {
     if (!conversation) return;
     const { error } = await supabase
@@ -124,7 +153,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setCurrentPrompt(0);
     setIsFlipped(false);
     setShowSummary(false);
-    setSummaryText("");
+    setSummaryText(null);
+    setRevealedSegments(new Set());
+    setFreshSegments(new Set());
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, queryClient]);
@@ -316,7 +347,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-          <button onClick={() => setShowSummary(false)} className="text-muted-foreground">
+          <button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="text-muted-foreground">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
@@ -357,9 +388,30 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             })
           ) : null}
           {!isGeneratingSummary && summarySegments.length > 0 && !freshSegments.size && (
-            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
-              Done
-            </Button>
+            <div className="space-y-3 mt-4">
+              <Button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="w-full rounded-xl">
+                Done
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full rounded-xl gap-2">
+                    <RotateCcw className="w-4 h-4" /> Start Over
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Start over?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will clear the summary and all recorded responses. You'll start fresh with the first question.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRestart}>Start Over</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )}
         </div>
       </div>
