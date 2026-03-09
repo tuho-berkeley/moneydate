@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import Activity from "./pages/Activity";
 import Conversation from "./pages/Conversation";
+import Lesson from "./pages/Lesson";
 
 const queryClient = new QueryClient();
 
