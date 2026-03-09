@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut } from "lucide-react";
+import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -61,6 +72,27 @@ const Profile = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${currentSession?.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to delete account");
+      await signOut();
+      navigate("/onboarding");
+    } catch {
+      toast.error("Could not delete account. Please try again.");
+    }
   };
 
   const copyInviteCode = () => {
@@ -140,7 +172,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <div>
+        <div className="space-y-4 pb-4">
           <button
             onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors"
@@ -148,6 +180,30 @@ const Profile = () => {
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
+
+          <div className="flex justify-center">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-xs text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors">
+                  Delete account
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action is permanent and cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete account
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
     </div>
