@@ -275,9 +275,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
       isMe: m.sender_id === user?.id,
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
+      askedName: m.role === "ai" ? parseAsking(m.content) : null,
     })),
     ...(streamingMessage !== null
-      ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide" }]
+      ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage) }]
       : []),
   ];
 
