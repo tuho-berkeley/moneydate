@@ -8,21 +8,18 @@ const slides = [
     title: "Talk about money without awkwardness",
     description: "Thoughtful questions to guide honest, meaningful conversations together.",
     color: "bg-secondary",
-    iconColor: "text-primary",
   },
   {
     icon: Target,
     title: "Turn conversations into real plans",
     description: "Build shared goals, budgets, and financial plans for your future.",
-    color: "bg-accent",
-    iconColor: "text-accent-foreground",
+    color: "bg-secondary",
   },
   {
     icon: Shield,
     title: "No more financial surprises",
     description: "Understand each other's habits and expectations early.",
-    color: "bg-muted",
-    iconColor: "text-foreground",
+    color: "bg-secondary",
   },
 ];
 
