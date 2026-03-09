@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
+import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
 type DBMessage = Database["public"]["Tables"]["messages"]["Row"];
 
