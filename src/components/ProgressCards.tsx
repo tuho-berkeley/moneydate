@@ -8,7 +8,7 @@ const ProgressCards = () => {
     <div className="grid grid-cols-3 gap-2">
       <div className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center text-center">
         <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center mb-2">
-          <Flame className="w-4 h-4 text-primary" />
+          <Flame className="w-4 h-4 text-secondary-foreground" />
         </div>
         <p className="text-xl font-bold text-foreground">1</p>
         <p className="text-[10px] text-muted-foreground mt-0.5">Week Streak</p>
@@ -27,8 +27,8 @@ const ProgressCards = () => {
         <p className="text-xl font-bold text-foreground">78%</p>
         <p className="text-[10px] text-muted-foreground mt-0.5">Compatibility</p>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ProgressCards;
