@@ -345,7 +345,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
   if (showSummary) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-[100dvh] bg-background flex flex-col">
         <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
           <button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="text-muted-foreground">
             <ArrowLeft className="w-5 h-5" />
