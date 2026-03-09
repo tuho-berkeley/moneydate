@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import Activity from "./pages/Activity";
 import Conversation from "./pages/Conversation";
+import Lesson from "./pages/Lesson";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/activity/:id" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
             <Route path="/conversation/:activityId" element={<ProtectedRoute><Conversation /></ProtectedRoute>} />
+            <Route path="/lesson/:id" element={<ProtectedRoute><Lesson /></ProtectedRoute>} />
             <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
             <Route path="/plan" element={<ProtectedRoute><Plan /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
