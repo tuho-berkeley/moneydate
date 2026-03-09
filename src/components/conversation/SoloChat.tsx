@@ -143,6 +143,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   // Sequential reveal of new AI messages (one at a time, after typewriter completes)
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
+
+    // On first load (returning to existing conversation), reveal all immediately (no animation)
+    // Skip if we're currently seeding — those messages should go through the queue
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
+      setRevealedIds(new Set(dbMessages.map(m => m.id)));
+      prevMessageIdsRef.current = currentIds;
+      return;
+    }
+
     const newAiMsgs = dbMessages.filter(
       m => m.role === "ai" && !prevMessageIdsRef.current.has(m.id) && !revealedIds.has(m.id)
     );
@@ -169,12 +178,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         newUserMsgs.forEach(m => next.add(m.id));
         return next;
       });
-    }
-
-    // On first load (returning to existing conversation), reveal all immediately (no animation)
-    // Skip if we're currently seeding — those messages should go through the queue
-    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
-      setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
 
     prevMessageIdsRef.current = currentIds;
