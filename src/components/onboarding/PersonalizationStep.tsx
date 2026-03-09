@@ -183,7 +183,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
   };
 
   return (
-    <div className="w-full max-w-sm flex flex-col min-h-[calc(100dvh-3rem)]">
+    <div className="w-full max-w-sm flex flex-col h-[calc(100dvh-3rem)]">
       {/* Progress dots */}
       <div className="fixed top-6 left-0 right-0 z-50 flex items-center justify-center gap-1.5">
         {Array.from({ length: totalQuestions }).map((_, i) => (
@@ -202,7 +202,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       </div>
 
       {/* Fixed bottom buttons */}
-      <div className="py-6 space-y-3">
+      <div className="shrink-0 py-6 space-y-3">
         <Button onClick={handleNext} className="w-full rounded-full" size="lg">
           {subStep === 3 ? "Start Your Journey" : "Next"}
         </Button>
