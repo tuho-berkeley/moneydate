@@ -102,107 +102,109 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-28">
-      <div className="px-6 pt-14 pb-6">
-        <div className="bg-card rounded-3xl p-6 shadow-soft text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-lg font-bold text-primary">
-              {profile?.display_name?.charAt(0)?.toUpperCase() || "?"}
+      <div className="max-w-lg mx-auto">
+        <div className="px-6 pt-14 pb-6">
+          <div className="bg-card rounded-3xl p-6 shadow-soft text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-lg font-bold text-primary">
+                {profile?.display_name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
             </div>
+            <h2 className="font-display text-xl font-bold text-foreground">
+              {profile?.display_name || "Your Profile"}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
+            {inviteCode && (
+              <button
+                onClick={copyInviteCode}
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-secondary px-3 py-1.5 rounded-full"
+              >
+                <Link2 className="w-3.5 h-3.5" />
+                Invite Code: {inviteCode}
+              </button>
+            )}
           </div>
-          <h2 className="font-display text-xl font-bold text-foreground">
-            {profile?.display_name || "Your Profile"}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
-          {inviteCode && (
-            <button
-              onClick={copyInviteCode}
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-secondary px-3 py-1.5 rounded-full"
-            >
-              <Link2 className="w-3.5 h-3.5" />
-              Invite Code: {inviteCode}
-            </button>
-          )}
         </div>
-      </div>
 
-      <div className="px-6 space-y-5">
-        {goals.length > 0 && (
+        <div className="px-6 space-y-5">
+          {goals.length > 0 && (
+            <div>
+              <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Shared Goals</h3>
+              <div className="space-y-2">
+                {goals.map((goal, i) => (
+                  <div key={i} className="bg-card rounded-2xl p-4 shadow-card flex items-center gap-3">
+                    <span className="text-2xl">{goal.icon}</span>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-foreground">{goal.title}</h4>
+                      <div className="mt-1.5 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${goal.progress}%` }} />
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground">{goal.progress}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
-            <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Shared Goals</h3>
-            <div className="space-y-2">
-              {goals.map((goal, i) => (
-                <div key={i} className="bg-card rounded-2xl p-4 shadow-card flex items-center gap-3">
-                  <span className="text-2xl">{goal.icon}</span>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-semibold text-foreground">{goal.title}</h4>
-                    <div className="mt-1.5 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${goal.progress}%` }} />
+            <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
+            <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
+              {settings.map((setting, i) => {
+                const Icon = setting.icon;
+                return (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3.5">
+                    <Icon className="w-5 h-5 text-muted-foreground" />
+                    <span className="flex-1 text-sm font-medium text-foreground">{setting.label}</span>
+                    <div
+                      className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${
+                        setting.active ? "bg-primary" : "bg-muted"
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-5 h-5 rounded-full bg-card shadow-sm transition-transform ${
+                          setting.active ? "translate-x-5" : "translate-x-0.5"
+                        }`}
+                      />
                     </div>
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground">{goal.progress}%</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-        )}
 
-        <div>
-          <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
-          <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
-            {settings.map((setting, i) => {
-              const Icon = setting.icon;
-              return (
-                <div key={i} className="flex items-center gap-3 px-4 py-3.5">
-                  <Icon className="w-5 h-5 text-muted-foreground" />
-                  <span className="flex-1 text-sm font-medium text-foreground">{setting.label}</span>
-                  <div
-                    className={`w-11 h-6 rounded-full relative cursor-pointer transition-colors ${
-                      setting.active ? "bg-primary" : "bg-muted"
-                    }`}
-                  >
-                    <div
-                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-card shadow-sm transition-transform ${
-                        setting.active ? "translate-x-5" : "translate-x-0.5"
-                      }`}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+          <div className="space-y-4 pb-4">
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
 
-        <div className="space-y-4 pb-4">
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </button>
-
-          <div className="flex justify-center">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="text-xs text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors">
-                  Delete account
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action is permanent and cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <div className="flex justify-center">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="text-xs text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors">
                     Delete account
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action is permanent and cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Delete account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
       </div>
