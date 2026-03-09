@@ -4,7 +4,7 @@ type AILabelType = "welcome" | "question" | "insight";
 
 export function getAILabelType(content: string, isFirstAIMessage: boolean): AILabelType {
   if (isFirstAIMessage) return "welcome";
-  if (content.trim().endsWith("?")) return "question";
+  if (/\?/.test(content)) return "question";
   return "insight";
 }
 
