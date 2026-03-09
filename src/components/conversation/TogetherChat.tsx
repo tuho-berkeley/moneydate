@@ -39,7 +39,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
-  const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isAIResponding, setIsAIResponding] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
