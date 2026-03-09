@@ -63,7 +63,7 @@ const typeConfig: Record<ActivityType, { label: string; icon: typeof MessageCirc
 };
 
 const statusStyles: Record<ActivityStatus, string> = {
-  completed: "bg-success-light border-success/20",
+  completed: "bg-card border-border shadow-card",
   current: "bg-card border-primary/30 shadow-soft",
   "in-progress": "bg-card border-primary/20 shadow-card",
   locked: "bg-muted/50 border-border/50 opacity-60",
@@ -91,7 +91,7 @@ const ActivityPath = () => {
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     activity.status === "completed"
-                      ? "bg-success text-primary-foreground"
+                      ? "bg-secondary text-secondary-foreground"
                       : activity.status === "current"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground"
