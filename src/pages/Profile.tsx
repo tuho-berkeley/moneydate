@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut, Trash2 } from "lucide-react";
+import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut, Trash2, Moon } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,21 @@ const Profile = () => {
   const [profile, setProfile] = useState<{ display_name: string; couple_id: string | null } | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [goals, setGoals] = useState<{ icon: string; title: string; progress: number }[]>([]);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  const toggleDarkMode = (checked: boolean) => {
+    setIsDark(checked);
+    document.documentElement.classList.toggle("dark", checked);
+    localStorage.setItem("theme", checked ? "dark" : "light");
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -150,6 +166,14 @@ const Profile = () => {
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
             <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3.5">
+                <Moon className="w-5 h-5 text-muted-foreground" />
+                <span className="flex-1 text-sm font-medium text-foreground">Dark Mode</span>
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={toggleDarkMode}
+                />
+              </div>
               {settings.map((setting, i) => {
                 const Icon = setting.icon;
                 return (
