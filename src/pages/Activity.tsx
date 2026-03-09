@@ -135,7 +135,7 @@ const Activity = () => {
             <div className="bg-card rounded-2xl p-5 border border-border">
               <h3 className="font-semibold text-foreground mb-2">Choose how to start</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                You can have this conversation on your own, with your partner, or face-to-face.
+                You can have this conversation on your own, with your partner via chat, or face-to-face.
               </p>
 
               <div className="space-y-3">
