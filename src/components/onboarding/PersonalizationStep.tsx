@@ -183,8 +183,8 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
   const totalQuestions = 4;
 
   return (
-    <div className="w-full max-w-sm flex flex-col">
-      <div className="flex items-center justify-center gap-1.5 mb-6">
+    <div className="w-full max-w-sm">
+      <div className="flex items-center justify-center gap-1.5 pb-6">
         {Array.from({ length: totalQuestions }).map((_, i) => (
           <div
             key={i}
@@ -194,9 +194,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
           />
         ))}
       </div>
-      <div className="flex-1">
-        {renderQuestion()}
-      </div>
+      {renderQuestion()}
     </div>
   );
 };
