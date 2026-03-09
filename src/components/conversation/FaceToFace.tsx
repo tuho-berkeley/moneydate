@@ -219,13 +219,13 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     if (!conversation || !user) return;
     setIsGeneratingSummary(true);
     setShowSummary(true);
+    setSummaryText(null);
     const formattedResponses = defaultPrompts.map((prompt, i) => {
       const a = getResponse(i, "partner_a");
       const b = getResponse(i, "partner_b");
       return `Question: ${prompt.question}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
     }).join("\n\n");
     let fullResponse = "";
-    setSummaryText("");
     await streamChat({
       messages: [
         {
@@ -238,7 +238,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       conversationType: "face_to_face",
       onDelta: (chunk) => {
         fullResponse += chunk;
-        setSummaryText(fullResponse);
       },
       onDone: async () => {
         if (fullResponse && conversation) {
@@ -252,6 +251,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             });
           }
         }
+        setSummaryText(fullResponse);
         setIsGeneratingSummary(false);
       },
       onError: (error) => {
