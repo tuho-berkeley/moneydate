@@ -264,7 +264,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       },
       onError: (error) => {
         toast.error(error);
-        setStreamingMessage(null);
         setIsAIResponding(false);
         aiTriggerRef.current = false;
       },
