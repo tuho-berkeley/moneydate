@@ -156,6 +156,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       const startIndex = justStreamedRef.current ? 1 : 0;
       if (justStreamedRef.current && newAiMsgs[0]) {
         setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
       }
       justStreamedRef.current = false;
       
@@ -177,12 +178,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         newUserMsgs.forEach(m => next.add(m.id));
         return next;
       });
-    }
-
-    // Mark first-streamed message as fresh too
-    if (justStreamedRef.current && newAiMsgs[0]) {
-      setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
-    }
     }
 
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
