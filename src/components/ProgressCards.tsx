@@ -6,7 +6,7 @@ const ProgressCards = () => {
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-start">
+      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-center">
         <p className="text-[10px] text-muted-foreground mb-1">Week Streak</p>
         <div className="flex items-center gap-1.5">
           <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
