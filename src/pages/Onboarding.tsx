@@ -160,18 +160,6 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {step > 0 && step < totalSteps && (
-        <div className="flex items-center justify-center gap-1.5 pt-8 pb-4">
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === step ? "w-6 bg-primary" : i < step ? "w-1.5 bg-primary/40" : "w-1.5 bg-border"
-              }`}
-            />
-          ))}
-        </div>
-      )}
 
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         {renderStep()}

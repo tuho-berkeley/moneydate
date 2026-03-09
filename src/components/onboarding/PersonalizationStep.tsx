@@ -175,7 +175,23 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
     );
   };
 
-  return <div className="w-full max-w-sm">{renderQuestion()}</div>;
+  const totalQuestions = 4;
+
+  return (
+    <div className="w-full max-w-sm">
+      <div className="flex items-center justify-center gap-1.5 pb-6">
+        {Array.from({ length: totalQuestions }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === subStep ? "w-6 bg-primary" : i < subStep ? "w-1.5 bg-primary/40" : "w-1.5 bg-border"
+            }`}
+          />
+        ))}
+      </div>
+      {renderQuestion()}
+    </div>
+  );
 };
 
 export default PersonalizationStep;
