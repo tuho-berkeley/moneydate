@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { User, Heart, Gem } from "lucide-react";
 
 const options = [
-  { value: "exploring_alone", label: "I'm exploring alone", icon: User },
-  { value: "in_relationship", label: "I'm in a relationship", icon: Heart },
-  { value: "preparing_marriage", label: "We're preparing for marriage", icon: Gem },
+  { value: "exploring_alone", label: "Exploring on my own", icon: User },
+  { value: "in_relationship", label: "In a relationship", icon: Heart },
+  { value: "engaged", label: "Engaged or planning marriage", icon: Gem },
+  { value: "newly_married", label: "Newly married", icon: Heart },
+  { value: "married_long", label: "Married for a while", icon: Heart },
 ];
 
 interface Props {
