@@ -120,6 +120,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, queryClient]);
 
   // Stagger reveal of new AI messages
+  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -127,10 +128,17 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
+      // If these came from streaming, reveal first immediately (it was already visible)
+      const startIndex = justStreamedRef.current ? 1 : 0;
+      if (justStreamedRef.current && newAiMsgs[0]) {
+        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+      }
+      justStreamedRef.current = false;
+      
+      newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
-        }, i * 600);
+        }, (i + 1) * 700);
       });
     }
 
@@ -153,6 +161,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isStreaming: true }]
       : []),
   ];
+
+  // Show thinking bubble: during send (before stream starts) OR while unrevealed AI messages exist
+  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
+  const showThinking = (isSending && !streamingMessage) || hasUnrevealedAI;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -235,8 +247,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           setStreamingMessage(prev => (prev ?? "") + chunk);
         },
         onDone: async () => {
-          setStreamingMessage(null);
           if (fullResponse) {
+            justStreamedRef.current = true;
             const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
             for (const segment of segments) {
               await supabase.from("messages").insert({
@@ -246,8 +258,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                 content: segment,
               });
             }
-            queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+            await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
           }
+          setStreamingMessage(null);
           setIsSending(false);
         },
         onError: (error) => {
@@ -311,7 +324,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         )}
 
         {messages.map((msg, idx) => {
-          // Detect if this is the last AI message in a consecutive AI sequence and ends with ?
           const isLastAI = msg.role === "ai" && !msg.isStreaming &&
             (idx === messages.length - 1 || messages[idx + 1]?.role === "user") &&
             !(idx === messages.length - 1 && streamingMessage !== null);
@@ -323,7 +335,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
             <div
               key={msg.id}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-message`}
-              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}
@@ -350,7 +361,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           );
         })}
 
-        {isSending && !streamingMessage && <AIThinkingBubble />}
+        {showThinking && messages.length > 0 && <AIThinkingBubble />}
 
         <div ref={messagesEndRef} />
       </div>

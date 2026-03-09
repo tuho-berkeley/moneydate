@@ -245,8 +245,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         setStreamingMessage(prev => (prev ?? "") + chunk);
       },
       onDone: async () => {
-        setStreamingMessage(null);
         if (fullResponse) {
+          justStreamedRef.current = true;
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
@@ -256,11 +256,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               content: segment,
             });
           }
-          // Wait for query cache to settle before allowing another AI trigger
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
+        setStreamingMessage(null);
         setIsAIResponding(false);
-        // Keep aiTriggerRef true briefly to prevent re-trigger from stale derived state
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
       },
       onError: (error) => {
@@ -273,6 +272,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
   // Stagger reveal of new AI messages
+  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -280,20 +280,28 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
+      const startIndex = justStreamedRef.current ? 1 : 0;
+      if (justStreamedRef.current && newAiMsgs[0]) {
+        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+      }
+      justStreamedRef.current = false;
+
+      newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
-        }, i * 600);
+        }, (i + 1) * 700);
       });
     }
 
-    // On first load, reveal all existing messages immediately
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
 
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
+
+  // Show thinking bubble while unrevealed AI messages are pending
+  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
 
   // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
@@ -436,7 +444,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               className={`flex ${
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
               } animate-fade-in-message`}
-              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
                 {msg.role === "ai" ? (
@@ -471,7 +478,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         })}
 
         {/* Waiting indicator */}
-        {waitingForPartner && !isAIResponding && (
+        {waitingForPartner && !isAIResponding && !hasUnrevealedAI && (
           <div className="flex justify-center">
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
               <Clock className="w-3.5 h-3.5" />
@@ -480,8 +487,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           </div>
         )}
 
-        {/* AI is thinking */}
-        {isAIResponding && !streamingMessage && dbMessages.length > 0 && (
+        {/* AI is thinking — show when responding or when unrevealed messages are pending */}
+        {((isAIResponding && !streamingMessage) || hasUnrevealedAI) && dbMessages.length > 0 && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Guide
