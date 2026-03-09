@@ -104,9 +104,9 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Progress dots */}
-      {step > 0 && step < 7 && (
+      {step > 0 && step < 6 && (
         <div className="flex items-center justify-center gap-1.5 pt-8 pb-4">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
