@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, Users, Sparkles, RotateCcw, Clock } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
 import { Button } from "@/components/ui/button";
