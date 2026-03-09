@@ -26,14 +26,35 @@ interface FaceToFaceProps {
   activityDescription: string;
 }
 
-// Prompt questions based on activity context
-const defaultPrompts = [
-  "How does this topic make you feel?",
-  "What's your earliest memory related to this?",
-  "What do you wish your partner understood about your perspective?",
-  "What's one thing you'd like to agree on together?",
-  "Is there anything you've been wanting to say about this?",
+// Prompt questions with guidance descriptions
+interface Prompt {
+  question: string;
+  guidance: string;
+}
+
+const defaultPrompts: Prompt[] = [
+  {
+    question: "How did your family usually talk about money when you were growing up?",
+    guidance: "Think about everyday moments at home. Was money openly discussed, or rarely mentioned? Did your family treat money as something stressful, practical, or normal? What tone do you remember around money conversations? Take about 1–2 minutes each to share.",
+  },
+  {
+    question: "What is one memory about money from your childhood that stands out?",
+    guidance: "It could be something your parents said about money, a time when money caused stress or celebration, or a lesson you remember hearing often. Try to describe what happened and how it made you feel.",
+  },
+  {
+    question: "What money lesson did you learn from your family?",
+    guidance: "Examples might include: \"Always save for a rainy day,\" \"Money should be enjoyed,\" or \"Debt should be avoided.\" Think about whether this lesson still influences how you make decisions today.",
+  },
+  {
+    question: "Do you think your childhood experiences shaped how you think about money now?",
+    guidance: "You might reflect on: Do you feel cautious with money? Do you value financial security more than freedom? Are there habits you notice repeating from your family? Share anything that feels meaningful to you.",
+  },
+  {
+    question: "What would you like your future relationship with money to look like together?",
+    guidance: "Instead of focusing on numbers, think about feelings and values. For example: feeling financially secure, enjoying experiences together, supporting each other's goals, or building a stable future. Describe the kind of financial life you hope to create as a couple.",
+  },
 ];
+
 
 type RecordingState = "idle" | "recording" | "transcribing";
 type Partner = "partner_a" | "partner_b";
