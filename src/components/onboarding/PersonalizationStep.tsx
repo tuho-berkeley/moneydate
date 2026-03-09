@@ -78,9 +78,6 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               );
             })}
           </div>
-          <Button onClick={() => setSubStep(1)} className="w-full rounded-full" size="lg" disabled={!data.usageIntent}>
-            Next
-          </Button>
         </div>
       );
     }
