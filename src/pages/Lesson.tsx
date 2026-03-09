@@ -88,7 +88,7 @@ const Lesson = () => {
           {isCompleted && (
             <div className="flex items-center gap-1 text-xs text-green-600">
               <CheckCircle2 className="w-4 h-4" />
-              Done
+              Completed
             </div>
           )}
         </div>
