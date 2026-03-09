@@ -300,13 +300,14 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
-  // Show thinking bubble while unrevealed AI messages are pending
-  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
-
   // Only show the first segment of streaming content (before ---) 
   const streamingDisplayContent = streamingMessage
     ? stripAskingTag(streamingMessage.split(/\n---\n/)[0].trim())
     : null;
+
+  // Show thinking bubble while unrevealed AI messages are pending (but not while streaming text is visible)
+  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
+  const hasPendingAIReveal = !streamingDisplayContent && hasUnrevealedAI;
 
   // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
@@ -483,7 +484,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         })}
 
         {/* Waiting indicator */}
-        {waitingForPartner && !isAIResponding && !hasUnrevealedAI && (
+        {waitingForPartner && !isAIResponding && !hasPendingAIReveal && (
           <div className="flex justify-center">
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
               <Clock className="w-3.5 h-3.5" />
@@ -493,7 +494,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         )}
 
         {/* AI is thinking — show when responding or when unrevealed messages are pending */}
-        {((isAIResponding && !streamingMessage) || hasUnrevealedAI) && dbMessages.length > 0 && (
+        {((isAIResponding && !streamingMessage) || hasPendingAIReveal) && dbMessages.length > 0 && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Guide
