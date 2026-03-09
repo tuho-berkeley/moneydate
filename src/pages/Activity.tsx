@@ -205,7 +205,7 @@ const Activity = () => {
                 {activity.description || "This lesson will teach you important concepts about managing finances as a couple."}
               </p>
               <Button className="w-full rounded-xl" onClick={() => navigate(`/lesson/${id}`)}>
-                Start Lesson
+                {lessonCompleted ? "Review Lesson" : "Start Lesson"}
               </Button>
             </div>
           )}
