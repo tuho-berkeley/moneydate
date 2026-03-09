@@ -186,12 +186,14 @@ const Activity = () => {
                     {completedTypes?.has("face_to_face") ? <Check className="w-5 h-5 text-primary" /> : <span className="text-lg">💬</span>}
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="font-semibold text-foreground">Face-to-Face</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground">Face-to-Face</p>
+                      {completedTypes?.has("face_to_face") && (
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-0.5 rounded-full">Done</span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">In-person with voice recording</p>
                   </div>
-                  {completedTypes?.has("face_to_face") && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-2 py-1 rounded-full flex-shrink-0">Completed</span>
-                  )}
                 </Button>
               </div>
             </div>
