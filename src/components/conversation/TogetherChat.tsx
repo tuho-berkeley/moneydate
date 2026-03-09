@@ -48,6 +48,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const seedingRef = useRef(false);
   const aiTriggerRef = useRef(false);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
+  const revealQueueRef = useRef<string[]>([]);
   const { markCompleted } = useConversationCompletion(activityId);
 
   // Get user profile for couple_id
