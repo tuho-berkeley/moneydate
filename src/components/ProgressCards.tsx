@@ -12,7 +12,7 @@ const ProgressCards = () => {
           <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center">
             <Flame className="w-3 h-3 text-secondary-foreground" />
           </div>
-          <p className="text-xl font-bold text-foreground">1</p>
+          <p className="text-xl font-bold text-foreground">1<span className="text-xs font-medium text-muted-foreground"> week</span></p>
         </div>
       </div>
       <div className="bg-card rounded-lg p-3 shadow-card flex flex-col items-center">
