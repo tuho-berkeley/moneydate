@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import WelcomeStep from "@/components/onboarding/WelcomeStep";
 import ValueSlides from "@/components/onboarding/ValueSlides";
-import AuthStep from "@/components/onboarding/AuthStep";
 import PartnerConnectionStep from "@/components/onboarding/PartnerConnectionStep";
 import PersonalizationStep from "@/components/onboarding/PersonalizationStep";
 import TrustStep from "@/components/onboarding/TrustStep";
@@ -20,6 +20,8 @@ export interface OnboardingData {
 
 const Onboarding = () => {
   const [step, setStep] = useState(0);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(true);
   const [data, setData] = useState<OnboardingData>({
     usageIntent: "",
     relationshipDuration: "",
@@ -29,18 +31,61 @@ const Onboarding = () => {
   });
   const navigate = useNavigate();
   const { session } = useAuth();
+  const wasAuthenticatedBeforeSlides = useRef(!!session);
+
+  // When auth state changes on step 1 (ValueSlides), determine if new user and advance
+  useEffect(() => {
+    if (!session?.user || step !== 1) return;
+
+    const checkAndAdvance = async () => {
+      // If user was already authenticated before reaching slides, they're returning
+      if (wasAuthenticatedBeforeSlides.current) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      // Check if onboarding was already completed (returning user signing in again)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profile?.onboarding_completed) {
+        // Returning user — go straight home
+        navigate("/", { replace: true });
+      } else {
+        // New user — continue onboarding
+        setIsNewUser(true);
+        setStep(2);
+      }
+    };
+
+    checkAndAdvance();
+  }, [session, step, navigate]);
 
   const next = () => setStep((s) => s + 1);
 
   const updateData = (partial: Partial<OnboardingData>) =>
     setData((d) => ({ ...d, ...partial }));
 
+  const handleGoogleAuth = async () => {
+    setAuthLoading(true);
+    const { error } = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/onboarding",
+    });
+    if (error) {
+      toast.error(error.message);
+      setAuthLoading(false);
+    }
+    // Auth state change will be handled by the useEffect above
+  };
+
   const finishOnboarding = async () => {
     if (!session?.user) return;
     const uid = session.user.id;
 
     try {
-      // Save preferences
       const { error: prefError } = await supabase
         .from("user_preferences" as any)
         .upsert({
@@ -53,7 +98,6 @@ const Onboarding = () => {
 
       if (prefError) throw prefError;
 
-      // Mark onboarding completed
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ onboarding_completed: true } as any)
@@ -68,16 +112,26 @@ const Onboarding = () => {
     }
   };
 
-  // Steps 0-2 are pre-auth, steps 3+ require auth
-  // Step 3 is auth (signup/login) — if user is already authenticated, skip it
-  const isAuthenticated = !!session;
+  // Flow:
+  // Step 0: Welcome
+  // Step 1: Value Slides + Google Auth
+  // Step 2: Personalization (new users only)
+  // Step 3: Partner Connection (new users only)
+  // Step 4: Trust & Safety (new users only)
+  const totalSteps = 5;
 
   const renderStep = () => {
     switch (step) {
       case 0:
         return <WelcomeStep onNext={next} />;
       case 1:
-        return <ValueSlides onNext={next} />;
+        return (
+          <ValueSlides
+            onNext={next}
+            onGoogleAuth={handleGoogleAuth}
+            authLoading={authLoading}
+          />
+        );
       case 2:
         return (
           <PersonalizationStep
@@ -87,14 +141,8 @@ const Onboarding = () => {
           />
         );
       case 3:
-        if (isAuthenticated) {
-          setStep(4);
-          return null;
-        }
-        return <AuthStep onNext={() => setStep(4)} />;
-      case 4:
         return <PartnerConnectionStep onNext={next} onSkip={next} />;
-      case 5:
+      case 4:
         return <TrustStep onFinish={finishOnboarding} />;
       default:
         return null;
@@ -104,9 +152,9 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Progress dots */}
-      {step > 0 && step < 6 && (
+      {step > 0 && step < totalSteps && (
         <div className="flex items-center justify-center gap-1.5 pt-8 pb-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
