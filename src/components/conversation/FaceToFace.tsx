@@ -248,6 +248,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     });
   }, [conversation, user, responses, activityTitle, activityDescription]);
 
+  // Split summary into segments for staggered display
+  const summarySegments = summaryText
+    ? summaryText.split(/\n---\n/).map(s => s.trim()).filter(Boolean)
+    : [];
+
   if (showSummary) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -260,28 +265,45 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             <p className="text-xs text-muted-foreground">{activityTitle}</p>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="bg-accent/30 border border-accent rounded-2xl p-5 mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-secondary-foreground">
-                AI Insights
-              </span>
-            </div>
-            {summaryText ? (
-              <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 text-foreground">
-                <ReactMarkdown>{summaryText.replace(/\n---\n/g, "\n\n")}</ReactMarkdown>
-                {isGeneratingSummary && (
-                  <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {summarySegments.length > 0 ? (
+            summarySegments.map((segment, idx) => (
+              <div
+                key={idx}
+                className="bg-accent/30 border border-accent rounded-2xl p-5 animate-fade-in-message"
+              >
+                {idx === 0 && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-secondary-foreground">
+                      AI Insights
+                    </span>
+                  </div>
                 )}
+                <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 text-foreground">
+                  <ReactMarkdown>{segment}</ReactMarkdown>
+                  {isGeneratingSummary && idx === summarySegments.length - 1 && (
+                    <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                  )}
+                </div>
               </div>
-            ) : (
+            ))
+          ) : (
+            <div className="bg-accent/30 border border-accent rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-secondary-foreground">
+                  AI Insights
+                </span>
+              </div>
               <AIThinkingBubble />
-            )}
-          </div>
-          <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
-            Done
-          </Button>
+            </div>
+          )}
+          {!isGeneratingSummary && summarySegments.length > 0 && (
+            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4 animate-fade-in-message">
+              Done
+            </Button>
+          )}
         </div>
       </div>
     );
