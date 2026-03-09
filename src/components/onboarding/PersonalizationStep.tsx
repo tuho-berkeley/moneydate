@@ -103,9 +103,12 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               </button>
             ))}
           </div>
-          <Button onClick={() => setSubStep(2)} className="w-full rounded-full" size="lg" disabled={!data.relationshipDuration}>
-            Next
-          </Button>
+          <div className="flex gap-3">
+            <Button onClick={() => setSubStep(0)} variant="secondary" className="rounded-full" size="lg">Back</Button>
+            <Button onClick={() => setSubStep(2)} className="flex-1 rounded-full" size="lg" disabled={!data.relationshipDuration}>
+              Next
+            </Button>
+          </div>
         </div>
       );
     }
@@ -131,9 +134,12 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               </button>
             ))}
           </div>
-          <Button onClick={() => setSubStep(3)} className="w-full rounded-full" size="lg" disabled={!data.moneyTalkFrequency}>
-            Next
-          </Button>
+          <div className="flex gap-3">
+            <Button onClick={() => setSubStep(1)} variant="secondary" className="rounded-full" size="lg">Back</Button>
+            <Button onClick={() => setSubStep(3)} className="flex-1 rounded-full" size="lg" disabled={!data.moneyTalkFrequency}>
+              Next
+            </Button>
+          </div>
         </div>
       );
     }
@@ -168,9 +174,12 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
             );
           })}
         </div>
-        <Button onClick={onNext} className="w-full rounded-full" size="lg">
-          Continue
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => setSubStep(2)} variant="secondary" className="rounded-full" size="lg">Back</Button>
+          <Button onClick={onNext} className="flex-1 rounded-full" size="lg">
+            Continue
+          </Button>
+        </div>
       </div>
     );
   };
