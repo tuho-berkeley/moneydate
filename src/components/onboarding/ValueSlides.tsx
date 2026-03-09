@@ -23,7 +23,7 @@ const slides = [
   },
 ];
 
-const AUTO_SCROLL_INTERVAL = 3500;
+const AUTO_SCROLL_INTERVAL = 2000;
 
 interface Props {
   onGoogleAuth: () => void;
