@@ -7,10 +7,10 @@ const WelcomeStep = ({ onNext }: { onNext: () => void }) => (
       <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto">
         <Heart className="w-10 h-10 text-primary fill-primary" />
       </div>
-      <h1 className="font-display text-3xl font-bold text-foreground leading-tight">
+      <h1 className="font-display text-3xl font-bold text-foreground leading-tight text-pretty">
         Before forever,<br />talk about money.
       </h1>
-      <p className="text-muted-foreground text-sm leading-relaxed">
+      <p className="text-muted-foreground text-sm leading-relaxed text-pretty">
         Money conversations don't have to feel awkward. Start exploring your shared values and plan the future together.
       </p>
     </div>
