@@ -38,7 +38,7 @@ const Insights = () => {
 
         <div className="px-6 space-y-3">
           {/* Summary Card */}
-          <div className="bg-card rounded-3xl p-6 shadow-soft">
+          <div className="bg-card rounded-xl p-6 shadow-soft">
             <h3 className="font-display text-lg font-semibold text-foreground mb-2">Money Compatibility</h3>
             <div className="flex items-end gap-3">
               <span className="text-4xl font-bold text-primary">78%</span>
