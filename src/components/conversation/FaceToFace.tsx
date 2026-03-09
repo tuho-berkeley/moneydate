@@ -345,7 +345,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-          <button onClick={() => setShowSummary(false)} className="text-muted-foreground">
+          <button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="text-muted-foreground">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
@@ -386,9 +386,30 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             })
           ) : null}
           {!isGeneratingSummary && summarySegments.length > 0 && !freshSegments.size && (
-            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
-              Done
-            </Button>
+            <div className="space-y-3 mt-4">
+              <Button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="w-full rounded-xl">
+                Done
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full rounded-xl gap-2">
+                    <RotateCcw className="w-4 h-4" /> Start Over
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Start over?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will clear the summary and all recorded responses. You'll start fresh with the first question.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRestart}>Start Over</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )}
         </div>
       </div>
