@@ -275,6 +275,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           toast.error(error);
           setStreamingMessage(null);
           setIsSending(false);
+          setIsWaitingForAI(false);
         },
         signal: abort.signal,
       });
