@@ -172,7 +172,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <div>
+        <div className="space-y-4 pb-4">
           <button
             onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors"
@@ -180,6 +180,30 @@ const Profile = () => {
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
+
+          <div className="flex justify-center">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-xs text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors">
+                  Delete account
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action is permanent and cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete account
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
     </div>
