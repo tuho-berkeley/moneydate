@@ -114,7 +114,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       return (
         <div className="space-y-6 animate-fade-in" key="q2">
           <div className="text-center space-y-2">
-            <h2 className="font-display text-2xl font-bold text-foreground">Have you talked about money before?</h2>
+            <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Have you talked about money before?</h2>
           </div>
           <div className="space-y-3">
             {talkOptions.map((opt) => (
