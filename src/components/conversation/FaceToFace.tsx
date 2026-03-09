@@ -242,7 +242,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     const formattedResponses = defaultPrompts.map((prompt, i) => {
       const a = getResponse(i, "partner_a");
       const b = getResponse(i, "partner_b");
-      return `Question: ${prompt}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
+      return `Question: ${prompt.question}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
     }).join("\n\n");
 
     let fullResponse = "";
