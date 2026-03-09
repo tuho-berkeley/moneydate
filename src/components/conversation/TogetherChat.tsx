@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
+import TypewriterText from "@/components/conversation/TypewriterText";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -38,7 +39,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
-  const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isAIResponding, setIsAIResponding] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
@@ -245,11 +245,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       partnerName,
       onDelta: (chunk) => {
         fullResponse += chunk;
-        setStreamingMessage(prev => (prev ?? "") + chunk);
       },
       onDone: async () => {
         if (fullResponse) {
-          justStreamedRef.current = true;
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
@@ -261,13 +259,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
-        setStreamingMessage(null);
         setIsAIResponding(false);
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
       },
       onError: (error) => {
         toast.error(error);
-        setStreamingMessage(null);
         setIsAIResponding(false);
         aiTriggerRef.current = false;
       },
@@ -275,7 +271,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
   // Stagger reveal of new AI messages
-  const justStreamedRef = useRef(false);
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -283,18 +278,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     );
 
     if (newAiMsgs.length > 0) {
-      const startIndex = justStreamedRef.current ? 1 : 0;
-      if (justStreamedRef.current && newAiMsgs[0]) {
-        setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
-        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
-      }
-      justStreamedRef.current = false;
-
-      newAiMsgs.slice(startIndex).forEach((msg, i) => {
+      newAiMsgs.forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
           setFreshIds(prev => new Set([...prev, msg.id]));
-        }, (i + 1) * 700);
+        }, i * 400);
       });
     }
 
@@ -317,35 +305,29 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
-  // Only show the first segment of streaming content (before ---) 
-  const streamingDisplayContent = streamingMessage
-    ? stripAskingTag(streamingMessage.split(/\n---\n/)[0].trim())
-    : null;
-
-  // Show thinking bubble while unrevealed AI messages are pending (but not while streaming text is visible)
-  const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
-  const hasPendingAIReveal = !streamingDisplayContent && hasUnrevealedAI;
-
   // Build display messages — strip [ASKING:...] tag from AI messages
-  const displayMessages = [
-    ...dbMessages
-      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
-      .map((m: DBMessage) => ({
+  const displayMessages = dbMessages
+    .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+    .map((m: DBMessage) => ({
       id: m.id,
       role: m.role,
       content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
       isMe: m.sender_id === user?.id,
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
       askedName: m.role === "ai" ? parseAsking(m.content) : null,
-    })),
-    ...(streamingDisplayContent
-      ? [{ id: "streaming", role: "ai" as const, content: streamingDisplayContent, isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage || "") }]
-      : []),
-  ];
+    }));
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [displayMessages]);
+
+  const handleTypewriterComplete = useCallback((msgId: string) => {
+    setFreshIds(prev => {
+      const next = new Set(prev);
+      next.delete(msgId);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -356,11 +338,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   const handleRestart = useCallback(async () => {
     if (!conversation || isSending) return;
-    setStreamingMessage(null);
     setIsSending(false);
     setIsAIResponding(false);
     seedingRef.current = false;
     aiTriggerRef.current = false;
+    setRevealedIds(new Set());
+    setFreshIds(new Set());
+    prevMessageIdsRef.current = new Set();
 
     const { error } = await supabase
       .from("messages")
@@ -413,7 +397,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   };
 
   // Determine if input should be disabled
-  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || (dbMessages.length === 0 && !streamingMessage);
+  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || dbMessages.length === 0;
   
 
   return (
@@ -454,23 +438,23 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Show thinking bubble during initial load/seeding */}
-        {dbMessages.length === 0 && !streamingMessage && (
+        {dbMessages.length === 0 && isAIResponding && (
           <AIThinkingBubble />
         )}
 
         {displayMessages.map((msg, idx) => {
-          const isLastAI = msg.role === "ai" && msg.id !== "streaming" &&
-            (idx === displayMessages.length - 1 || displayMessages[idx + 1]?.role !== "ai");
           const isFirstAI = msg.role === "ai" && idx === 0;
           const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
           const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
+          const isFresh = freshIds.has(msg.id);
 
           return (
             <div
               key={msg.id}
               className={`flex ${
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
-              }`}
+              } ${isFresh && msg.role === "ai" ? "animate-message-appear" : ""}`}
+              style={isFresh && msg.role === "ai" ? { opacity: 0 } : undefined}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" ? (
@@ -492,9 +476,16 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                   }`}
                 >
                   {msg.role === "ai" ? (
-                    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                      <ReactMarkdown>{displayContent}</ReactMarkdown>
-                    </div>
+                    isFresh ? (
+                      <TypewriterText
+                        content={displayContent}
+                        onComplete={() => handleTypewriterComplete(msg.id)}
+                      />
+                    ) : (
+                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                        <ReactMarkdown>{displayContent}</ReactMarkdown>
+                      </div>
+                    )
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
@@ -505,7 +496,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         })}
 
         {/* Waiting indicator */}
-        {waitingForPartner && !isAIResponding && !hasPendingAIReveal && (
+        {waitingForPartner && !isAIResponding && (
           <div className="flex justify-center">
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
               <Clock className="w-3.5 h-3.5" />
@@ -515,7 +506,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         )}
 
         {/* AI is thinking — show when responding or when unrevealed messages are pending */}
-        {((isAIResponding && !streamingMessage) || hasPendingAIReveal) && dbMessages.length > 0 && (
+        {isAIResponding && dbMessages.length > 0 && (
           <AIThinkingBubble />
         )}
 

@@ -111,6 +111,10 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.85" },
         },
+        "message-appear": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -120,7 +124,7 @@ export default {
         "fade-in-message": "fade-in-message 0.5s cubic-bezier(0.16,1,0.3,1) forwards",
         "thinking-wave": "thinking-wave 1.2s ease-in-out infinite",
         "pulse-subtle": "pulse-subtle 2.5s ease-in-out infinite",
-      },
+        "message-appear": "message-appear 0.4s ease-out forwards",
     },
   },
   plugins: [require("tailwindcss-animate")],
