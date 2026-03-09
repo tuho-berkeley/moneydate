@@ -300,8 +300,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
-  // Show thinking bubble while unrevealed AI messages are pending
+  // Show thinking bubble while unrevealed AI messages are pending (but not while streaming text is visible)
   const hasUnrevealedAI = dbMessages.some(m => m.role === "ai" && !revealedIds.has(m.id));
+  const hasPendingAIReveal = !streamingDisplayContent && hasUnrevealedAI;
 
   // Only show the first segment of streaming content (before ---) 
   const streamingDisplayContent = streamingMessage
