@@ -72,29 +72,29 @@ const UpNextCard = () => {
   const Icon = typeIcons[current.type];
 
   return (
-    <div className="bg-card rounded-3xl p-6 shadow-soft">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="bg-card rounded-3xl p-4 shadow-soft">
+      <div className="flex items-center gap-2 mb-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
           {typeLabels[current.type]}
         </span>
       </div>
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-lg font-semibold text-foreground mb-1 text-pretty">
+          <h3 className="font-display text-lg font-semibold text-foreground mb-0.5 text-pretty">
             {current.title}
           </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed text-pretty">
+          <p className="text-sm text-muted-foreground leading-snug text-pretty">
             {current.description}
           </p>
         </div>
+        <button 
+          onClick={handleStart}
+          className="shrink-0 flex items-center justify-center gap-1.5 bg-primary text-primary-foreground rounded-xl px-4 py-2.5 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
+        >
+          {current.userStatus === "in_progress" ? "Continue" : "Start"}
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
-      <button 
-        onClick={handleStart}
-        className="mt-5 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl py-3.5 font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
-      >
-        {current.userStatus === "in_progress" ? "Continue" : "Start"}
-        <ArrowRight className="w-4 h-4" />
-      </button>
     </div>
   );
 };
