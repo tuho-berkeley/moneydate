@@ -337,7 +337,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   };
 
   // Determine if input should be disabled
-  const inputDisabled = isAIResponding || myResponseSent || dbMessages.length === 0 && !streamingMessage;
+  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || (dbMessages.length === 0 && !streamingMessage);
   const isLoadingStart = dbMessages.length === 0 && streamingMessage === null && !isAIResponding;
 
   return (
