@@ -330,11 +330,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   const handleRestart = useCallback(async () => {
     if (!conversation || isSending) return;
-    setStreamingMessage(null);
     setIsSending(false);
     setIsAIResponding(false);
     seedingRef.current = false;
     aiTriggerRef.current = false;
+    setRevealedIds(new Set());
+    setFreshIds(new Set());
+    prevMessageIdsRef.current = new Set();
 
     const { error } = await supabase
       .from("messages")
