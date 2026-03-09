@@ -268,10 +268,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     ? summaryText.split(/\n---\n/).map(s => s.trim()).filter(Boolean)
     : [];
   const prevSegmentCountRef = useRef(0);
+  const animateFromIdx = prevSegmentCountRef.current;
   useEffect(() => {
-    // Update after render so current render knows which segments are "new"
     prevSegmentCountRef.current = summarySegments.length;
-  });
+  }, [summarySegments.length]);
 
   if (showSummary) {
     return (
