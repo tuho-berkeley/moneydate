@@ -21,8 +21,12 @@ const Activity = () => {
     queryKey: ["activity", id],
     queryFn: async () => {
       if (!id) throw new Error("No activity ID");
-
-      const { data, error } = await supabase.from("activities").select("*").eq("id", id).single();
+      
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("id", id)
+        .single();
 
       if (error) throw error;
       return data;
@@ -65,15 +69,19 @@ const Activity = () => {
           <ArrowLeft className="w-5 h-5" />
           Back
         </button>
-
+        
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
             {config.label}
           </span>
         </div>
-
-        <h1 className="font-display text-2xl font-bold text-foreground">{activity.title}</h1>
-        {activity.description && <p className="text-muted-foreground mt-2">{activity.description}</p>}
+        
+        <h1 className="font-display text-2xl font-bold text-foreground">
+          {activity.title}
+        </h1>
+        {activity.description && (
+          <p className="text-muted-foreground mt-2">{activity.description}</p>
+        )}
       </div>
 
       {/* Content based on activity type */}
@@ -85,10 +93,10 @@ const Activity = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 You can have this conversation on your own, with your partner, or face-to-face.
               </p>
-
+              
               <div className="space-y-3">
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="outline" 
                   className="w-full justify-start h-auto p-4 rounded-xl"
                   onClick={() => handleStartConversation("solo")}
                 >
@@ -101,8 +109,8 @@ const Activity = () => {
                   </div>
                 </Button>
 
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="outline" 
                   className="w-full justify-start h-auto p-4 rounded-xl"
                   onClick={() => handleStartConversation("together")}
                 >
@@ -111,12 +119,12 @@ const Activity = () => {
                   </div>
                   <div className="text-left">
                     <p className="font-semibold text-foreground">Together Chat</p>
-                    <p className="text-xs text-muted-foreground">Chat with your partner & AI facilitator</p>
+                    <p className="text-xs text-muted-foreground">Chat with your partner & AI</p>
                   </div>
                 </Button>
 
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="outline" 
                   className="w-full justify-start h-auto p-4 rounded-xl"
                   onClick={() => handleStartConversation("face_to_face")}
                 >
@@ -142,7 +150,9 @@ const Activity = () => {
             <p className="text-sm text-muted-foreground mb-4">
               This lesson will teach you important concepts about managing finances as a couple.
             </p>
-            <Button className="w-full rounded-xl">Start Lesson</Button>
+            <Button className="w-full rounded-xl">
+              Start Lesson
+            </Button>
           </div>
         )}
 
@@ -155,7 +165,9 @@ const Activity = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Work together with AI to create a concrete financial plan based on your conversations.
             </p>
-            <Button className="w-full rounded-xl">Start Planning</Button>
+            <Button className="w-full rounded-xl">
+              Start Planning
+            </Button>
           </div>
         )}
       </div>
