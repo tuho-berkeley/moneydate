@@ -18,7 +18,7 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-      <nav className="flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50">
+      <nav className="flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           const Icon = tab.icon;
