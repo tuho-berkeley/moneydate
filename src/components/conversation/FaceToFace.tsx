@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Mic, Square, ChevronLeft, ChevronRight, Loader2, Sparkles, RotateCcw } from "lucide-react";
+import { ArrowLeft, Mic, Square, ChevronLeft, ChevronRight, Loader2, Sparkles, RotateCcw, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -26,7 +26,6 @@ interface FaceToFaceProps {
   activityDescription: string;
 }
 
-// Prompt questions with guidance descriptions
 interface Prompt {
   question: string;
   guidance: string;
@@ -55,7 +54,6 @@ const defaultPrompts: Prompt[] = [
   },
 ];
 
-
 type RecordingState = "idle" | "recording" | "transcribing";
 type Partner = "partner_a" | "partner_b";
 
@@ -70,6 +68,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  const [isFlipped, setIsFlipped] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
@@ -83,12 +82,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef("");
 
-  // Get or create conversation
   const { data: conversation } = useQuery({
     queryKey: ["conversation", activityId, "face_to_face", user?.id],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-
       const { data: existing } = await supabase
         .from("conversations")
         .select("*")
@@ -96,15 +93,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         .eq("user_id", user.id)
         .eq("type", "face_to_face")
         .maybeSingle();
-
       if (existing) return existing;
-
       const { data: newConv, error } = await supabase
         .from("conversations")
         .insert({ activity_id: activityId, user_id: user.id, type: "face_to_face" })
         .select()
         .single();
-
       if (error) throw error;
       return newConv;
     },
@@ -113,19 +107,17 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
   const handleRestart = useCallback(async () => {
     if (!conversation) return;
-
     const { error } = await supabase
       .from("messages")
       .delete()
       .eq("conversation_id", conversation.id);
-
     if (error) {
       toast.error("Failed to restart chat");
       return;
     }
-
     setResponses([]);
     setCurrentPrompt(0);
+    setIsFlipped(false);
     setShowSummary(false);
     setSummaryText("");
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
@@ -135,18 +127,13 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      // Use Web Speech API for on-device transcription
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = "en-US";
-        
         transcriptRef.current = "";
-        
         recognition.onresult = (event: any) => {
           let finalTranscript = "";
           for (let i = 0; i < event.results.length; i++) {
@@ -158,23 +145,17 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             transcriptRef.current = finalTranscript.trim();
           }
         };
-        
         recognition.onerror = (event: any) => {
           console.error("Speech recognition error:", event.error);
         };
-        
         recognitionRef.current = recognition;
         recognition.start();
       }
-
-      // Also record audio as backup
       const mediaRecorder = new MediaRecorder(stream);
       chunksRef.current = [];
-      
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
-      
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start(1000);
       setRecordingState("recording");
@@ -185,38 +166,25 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
   const stopRecording = useCallback(async () => {
     setRecordingState("transcribing");
-
-    // Stop speech recognition
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-
-    // Stop media recorder
+    if (recognitionRef.current) recognitionRef.current.stop();
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop());
     }
-
-    // Short delay for final transcript
     await new Promise((r) => setTimeout(r, 500));
-
     const transcript = transcriptRef.current;
-
     if (!transcript) {
       toast.error("No speech detected. Please try again and speak clearly.");
       setRecordingState("idle");
       return;
     }
-
     const newResponse: PromptResponse = {
       promptIndex: currentPrompt,
       partner: activePartner,
       transcript,
     };
-
     setResponses((prev) => [...prev, newResponse]);
     setRecordingState("idle");
-
     toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
   }, [currentPrompt, activePartner]);
 
@@ -237,17 +205,13 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     if (!conversation || !user) return;
     setIsGeneratingSummary(true);
     setShowSummary(true);
-
-    // Format all responses for AI
     const formattedResponses = defaultPrompts.map((prompt, i) => {
       const a = getResponse(i, "partner_a");
       const b = getResponse(i, "partner_b");
       return `Question: ${prompt.question}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
     }).join("\n\n");
-
     let fullResponse = "";
     setSummaryText("");
-
     await streamChat({
       messages: [
         {
@@ -263,7 +227,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         setSummaryText(fullResponse);
       },
       onDone: async () => {
-        // Save the summary as an AI message
         if (fullResponse && conversation) {
           await supabase.from("messages").insert({
             conversation_id: conversation.id,
@@ -293,7 +256,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             <p className="text-xs text-muted-foreground">{activityTitle}</p>
           </div>
         </div>
-
         <div className="flex-1 overflow-y-auto p-6">
           <div className="bg-accent/30 border border-accent rounded-2xl p-5 mb-4">
             <div className="flex items-center gap-2 mb-3">
@@ -316,7 +278,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               </div>
             )}
           </div>
-
           <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
             Done
           </Button>
@@ -360,19 +321,60 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         </span>
       </div>
 
-      {/* Flash Card Prompt */}
+      {/* Flash Card + Controls */}
       <div className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="bg-card rounded-3xl border border-border shadow-soft p-8 w-full max-w-sm text-center space-y-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Discuss Together
-          </p>
-           <h2 className="font-display text-xl font-semibold text-foreground leading-snug">
-             {defaultPrompts[currentPrompt].question}
-           </h2>
-           <p className="text-sm text-muted-foreground leading-relaxed text-left">
-             {defaultPrompts[currentPrompt].guidance}
-           </p>
+        {/* Flippable Flash Card */}
+        <div
+          className="w-full max-w-sm cursor-pointer"
+          style={{ perspective: "1000px" }}
+          onClick={() => setIsFlipped((f) => !f)}
+        >
+          <div
+            className="relative w-full transition-transform duration-500"
+            style={{
+              transformStyle: "preserve-3d",
+              transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+            }}
+          >
+            {/* Front — Question */}
+            <div
+              className="bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center space-y-4"
+              style={{ backfaceVisibility: "hidden" }}
+            >
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Discuss Together
+              </p>
+              <h2 className="font-display text-xl font-semibold text-foreground leading-snug">
+                {defaultPrompts[currentPrompt].question}
+              </h2>
+              <button
+                className="inline-flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
+                onClick={(e) => { e.stopPropagation(); setIsFlipped(true); }}
+              >
+                <Lightbulb className="w-3.5 h-3.5" />
+                Tap for hint
+              </button>
+            </div>
 
+            {/* Back — Guidance / Hint */}
+            <div
+              className="bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center space-y-4 absolute inset-0"
+              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+            >
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+                <Lightbulb className="w-3.5 h-3.5" />
+                Hint
+              </div>
+              <p className="text-sm text-foreground leading-relaxed text-left">
+                {defaultPrompts[currentPrompt].guidance}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Partner tabs + Recording — outside the card */}
+        <div className="w-full max-w-sm mt-5 space-y-4">
           {/* Partner tabs */}
           <div className="flex gap-2">
             <button
@@ -399,7 +401,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
           {/* Recording controls */}
           {hasResponse(currentPrompt, activePartner) ? (
-            <div className="bg-secondary/50 rounded-xl p-3 text-left">
+            <div className="bg-secondary/50 rounded-xl p-3 text-left animate-fade-in">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response
               </p>
@@ -451,7 +453,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setCurrentPrompt((p) => Math.max(0, p - 1))}
+            onClick={() => { setCurrentPrompt((p) => Math.max(0, p - 1)); setIsFlipped(false); }}
             disabled={currentPrompt === 0}
             className="gap-1"
           >
@@ -462,7 +464,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setCurrentPrompt((p) => p + 1)}
+              onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
               disabled={!bothResponded}
               className="gap-1"
             >
