@@ -207,6 +207,20 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       next.delete(msgId);
       return next;
     });
+
+    // Reveal next segment in queue
+    const queue = revealQueueRef.current;
+    const idx = queue.indexOf(msgId);
+    if (idx >= 0) {
+      revealQueueRef.current = queue.slice(idx + 1);
+      if (revealQueueRef.current.length > 0) {
+        const nextId = revealQueueRef.current[0];
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, nextId]));
+          setFreshIds(prev => new Set([...prev, nextId]));
+        }, 300);
+      }
+    }
   }, []);
 
   const handleRestart = useCallback(async () => {
