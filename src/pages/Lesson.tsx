@@ -71,8 +71,8 @@ const Lesson = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-lg mx-auto flex flex-col min-h-[100dvh]">
+    <div className="h-[100dvh] bg-background">
+      <div className="max-w-lg mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
           <button
