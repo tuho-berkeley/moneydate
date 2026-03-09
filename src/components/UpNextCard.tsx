@@ -12,9 +12,9 @@ const typeIcons: Record<ActivityType, typeof MessageCircle> = {
 };
 
 const typeLabels: Record<ActivityType, string> = {
-  conversation: "Start Conversation",
-  lesson: "Start Lesson",
-  planning: "Start Planning",
+  conversation: "Conversation",
+  lesson: "Lesson",
+  planning: "Planning",
 };
 
 const UpNextCard = () => {
