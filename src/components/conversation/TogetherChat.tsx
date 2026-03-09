@@ -470,8 +470,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               key={msg.id}
               className={`flex ${
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
-              }${freshIds.has(msg.id) || msg.id === "streaming" ? " animate-fade-in-message" : ""}`}
-              onAnimationEnd={() => setFreshIds(prev => { const next = new Set(prev); next.delete(msg.id); return next; })}
+              }`}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" ? (
