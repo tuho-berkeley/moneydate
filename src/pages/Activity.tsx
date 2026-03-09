@@ -111,114 +111,116 @@ const Activity = () => {
 
   return (
     <div className="min-h-screen bg-background pb-28">
-      {/* Header */}
-      <div className="px-6 pt-14 pb-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground mb-6">
-          <ArrowLeft className="w-5 h-5" />
-          Back
-        </button>
+      <div className="max-w-lg mx-auto">
+        {/* Header */}
+        <div className="px-6 pt-14 pb-6">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground mb-6">
+            <ArrowLeft className="w-5 h-5" />
+            Back
+          </button>
 
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
-            {config.label}
-          </span>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary-foreground bg-secondary px-3 py-1 rounded-full">
+              {config.label}
+            </span>
+          </div>
+
+          <h1 className="font-display text-2xl font-bold text-foreground">{activity.title}</h1>
+          {activity.description && <p className="text-muted-foreground mt-2">{activity.description}</p>}
         </div>
 
-        <h1 className="font-display text-2xl font-bold text-foreground">{activity.title}</h1>
-        {activity.description && <p className="text-muted-foreground mt-2">{activity.description}</p>}
-      </div>
+        {/* Content based on activity type */}
+        <div className="px-6 space-y-4">
+          {activity.type === "conversation" && (
+            <>
+              <div className="bg-card rounded-2xl p-5 border border-border">
+                <h3 className="font-semibold text-foreground mb-2">Choose how to start</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  You can have this conversation on your own, with your partner via chat, or face-to-face.
+                </p>
 
-      {/* Content based on activity type */}
-      <div className="px-6 space-y-4">
-        {activity.type === "conversation" && (
-          <>
-            <div className="bg-card rounded-2xl p-5 border border-border">
-              <h3 className="font-semibold text-foreground mb-2">Choose how to start</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                You can have this conversation on your own, with your partner via chat, or face-to-face.
-              </p>
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-auto p-4 rounded-xl"
+                    onClick={() => handleStartConversation("solo")}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
+                      <MessageCircle className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      {completedTypes?.has("solo") && (
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                      )}
+                      <p className="font-semibold text-foreground">Solo Chat</p>
+                      <p className="text-xs text-muted-foreground">Reflect on your own first</p>
+                    </div>
+                  </Button>
 
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start h-auto p-4 rounded-xl"
-                  onClick={() => handleStartConversation("solo")}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
-                    <MessageCircle className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-left flex-1 min-w-0">
-                    {completedTypes?.has("solo") && (
-                      <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
-                    )}
-                    <p className="font-semibold text-foreground">Solo Chat</p>
-                    <p className="text-xs text-muted-foreground">Reflect on your own first</p>
-                  </div>
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-auto p-4 rounded-xl"
+                    onClick={() => handleStartConversation("together")}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
+                      <span className="text-lg">👥</span>
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      {completedTypes?.has("together") && (
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                      )}
+                      <p className="font-semibold text-foreground">Together Chat</p>
+                      <p className="text-xs text-muted-foreground">Chat with your partner & guided by AI</p>
+                    </div>
+                  </Button>
 
-                <Button
-                  variant="outline"
-                  className="w-full justify-start h-auto p-4 rounded-xl"
-                  onClick={() => handleStartConversation("together")}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
-                    <span className="text-lg">👥</span>
-                  </div>
-                  <div className="text-left flex-1 min-w-0">
-                    {completedTypes?.has("together") && (
-                      <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
-                    )}
-                    <p className="font-semibold text-foreground">Together Chat</p>
-                    <p className="text-xs text-muted-foreground">Chat with your partner & guided by AI</p>
-                  </div>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start h-auto p-4 rounded-xl"
-                  onClick={() => handleStartConversation("face_to_face")}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
-                    <span className="text-lg">💬</span>
-                  </div>
-                  <div className="text-left flex-1 min-w-0">
-                    {completedTypes?.has("face_to_face") && (
-                      <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
-                    )}
-                    <p className="font-semibold text-foreground">Face-to-Face</p>
-                    <p className="text-xs text-muted-foreground">In-person with voice recording</p>
-                  </div>
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-auto p-4 rounded-xl"
+                    onClick={() => handleStartConversation("face_to_face")}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
+                      <span className="text-lg">💬</span>
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      {completedTypes?.has("face_to_face") && (
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                      )}
+                      <p className="font-semibold text-foreground">Face-to-Face</p>
+                      <p className="text-xs text-muted-foreground">In-person with voice recording</p>
+                    </div>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
-        {activity.type === "lesson" && (
-          <div className="bg-card rounded-2xl p-5 border border-border">
-            <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
-              <BookOpen className="w-6 h-6 text-secondary-foreground" />
+          {activity.type === "lesson" && (
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
+                <BookOpen className="w-6 h-6 text-secondary-foreground" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Lesson Content</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                This lesson will teach you important concepts about managing finances as a couple.
+              </p>
+              <Button className="w-full rounded-xl">Start Lesson</Button>
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Lesson Content</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              This lesson will teach you important concepts about managing finances as a couple.
-            </p>
-            <Button className="w-full rounded-xl">Start Lesson</Button>
-          </div>
-        )}
+          )}
 
-        {activity.type === "planning" && (
-          <div className="bg-card rounded-2xl p-5 border border-border">
-            <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-4">
-              <PiggyBank className="w-6 h-6 text-primary" />
+          {activity.type === "planning" && (
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-4">
+                <PiggyBank className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Financial Planning</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Work together with AI to create a concrete financial plan based on your conversations.
+              </p>
+              <Button className="w-full rounded-xl">Start Planning</Button>
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Financial Planning</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Work together with AI to create a concrete financial plan based on your conversations.
-            </p>
-            <Button className="w-full rounded-xl">Start Planning</Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
