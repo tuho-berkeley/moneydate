@@ -347,8 +347,32 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         </span>
       </div>
 
-      {/* Scrollable content area: flashcard + transcript */}
+      {/* Scrollable content area: navigation + flashcard + transcript */}
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 flex flex-col items-center">
+        {/* Previous / Next navigation — above flashcard */}
+        <div className="flex items-center justify-between w-full max-w-sm mb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setCurrentPrompt((p) => Math.max(0, p - 1)); setIsFlipped(false); }}
+            disabled={currentPrompt === 0}
+            className="gap-1"
+          >
+            <ChevronLeft className="w-4 h-4" /> Previous
+          </Button>
+
+          {currentPrompt < defaultPrompts.length - 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
+              className="gap-1"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+
         {/* Flippable Flash Card — top aligned */}
         <div
           className="w-full max-w-sm cursor-pointer [perspective:1000px]"
@@ -481,48 +505,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           </button>
         </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between w-full max-w-sm mx-auto">
+        {/* Get Insights */}
+        {canGenerateInsights && (
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => { setCurrentPrompt((p) => Math.max(0, p - 1)); setIsFlipped(false); }}
-            disabled={currentPrompt === 0}
-            className="gap-1"
+            onClick={generateSummary}
+            disabled={isGeneratingSummary}
+            className="w-full max-w-sm mx-auto gap-2 rounded-xl"
           >
-            <ChevronLeft className="w-4 h-4" /> Previous
+            <Sparkles className="w-4 h-4" /> Get Insights
           </Button>
-
-          {currentPrompt < defaultPrompts.length - 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
-              className="gap-1"
-            >
-              Next <ChevronRight className="w-4 h-4" />
-            </Button>
-          )}
-          {canGenerateInsights && (
-            <Button
-              size="sm"
-              onClick={generateSummary}
-              disabled={isGeneratingSummary}
-              className="gap-1 rounded-xl"
-            >
-              <Sparkles className="w-4 h-4" /> Get Insights
-            </Button>
-          )}
-          {!canGenerateInsights && currentPrompt === defaultPrompts.length - 1 && (
-            <Button
-              size="sm"
-              disabled
-              className="gap-1 rounded-xl"
-            >
-              <Sparkles className="w-4 h-4" /> Get Insights
-            </Button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
