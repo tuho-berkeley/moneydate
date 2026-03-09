@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -300,23 +300,30 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-message`}
               style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
             >
-              <div
-                className={`max-w-[85%] rounded-2xl p-4 ${
-                  msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary/50 text-foreground"
-                } ${isQuestion ? "question-highlight" : ""}`}
-              >
-                {msg.role === "ai" ? (
-                  <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    {msg.isStreaming && (
-                      <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+              <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
+                {msg.role === "ai" && (
+                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Guide
+                  </p>
                 )}
+                <div
+                  className={`rounded-2xl p-4 ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary/50 text-foreground"
+                  } ${isQuestion ? "question-highlight" : ""}`}
+                >
+                  {msg.role === "ai" ? (
+                    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      {msg.isStreaming && (
+                        <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  )}
+                </div>
               </div>
             </div>
           );
