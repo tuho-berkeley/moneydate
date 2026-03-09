@@ -1,0 +1,1 @@
+UPDATE public.stages SET goal = 'Build self-awareness, emotional safety and shared values.' WHERE goal = 'Build emotional safety and self-awareness.';
