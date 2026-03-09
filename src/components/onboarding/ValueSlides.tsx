@@ -55,8 +55,8 @@ const ValueSlides = ({ onGoogleAuth, authLoading }: Props) => {
         </div>
 
         <div className="space-y-3">
-          <h2 className="font-display text-2xl font-bold text-foreground leading-tight">{slide.title}</h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">{slide.description}</p>
+          <h2 className="font-display text-2xl font-bold text-foreground leading-tight text-pretty">{slide.title}</h2>
+          <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{slide.description}</p>
         </div>
       </div>
 
