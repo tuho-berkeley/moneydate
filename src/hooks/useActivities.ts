@@ -7,19 +7,44 @@ type Activity = Database["public"]["Tables"]["activities"]["Row"];
 type UserActivity = Database["public"]["Tables"]["user_activities"]["Row"];
 type ActivityStatus = Database["public"]["Enums"]["activity_status"];
 
+export interface Stage {
+  id: string;
+  title: string;
+  description: string | null;
+  goal: string | null;
+  order_index: number;
+  icon: string;
+}
+
 export interface ActivityWithProgress extends Activity {
   userStatus: ActivityStatus;
   startedAt: string | null;
   completedAt: string | null;
+  stage_id: string | null;
 }
 
-export function useActivities() {
+export interface StageWithActivities extends Stage {
+  activities: ActivityWithProgress[];
+  completedCount: number;
+  totalCount: number;
+  isUnlocked: boolean;
+}
+
+export function useStagesWithActivities() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["activities", user?.id],
-    queryFn: async (): Promise<ActivityWithProgress[]> => {
+    queryKey: ["stages-with-activities", user?.id],
+    queryFn: async (): Promise<StageWithActivities[]> => {
       if (!user) return [];
+
+      // Fetch all stages
+      const { data: stages, error: stagesError } = await supabase
+        .from("stages")
+        .select("*")
+        .order("order_index", { ascending: true });
+
+      if (stagesError) throw stagesError;
 
       // Fetch all activities
       const { data: activities, error: activitiesError } = await supabase
@@ -41,37 +66,79 @@ export function useActivities() {
       const progressMap = new Map<string, UserActivity>();
       userActivities?.forEach((ua) => progressMap.set(ua.activity_id, ua));
 
-      // Merge activities with user progress
-      return (activities || []).map((activity, index) => {
-        const userActivity = progressMap.get(activity.id);
+      // Group activities by stage and compute progress
+      const stagesWithActivities: StageWithActivities[] = (stages || []).map((stage, stageIndex) => {
+        const stageActivities = (activities || []).filter((a) => a.stage_id === stage.id);
         
-        // Determine status: first activity is available by default, others follow progression
-        let userStatus: ActivityStatus = "locked";
+        // Determine if this stage is unlocked
+        // First stage is always unlocked, others require previous stage completion
+        let isUnlocked = stageIndex === 0;
         
-        if (userActivity) {
-          userStatus = userActivity.status;
-        } else if (index === 0) {
-          // First activity is always available
-          userStatus = "available";
-        } else {
-          // Check if previous activity is completed
-          const prevActivity = activities[index - 1];
-          const prevUserActivity = progressMap.get(prevActivity.id);
-          if (prevUserActivity?.status === "completed") {
-            userStatus = "available";
-          }
+        if (stageIndex > 0) {
+          const prevStage = stages[stageIndex - 1];
+          const prevStageActivities = (activities || []).filter((a) => a.stage_id === prevStage.id);
+          const allPrevCompleted = prevStageActivities.every((a) => {
+            const ua = progressMap.get(a.id);
+            return ua?.status === "completed";
+          });
+          isUnlocked = allPrevCompleted;
         }
 
+        // Map activities with their user status
+        const activitiesWithProgress: ActivityWithProgress[] = stageActivities.map((activity, activityIndex) => {
+          const userActivity = progressMap.get(activity.id);
+          
+          let userStatus: ActivityStatus = "locked";
+          
+          if (!isUnlocked) {
+            userStatus = "locked";
+          } else if (userActivity) {
+            userStatus = userActivity.status;
+          } else if (activityIndex === 0) {
+            // First activity in an unlocked stage is available
+            userStatus = "available";
+          } else {
+            // Check if previous activity in this stage is completed
+            const prevActivity = stageActivities[activityIndex - 1];
+            const prevUserActivity = progressMap.get(prevActivity.id);
+            if (prevUserActivity?.status === "completed") {
+              userStatus = "available";
+            }
+          }
+
+          return {
+            ...activity,
+            userStatus,
+            startedAt: userActivity?.started_at || null,
+            completedAt: userActivity?.completed_at || null,
+          };
+        });
+
+        const completedCount = activitiesWithProgress.filter((a) => a.userStatus === "completed").length;
+
         return {
-          ...activity,
-          userStatus,
-          startedAt: userActivity?.started_at || null,
-          completedAt: userActivity?.completed_at || null,
+          ...stage,
+          activities: activitiesWithProgress,
+          completedCount,
+          totalCount: stageActivities.length,
+          isUnlocked,
         };
       });
+
+      return stagesWithActivities;
     },
     enabled: !!user,
   });
+}
+
+// Keep legacy hook for backward compatibility
+export function useActivities() {
+  const { data: stages, isLoading, error } = useStagesWithActivities();
+  
+  // Flatten all activities from stages
+  const activities = stages?.flatMap((stage) => stage.activities) || [];
+  
+  return { data: activities, isLoading, error };
 }
 
 export function useStartActivity() {
@@ -97,6 +164,7 @@ export function useStartActivity() {
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
       queryClient.invalidateQueries({ queryKey: ["activities"] });
     },
   });
@@ -125,17 +193,29 @@ export function useCompleteActivity() {
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
       queryClient.invalidateQueries({ queryKey: ["activities"] });
     },
   });
 }
 
 export function useActivityStats() {
-  const { data: activities } = useActivities();
+  const { data: stages } = useStagesWithActivities();
 
-  const totalActivities = activities?.length || 0;
-  const completedActivities = activities?.filter((a) => a.userStatus === "completed").length || 0;
-  const currentActivity = activities?.find((a) => a.userStatus === "in_progress" || a.userStatus === "available");
+  const totalActivities = stages?.reduce((sum, s) => sum + s.totalCount, 0) || 0;
+  const completedActivities = stages?.reduce((sum, s) => sum + s.completedCount, 0) || 0;
+  
+  // Find current activity (first available or in_progress)
+  let currentActivity: ActivityWithProgress | undefined;
+  for (const stage of stages || []) {
+    const activity = stage.activities.find(
+      (a) => a.userStatus === "in_progress" || a.userStatus === "available"
+    );
+    if (activity) {
+      currentActivity = activity;
+      break;
+    }
+  }
 
   return {
     total: totalActivities,
