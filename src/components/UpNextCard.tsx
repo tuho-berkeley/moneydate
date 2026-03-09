@@ -83,10 +83,10 @@ const UpNextCard = () => {
           <Icon className="w-6 h-6 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-lg font-semibold text-foreground mb-1">
+          <h3 className="font-display text-lg font-semibold text-foreground mb-1 text-pretty">
             {current.title}
           </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed text-pretty">
             {current.description}
           </p>
         </div>
