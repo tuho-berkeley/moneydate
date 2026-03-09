@@ -274,6 +274,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   // Sequential reveal of new AI messages (one at a time, after typewriter completes)
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
+
+    // On first load (returning to existing conversation), reveal all immediately (no animation)
+    // Skip if seeding — those should go through the sequential queue
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
+      setRevealedIds(new Set(dbMessages.map(m => m.id)));
+      prevMessageIdsRef.current = currentIds;
+      return;
+    }
+
     const newAiMsgs = dbMessages.filter(
       m => m.role === "ai" && !prevMessageIdsRef.current.has(m.id) && !revealedIds.has(m.id)
     );
@@ -300,12 +309,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         newNonAiMsgs.forEach(m => next.add(m.id));
         return next;
       });
-    }
-
-    // On first load (returning to existing conversation), reveal all immediately
-    // Skip if seeding — those should go through the sequential queue
-    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
-      setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
 
     prevMessageIdsRef.current = currentIds;
