@@ -25,23 +25,29 @@ const ActivityPath = () => {
   const navigate = useNavigate();
   const { data: stages, isLoading, error } = useStagesWithActivities();
   const startActivity = useStartActivity();
+  // Auto-expand the current (first incomplete unlocked) stage
+  const currentStageId = stages?.find(
+    (s) => s.isUnlocked && s.completedCount < s.totalCount
+  )?.id || stages?.[0]?.id;
+
   const [openStages, setOpenStages] = useState<Set<string>>(new Set());
 
-  // Auto-open first unlocked stage that has incomplete activities
-  useState(() => {
-    if (stages && stages.length > 0) {
-      const firstIncomplete = stages.find(
-        (s) => s.isUnlocked && s.completedCount < s.totalCount
-      );
-      if (firstIncomplete) {
-        setOpenStages(new Set([firstIncomplete.id]));
-      }
-    }
-  });
+  const isStageOpen = (stageId: string) => {
+    if (openStages.has(stageId)) return true;
+    // Auto-open current stage if user hasn't manually toggled anything
+    if (openStages.size === 0 && stageId === currentStageId) return true;
+    return false;
+  };
 
   const toggleStage = (stageId: string) => {
     setOpenStages((prev) => {
       const next = new Set(prev);
+      // If it's auto-opened and not in the set yet, add all others' closed state
+      if (next.size === 0 && stageId === currentStageId) {
+        // Closing the auto-opened stage
+        next.add("__toggled__");
+        return next;
+      }
       if (next.has(stageId)) {
         next.delete(stageId);
       } else {
@@ -107,11 +113,12 @@ const ActivityPath = () => {
       </h2>
       
       <div className="space-y-3">
-        {stages.map((stage) => (
+        {stages.map((stage, index) => (
           <StageCard
             key={stage.id}
             stage={stage}
-            isOpen={openStages.has(stage.id)}
+            stageNumber={index + 1}
+            isOpen={isStageOpen(stage.id)}
             onToggle={() => toggleStage(stage.id)}
             onActivityClick={handleStartActivity}
           />
@@ -123,12 +130,13 @@ const ActivityPath = () => {
 
 interface StageCardProps {
   stage: StageWithActivities;
+  stageNumber: number;
   isOpen: boolean;
   onToggle: () => void;
   onActivityClick: (activity: ActivityWithProgress) => void;
 }
 
-const StageCard = ({ stage, isOpen, onToggle, onActivityClick }: StageCardProps) => {
+const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick }: StageCardProps) => {
   const isComplete = stage.completedCount === stage.totalCount && stage.totalCount > 0;
   const progressPercent = stage.totalCount > 0 ? (stage.completedCount / stage.totalCount) * 100 : 0;
 
@@ -152,9 +160,10 @@ const StageCard = ({ stage, isOpen, onToggle, onActivityClick }: StageCardProps)
             </div>
             
             <div className="flex-1 text-left min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground truncate">{stage.title}</h3>
-              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
+                Stage {stageNumber}
+              </p>
+              <h3 className="font-semibold text-foreground truncate">{stage.title}</h3>
               <p className="text-xs text-muted-foreground mt-0.5">{stage.goal}</p>
               
               {/* Progress bar */}
