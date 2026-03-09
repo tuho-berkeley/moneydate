@@ -82,15 +82,6 @@ const Onboarding = () => {
       case 2:
         return <UserIntentStep value={data.usageIntent} onChange={(v) => updateData({ usageIntent: v })} onNext={next} />;
       case 3:
-        // If already authenticated, skip to next step
-        if (isAuthenticated) {
-          setStep(4);
-          return null;
-        }
-        return <AuthStep onNext={() => setStep(4)} />;
-      case 4:
-        return <PartnerConnectionStep onNext={next} onSkip={next} />;
-      case 5:
         return (
           <PersonalizationStep
             data={data}
@@ -98,6 +89,14 @@ const Onboarding = () => {
             onNext={next}
           />
         );
+      case 4:
+        if (isAuthenticated) {
+          setStep(5);
+          return null;
+        }
+        return <AuthStep onNext={() => setStep(5)} />;
+      case 5:
+        return <PartnerConnectionStep onNext={next} onSkip={next} />;
       case 6:
         return <TrustStep onFinish={finishOnboarding} />;
       default:
