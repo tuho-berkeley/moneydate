@@ -17,7 +17,11 @@ const Index = () => {
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data?.display_name) setDisplayName(data.display_name);
+        const name = data?.display_name
+          || user.user_metadata?.full_name
+          || user.user_metadata?.name
+          || "";
+        setDisplayName(name);
       });
   }, [user]);
 
