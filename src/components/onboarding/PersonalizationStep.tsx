@@ -26,7 +26,7 @@ const talkOptions = [
 
 const helpOptions = [
   "Talking about money more comfortably",
-  "Understanding how we each think about money",
+  "Understanding each other's money mindset",
   "Aligning our financial goals",
   "Planning our life together",
   "Avoiding money conflicts later",
