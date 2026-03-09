@@ -245,8 +245,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         setStreamingMessage(prev => (prev ?? "") + chunk);
       },
       onDone: async () => {
-        setStreamingMessage(null);
         if (fullResponse) {
+          justStreamedRef.current = true;
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
@@ -256,11 +256,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               content: segment,
             });
           }
-          // Wait for query cache to settle before allowing another AI trigger
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
+        setStreamingMessage(null);
         setIsAIResponding(false);
-        // Keep aiTriggerRef true briefly to prevent re-trigger from stale derived state
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
       },
       onError: (error) => {
