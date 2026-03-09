@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut, Trash2 } from "lucide-react";
+import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut, Trash2, Moon } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
