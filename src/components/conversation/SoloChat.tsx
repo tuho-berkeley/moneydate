@@ -77,7 +77,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   });
 
   // Fetch messages
-  const { data: dbMessages = [] } = useQuery({
+  const { data: dbMessages = [], isSuccess: messagesLoaded } = useQuery({
     queryKey: ["messages", conversation?.id],
     queryFn: async () => {
       if (!conversation) return [];
@@ -93,10 +93,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   });
 
   // Seed starter AI message when conversation has no messages yet
-  const [seeded, setSeeded] = useState(false);
+  const seedingRef = useRef(false);
   useEffect(() => {
-    if (!conversation || seeded || dbMessages.length > 0) return;
-    setSeeded(true);
+    if (!conversation || !messagesLoaded || seedingRef.current || dbMessages.length > 0) return;
+    seedingRef.current = true;
 
     const starterContent = `Hi! I'm here to guide you through a personal reflection about **${activityTitle.toLowerCase()}**.\n\nTake your time — there are no right or wrong answers. What comes to mind first?`;
 
@@ -113,7 +113,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
       });
-  }, [conversation, dbMessages.length, seeded, activityTitle, queryClient]);
+  }, [conversation, dbMessages.length, messagesLoaded, activityTitle, queryClient]);
 
   const messages: ChatMessage[] = [
     ...dbMessages.map((m: DBMessage) => ({
