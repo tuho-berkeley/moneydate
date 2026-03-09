@@ -27,8 +27,8 @@ const ProgressCards = () => {
       <div className="bg-card rounded-lg p-3 shadow-card flex flex-col items-center">
         <p className="text-[10px] text-muted-foreground mb-1">Compatibility</p>
         <div className="flex items-center gap-1.5">
-          <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
-            <Heart className="w-3.5 h-3.5 text-secondary-foreground" />
+          <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center">
+            <Heart className="w-3 h-3 text-secondary-foreground" />
           </div>
           <p className="text-xl font-bold text-foreground">78%</p>
         </div>
