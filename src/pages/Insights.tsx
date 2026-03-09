@@ -37,7 +37,7 @@ const Insights = () => {
 
       <div className="px-6 space-y-3">
         {/* Summary Card */}
-        <div className="bg-card rounded-3xl p-6 shadow-soft animate-fade-in">
+        <div className="bg-card rounded-3xl p-6 shadow-soft">
           <h3 className="font-display text-lg font-semibold text-foreground mb-2">Money Compatibility</h3>
           <div className="flex items-end gap-3">
             <span className="text-4xl font-bold text-primary">78%</span>
@@ -54,8 +54,7 @@ const Insights = () => {
           return (
             <div
               key={i}
-              className="bg-card rounded-2xl p-4 shadow-card animate-fade-in"
-              style={{ animationDelay: `${(i + 1) * 0.1}s` }}
+              className="bg-card rounded-2xl p-4 shadow-card"
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${insight.color}`}>

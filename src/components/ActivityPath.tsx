@@ -71,7 +71,7 @@ const statusStyles: Record<ActivityStatus, string> = {
 
 const ActivityPath = () => {
   return (
-    <div className="space-y-3 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+    <div className="space-y-3">
       <h2 className="font-display text-xl font-semibold text-foreground px-1">
         Your Journey
       </h2>

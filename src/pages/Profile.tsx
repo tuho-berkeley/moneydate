@@ -18,7 +18,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background pb-28">
       {/* Couple Hero */}
       <div className="px-6 pt-14 pb-6">
-        <div className="bg-card rounded-3xl p-6 shadow-soft text-center animate-fade-in">
+        <div className="bg-card rounded-3xl p-6 shadow-soft text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-lg font-bold text-primary">
               S
@@ -41,7 +41,7 @@ const Profile = () => {
 
       <div className="px-6 space-y-5">
         {/* Shared Goals */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div>
           <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Shared Goals</h3>
           <div className="space-y-2">
             {goals.map((goal, i) => (
@@ -60,7 +60,7 @@ const Profile = () => {
         </div>
 
         {/* Preferences */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <div>
           <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
           <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
             {settings.map((setting, i) => {
@@ -87,7 +87,7 @@ const Profile = () => {
         </div>
 
         {/* Disconnect */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <div>
           <button className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors">
             <LogOut className="w-4 h-4" />
             Disconnect Partner

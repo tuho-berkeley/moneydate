@@ -45,7 +45,7 @@ const Plan = () => {
 
       <div className="px-6 space-y-3">
         {/* Total Progress */}
-        <div className="bg-card rounded-3xl p-6 shadow-soft animate-fade-in">
+        <div className="bg-card rounded-3xl p-6 shadow-soft">
           <h3 className="font-display text-lg font-semibold text-foreground mb-1">Total Saved</h3>
           <p className="text-3xl font-bold text-primary">$16,000</p>
           <p className="text-xs text-muted-foreground mt-1">across all goals</p>
@@ -58,8 +58,7 @@ const Plan = () => {
           return (
             <div
               key={i}
-              className="bg-card rounded-2xl p-4 shadow-card animate-fade-in"
-              style={{ animationDelay: `${(i + 1) * 0.1}s` }}
+              className="bg-card rounded-2xl p-4 shadow-card"
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${plan.color}`}>
