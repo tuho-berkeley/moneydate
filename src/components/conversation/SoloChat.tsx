@@ -281,8 +281,12 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           </div>
         )}
 
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+        {messages.map((msg, idx) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+            style={{ animationDelay: `${Math.min(idx * 50, 200)}ms`, animationFillMode: "backwards" }}
+          >
             <div
               className={`max-w-[85%] rounded-2xl p-4 ${
                 msg.role === "user"
@@ -305,12 +309,13 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         ))}
 
         {isSending && streamingMessage === null && (
-          <div className="flex justify-start">
-            <div className="bg-secondary/50 rounded-2xl p-4">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div className="flex justify-start animate-fade-in">
+            <div className="bg-secondary/50 rounded-2xl px-5 py-4">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground mr-2">Thinking</span>
+                <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           </div>
