@@ -492,7 +492,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                 </div>
               </div>
             </div>
-          ;
           );
         })}
 
