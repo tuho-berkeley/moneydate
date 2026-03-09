@@ -110,6 +110,35 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     enabled: !!user,
   });
 
+  // Load existing AI messages (saved summary) on mount
+  const { data: savedMessages = [] } = useQuery({
+    queryKey: ["messages", conversation?.id],
+    queryFn: async () => {
+      if (!conversation) return [];
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", conversation.id)
+        .eq("role", "ai")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!conversation,
+  });
+
+  // If returning to a completed conversation, show the saved summary
+  useEffect(() => {
+    if (savedMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
+      const combined = savedMessages.map(m => m.content).join("\n---\n");
+      setSummaryText(combined);
+      setShowSummary(true);
+      // Reveal all segments instantly (no typewriter for past summaries)
+      const segments = combined.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+      setRevealedSegments(new Set(segments.map((_, i) => i)));
+    }
+  }, [savedMessages]);
+
   const handleRestart = useCallback(async () => {
     if (!conversation) return;
     const { error } = await supabase
