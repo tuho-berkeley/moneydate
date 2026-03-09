@@ -225,8 +225,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [aiShouldRespond, isAIResponding]);
 
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
-    if (!conversation) return;
+    if (!conversation || isAIResponding) return;
     setIsAIResponding(true);
+    aiTriggerRef.current = true;
 
     let fullResponse = "";
     setStreamingMessage("");
@@ -254,9 +255,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               content: segment,
             });
           }
+          // Wait for query cache to settle before allowing another AI trigger
+          await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
         setIsAIResponding(false);
-        aiTriggerRef.current = false;
+        // Keep aiTriggerRef true briefly to prevent re-trigger from stale derived state
+        setTimeout(() => { aiTriggerRef.current = false; }, 500);
       },
       onError: (error) => {
         toast.error(error);
