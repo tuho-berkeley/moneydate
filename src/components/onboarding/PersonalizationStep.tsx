@@ -92,10 +92,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
             {durationOptions.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => {
-                  onChange({ relationshipDuration: opt.value });
-                  setTimeout(() => setSubStep(2), 300);
-                }}
+                onClick={() => onChange({ relationshipDuration: opt.value })}
                 className={`w-full p-4 rounded-2xl border-2 text-sm font-medium text-left transition-all duration-200 ${
                   data.relationshipDuration === opt.value
                     ? "border-primary bg-secondary text-foreground"
@@ -106,7 +103,12 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               </button>
             ))}
           </div>
-          <button onClick={() => setSubStep(0)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
+          <div className="space-y-3">
+            <Button onClick={() => setSubStep(2)} className="w-full rounded-full" size="lg">
+              Next
+            </Button>
+            <button onClick={() => setSubStep(0)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
+          </div>
         </div>
       );
     }
