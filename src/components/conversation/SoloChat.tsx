@@ -92,6 +92,29 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
+  // Seed starter AI message when conversation has no messages yet
+  const [seeded, setSeeded] = useState(false);
+  useEffect(() => {
+    if (!conversation || seeded || dbMessages.length > 0) return;
+    setSeeded(true);
+
+    const starterContent = `Hi! I'm here to guide you through a personal reflection about **${activityTitle.toLowerCase()}**.\n\nTake your time — there are no right or wrong answers. What comes to mind first?`;
+
+    supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversation.id,
+        sender_id: null,
+        role: "ai",
+        content: starterContent,
+      })
+      .then(({ error }) => {
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+        }
+      });
+  }, [conversation, dbMessages.length, seeded, activityTitle, queryClient]);
+
   const messages: ChatMessage[] = [
     ...dbMessages.map((m: DBMessage) => ({
       id: m.id,
@@ -173,36 +196,42 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       { role: "user" as const, content: userText },
     ];
 
-    await streamChat({
-      messages: historyForAI,
-      activityTitle,
-      activityDescription: activityDescription || "",
-      conversationType: "solo",
-      onDelta: (chunk) => {
-        fullResponse += chunk;
-        setStreamingMessage(fullResponse);
-      },
-      onDone: async () => {
-        setStreamingMessage(null);
-        // Save AI message
-        if (fullResponse) {
-          await supabase.from("messages").insert({
-            conversation_id: conversation.id,
-            sender_id: null,
-            role: "ai",
-            content: fullResponse,
-          });
-          queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
-        }
-        setIsSending(false);
-      },
-      onError: (error) => {
-        toast.error(error);
-        setStreamingMessage(null);
-        setIsSending(false);
-      },
-      signal: abort.signal,
-    });
+    try {
+      await streamChat({
+        messages: historyForAI,
+        activityTitle,
+        activityDescription: activityDescription || "",
+        conversationType: "solo",
+        onDelta: (chunk) => {
+          fullResponse += chunk;
+          setStreamingMessage(fullResponse);
+        },
+        onDone: async () => {
+          setStreamingMessage(null);
+          if (fullResponse) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: fullResponse,
+            });
+            queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+          }
+          setIsSending(false);
+        },
+        onError: (error) => {
+          toast.error(error);
+          setStreamingMessage(null);
+          setIsSending(false);
+        },
+        signal: abort.signal,
+      });
+    } catch (err) {
+      console.error("streamChat error:", err);
+      toast.error("Something went wrong. Please try again.");
+      setStreamingMessage(null);
+      setIsSending(false);
+    }
   }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -247,14 +276,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isSending && (
-          <div className="bg-secondary/50 rounded-2xl p-4 max-w-[85%]">
-            <p className="text-sm text-foreground">
-              Hi! I'm here to guide you through a personal reflection about{" "}
-              <strong>{activityTitle.toLowerCase()}</strong>.
-            </p>
-            <p className="text-sm text-foreground mt-2">
-              Take your time — there are no right or wrong answers. What comes to mind first?
-            </p>
+          <div className="flex justify-center py-8">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
