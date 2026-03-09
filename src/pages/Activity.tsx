@@ -82,7 +82,22 @@ const Activity = () => {
     enabled: !!id && !!user,
   });
 
-  if (isLoading) {
+  const { data: lessonCompleted } = useQuery({
+    queryKey: ["lesson-completed", id, user?.id],
+    queryFn: async () => {
+      if (!id || !user) return false;
+      const { data } = await supabase
+        .from("user_activities")
+        .select("status")
+        .eq("activity_id", id)
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!id && !!user,
+  });
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
