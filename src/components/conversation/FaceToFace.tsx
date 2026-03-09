@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import ReactMarkdown from "react-markdown";
+import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
 interface FaceToFaceProps {
   activityId: string;

@@ -377,9 +377,23 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
     if (error) {
       toast.error("Failed to send message");
+    } else {
+      // Together completion: check if both partners have answered at least 1 question
+      const myMessages = dbMessages.some(m => m.sender_id === user.id);
+      const partnerMessages = partnerId ? dbMessages.some(m => m.sender_id === partnerId) : false;
+      // Current user just sent a message, so they definitely have one
+      if (partnerMessages || (myMessages && !partnerMessages)) {
+        // If partner already has messages and user just sent one, or vice versa
+        if (myMessages && partnerMessages) {
+          markCompleted();
+        } else if (!myMessages && partnerMessages) {
+          // User's first message + partner already has messages
+          markCompleted();
+        }
+      }
     }
     setIsSending(false);
-  }, [input, isSending, conversation, user, myResponseSent]);
+  }, [input, isSending, conversation, user, myResponseSent, dbMessages, partnerId, markCompleted]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
