@@ -91,7 +91,7 @@ const ActivityPath = () => {
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     activity.status === "completed"
-                      ? "bg-success text-primary-foreground"
+                      ? "bg-secondary text-secondary-foreground"
                       : activity.status === "current"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground"
