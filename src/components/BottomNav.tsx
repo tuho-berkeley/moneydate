@@ -24,11 +24,22 @@ const BottomNav = () => {
       setIndicator(null);
       return;
     }
+
     const buttons = navRef.current.querySelectorAll<HTMLButtonElement>("button");
     const btn = buttons[activeIndex];
-    if (btn) {
-      setIndicator({ left: btn.offsetLeft, width: btn.offsetWidth });
+
+    if (!btn) {
+      setIndicator(null);
+      return;
     }
+
+    const width = btn.offsetWidth;
+    if (width <= 0) {
+      setIndicator(null);
+      return;
+    }
+
+    setIndicator({ left: btn.offsetLeft, width });
   };
 
   useLayoutEffect(() => {
@@ -49,13 +60,15 @@ const BottomNav = () => {
   if (location.pathname === "/onboarding") return null;
   if (location.pathname.startsWith("/activity/") || location.pathname.startsWith("/conversation/")) return null;
 
+  const hasValidIndicator = Boolean(indicator && indicator.width > 0);
+
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
       <nav
         ref={navRef}
         className="relative flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50"
       >
-        {indicator && (
+        {hasValidIndicator && indicator && (
           <div
             className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
             style={{ left: indicator.left, width: indicator.width }}
@@ -70,7 +83,9 @@ const BottomNav = () => {
               onClick={() => navigate(tab.path)}
               className={`relative z-10 flex flex-col items-center gap-0 px-4 py-1.5 rounded-full transition-colors duration-200 ${
                 isActive
-                  ? "text-primary-foreground"
+                  ? hasValidIndicator
+                    ? "text-primary-foreground"
+                    : "text-foreground bg-primary/15"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
