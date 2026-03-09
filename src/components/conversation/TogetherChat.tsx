@@ -302,7 +302,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       });
     }
 
-    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
+    // On first load (returning to existing conversation), reveal all immediately
+    // Skip if seeding — those should go through the sequential queue
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
 
