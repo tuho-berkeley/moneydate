@@ -119,13 +119,37 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       });
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, queryClient]);
 
+  // Stagger reveal of new AI messages
+  useEffect(() => {
+    const currentIds = new Set(dbMessages.map(m => m.id));
+    const newAiMsgs = dbMessages.filter(
+      m => m.role === "ai" && !prevMessageIdsRef.current.has(m.id) && !revealedIds.has(m.id)
+    );
+
+    if (newAiMsgs.length > 0) {
+      newAiMsgs.forEach((msg, i) => {
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, msg.id]));
+        }, i * 600);
+      });
+    }
+
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
+      setRevealedIds(new Set(dbMessages.map(m => m.id)));
+    }
+
+    prevMessageIdsRef.current = currentIds;
+  }, [dbMessages]);
+
   const messages: ChatMessage[] = [
-    ...dbMessages.map((m: DBMessage) => ({
-      id: m.id,
-      role: m.role as "user" | "ai",
-      content: m.content,
-    })),
-    ...(streamingMessage !== null
+    ...dbMessages
+      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+      .map((m: DBMessage) => ({
+        id: m.id,
+        role: m.role as "user" | "ai",
+        content: m.content,
+      })),
+    ...(streamingMessage
       ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isStreaming: true }]
       : []),
   ];
