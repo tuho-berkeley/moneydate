@@ -129,7 +129,10 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
             {talkOptions.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => onChange({ moneyTalkFrequency: opt.value })}
+                onClick={() => {
+                  onChange({ moneyTalkFrequency: opt.value });
+                  setTimeout(() => setSubStep(3), 300);
+                }}
                 className={`w-full p-4 rounded-2xl border-2 text-sm font-medium text-left transition-all duration-200 ${
                   data.moneyTalkFrequency === opt.value
                     ? "border-primary bg-secondary text-foreground"
