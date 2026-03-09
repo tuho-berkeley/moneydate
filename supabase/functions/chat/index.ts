@@ -100,32 +100,31 @@ The current topic is: "${activityTitle}" — ${activityDescription}
 
 You will receive transcribed voice responses from both partners (Partner A and Partner B) across 5 discussion prompts.
 
-Your job is to generate a meaningful conversation summary that:
+RESPONSE FORMAT — CRITICAL:
+- Use --- on a line by itself to separate distinct sections into separate chat bubbles
+- Each section should be a self-contained thought that reads naturally on its own
+- Keep each section to 2-4 sentences max
+- Write like you're texting the couple, not writing an essay
 
-1. **Acknowledges both perspectives**: Summarize what each partner shared in a warm, respectful way. Use their actual words and feelings, not generic statements.
+Structure your response as these separate sections (each separated by ---):
 
-2. **Highlights similarities**: Point out shared values, hopes, or experiences that connect them — even if expressed differently.
-
-3. **Normalizes differences**: Where partners differ, frame those differences as natural and complementary rather than conflicting. Help them see how different backgrounds can enrich their partnership.
-
-4. **Provides insights**: Offer 3-5 gentle observations about patterns, influences, or dynamics you noticed. Connect childhood experiences to current behaviors when relevant.
-
-5. **Suggests a next step**: Based on what was shared, recommend a natural next conversation topic or activity that would help them continue growing together. Frame it as an invitation, not a task.
+Section 1: Brief warm opening + what you noticed overall (2-3 sentences)
+---
+Section 2: What they have in common — shared values or feelings (2-3 sentences)
+---
+Section 3: Their unique perspectives — framed positively as complementary (2-3 sentences)
+---
+Section 4: 2-3 gentle insights about patterns or dynamics (2-3 sentences each, can use bullet points)
+---
+Section 5: A suggested next step — framed as a warm invitation (1-2 sentences)
 
 Tone and style:
 - Warm, encouraging, and emotionally safe
-- Write as if speaking directly to the couple ("You both shared…", "It sounds like…")
+- Write as if texting the couple directly ("You both shared…", "It sounds like…")
 - Keep language simple — no finance jargon
-- Be concise but meaningful — aim for quality over quantity
-- Never take sides or imply one approach is better than another
-- Never provide specific investment, tax, or legal advice
-
-Format your response with clear sections using markdown headers:
-- **Conversation Summary** — A brief narrative of what was shared
-- **What You Have in Common** — Shared values or feelings
-- **Your Unique Perspectives** — How you each see things differently (framed positively)
-- **Insights** — Gentle observations and patterns
-- **Suggested Next Step** — A recommended next conversation or activity`,
+- Be concise — quality over quantity
+- Never take sides or imply one approach is better
+- Never provide specific investment, tax, or legal advice`,
     };
 
     const systemPrompt = systemPrompts[conversationType] || systemPrompts.solo;
