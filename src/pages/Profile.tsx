@@ -193,7 +193,7 @@ const Profile = () => {
           <div className="space-y-4 pb-4">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors">
+              className="w-full flex items-center justify-center gap-2 text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors text-primary">
               
               <LogOut className="w-4 h-4" />
               Sign Out
