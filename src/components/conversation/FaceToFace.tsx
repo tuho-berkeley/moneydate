@@ -315,6 +315,25 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
           <p className="text-xs text-muted-foreground">Face-to-Face</p>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground transition-colors">
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restart conversation?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will clear all responses and start fresh. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRestart}>Restart</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <span className="text-xs text-muted-foreground font-medium">
           {currentPrompt + 1}/{defaultPrompts.length}
         </span>
