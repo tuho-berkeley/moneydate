@@ -276,10 +276,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Generating insights...</span>
-              </div>
+              <AIThinkingBubble />
             )}
           </div>
           <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">

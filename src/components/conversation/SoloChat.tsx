@@ -286,45 +286,43 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           </div>
         )}
 
-        {messages.map((msg, idx) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
-            style={{ animationDelay: `${Math.min(idx * 50, 200)}ms`, animationFillMode: "backwards" }}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl p-4 ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary/50 text-foreground"
-              }`}
-            >
-              {msg.role === "ai" ? (
-                <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  {msg.isStreaming && (
-                    <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-              )}
-            </div>
-          </div>
-        ))}
+        {messages.map((msg, idx) => {
+          // Detect if this is the last AI message in a consecutive AI sequence and ends with ?
+          const isLastAI = msg.role === "ai" && !msg.isStreaming &&
+            (idx === messages.length - 1 || messages[idx + 1]?.role === "user") &&
+            // check no streaming message follows
+            !(idx === messages.length - 1 && streamingMessage !== null);
+          const isQuestion = isLastAI && msg.content.trim().endsWith("?");
 
-        {isSending && streamingMessage === null && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="bg-secondary/50 rounded-2xl px-5 py-4">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted-foreground mr-2">Thinking</span>
-                <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          return (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-message`}
+              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms`, animationFillMode: "backwards" }}
+            >
+              <div
+                className={`max-w-[85%] rounded-2xl p-4 ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary/50 text-foreground"
+                } ${isQuestion ? "question-highlight" : ""}`}
+              >
+                {msg.role === "ai" ? (
+                  <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    {msg.isStreaming && (
+                      <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                )}
               </div>
             </div>
-          </div>
-        )}
+          );
+        })}
+
+        {isSending && streamingMessage === null && <AIThinkingBubble />}
 
         <div ref={messagesEndRef} />
       </div>
