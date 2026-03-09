@@ -269,6 +269,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           }
           setStreamingMessage(null);
           setIsSending(false);
+          setIsWaitingForAI(false);
         },
         onError: (error) => {
           toast.error(error);
