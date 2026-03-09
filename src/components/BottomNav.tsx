@@ -78,7 +78,7 @@ const BottomNav = () => {
   const hasValidIndicator = Boolean(indicator && indicator.width > 0);
 
   return (
-    <div className={`fixed bottom-2 left-1/2 -translate-x-1/2 z-50 transition-transform ${hidden ? "duration-700 ease-in translate-y-[calc(100%+1rem)]" : "duration-300 ease-out"}`}>
+    <div className={`fixed bottom-2 left-1/2 -translate-x-1/2 z-50 transition-transform ${hidden ? "duration-[600ms] ease-in translate-y-[calc(100%+1rem)]" : "duration-300 ease-out"}`}>
       <nav
         ref={navRef}
         className="relative flex items-center gap-1.5 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
