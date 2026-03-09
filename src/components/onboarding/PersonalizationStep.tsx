@@ -135,12 +135,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               </button>
             ))}
           </div>
-          <div className="flex gap-3">
-            <Button onClick={() => setSubStep(1)} variant="secondary" className="rounded-full" size="lg">Back</Button>
-            <Button onClick={() => setSubStep(3)} className="flex-1 rounded-full" size="lg" disabled={!data.moneyTalkFrequency}>
-              Next
-            </Button>
-          </div>
+          <button onClick={() => setSubStep(1)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
         </div>
       );
     }
