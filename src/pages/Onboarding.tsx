@@ -79,8 +79,6 @@ const Onboarding = () => {
       case 1:
         return <ValueSlides onNext={next} />;
       case 2:
-        return <UserIntentStep value={data.usageIntent} onChange={(v) => updateData({ usageIntent: v })} onNext={next} />;
-      case 3:
         return (
           <PersonalizationStep
             data={data}
@@ -88,15 +86,15 @@ const Onboarding = () => {
             onNext={next}
           />
         );
-      case 4:
+      case 3:
         if (isAuthenticated) {
-          setStep(5);
+          setStep(4);
           return null;
         }
-        return <AuthStep onNext={() => setStep(5)} />;
-      case 5:
+        return <AuthStep onNext={() => setStep(4)} />;
+      case 4:
         return <PartnerConnectionStep onNext={next} onSkip={next} />;
-      case 6:
+      case 5:
         return <TrustStep onFinish={finishOnboarding} />;
       default:
         return null;
