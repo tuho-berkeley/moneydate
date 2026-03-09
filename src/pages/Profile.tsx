@@ -112,7 +112,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background pb-28">
       <div className="max-w-lg mx-auto">
-        <div className="px-6 pt-14 pb-6">
+        <div className="px-6 pt-8 pb-6">
           <div className="bg-card rounded-3xl p-6 shadow-soft text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-lg font-bold text-primary">
