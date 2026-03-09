@@ -18,7 +18,8 @@ const AIThinkingBubble = () => {
   }, []);
 
   return (
-    <div className="flex justify-start"bg-secondary/50 rounded-2xl px-5 py-4">
+    <div className="flex justify-start">
+      <div className="bg-secondary/50 rounded-2xl px-5 py-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <span className="thinking-dot" style={{ animationDelay: "0ms" }} />
@@ -27,7 +28,9 @@ const AIThinkingBubble = () => {
           </div>
           <span
             key={labelIndex}
-            className="text-xs text-muted-foreground animate-fade-in-message  {labels[labelIndex]}
+            className="text-xs text-muted-foreground"
+          >
+            {labels[labelIndex]}
           </span>
         </div>
       </div>

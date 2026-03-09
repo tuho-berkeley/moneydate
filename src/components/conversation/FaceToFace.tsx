@@ -290,7 +290,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             summarySegments.map((segment, idx) => (
               <div
                 key={idx}
-                className=""ageLabel type="insight" />}
+              >
+                {idx === 0 && <AIMessageLabel type="insight" />}
                 <div className="bg-secondary/50 rounded-2xl p-4">
                 <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 text-foreground">
                   <ReactMarkdown>{segment}</ReactMarkdown>
@@ -308,12 +309,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </div>
           )}
           {!isGeneratingSummary && summarySegments.length > 0 && (
-            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4 animate-fade-in-message">
+            <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
               Done
-        )}
-        </div>
-      </div>
-    );
+            </Button>
+          )}
   }
 
   return (
