@@ -87,7 +87,7 @@ const Profile = () => {
         </div>
 
         {/* Disconnect */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <div>
           <button className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors">
             <LogOut className="w-4 h-4" />
             Disconnect Partner

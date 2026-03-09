@@ -2,7 +2,7 @@ import { Flame, MessageCircle } from "lucide-react";
 
 const ProgressCards = () => {
   return (
-    <div className="grid grid-cols-2 gap-3 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+    <div className="grid grid-cols-2 gap-3">
       <div className="bg-card rounded-2xl p-4 shadow-card">
         <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center mb-3">
           <Flame className="w-5 h-5 text-primary" />
