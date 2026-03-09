@@ -46,9 +46,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [input, setInput] = useState("");
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const prevMessageIdsRef = useRef<Set<string>>(new Set());
 
   // Get or create conversation
   const { data: conversation } = useQuery({
