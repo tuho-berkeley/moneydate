@@ -144,12 +144,15 @@ export function useStartActivity() {
 
       const { data, error } = await supabase
         .from("user_activities")
-        .upsert({
-          user_id: user.id,
-          activity_id: activityId,
-          status: "in_progress" as ActivityStatus,
-          started_at: new Date().toISOString(),
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            activity_id: activityId,
+            status: "in_progress" as ActivityStatus,
+            started_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,activity_id" }
+        )
         .select()
         .single();
 
