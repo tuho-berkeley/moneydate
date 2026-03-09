@@ -8,14 +8,14 @@ import type { Database } from "@/integrations/supabase/types";
 
 type ActivityType = Database["public"]["Enums"]["activity_type"];
 
-const typeConfig: Record<ActivityType, { label: string; icon: typeof MessageCircle; color: string }> = {
+const typeConfig: Record<ActivityType, {label: string;icon: typeof MessageCircle;color: string;}> = {
   conversation: { label: "Conversation", icon: MessageCircle, color: "bg-primary" },
   lesson: { label: "Lesson", icon: BookOpen, color: "bg-secondary" },
-  planning: { label: "Plan", icon: PiggyBank, color: "bg-accent" },
+  planning: { label: "Plan", icon: PiggyBank, color: "bg-accent" }
 };
 
 const Activity = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{id: string;}>();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -27,7 +27,7 @@ const Activity = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!id,
+    enabled: !!id
   });
 
   // Check which conversation types have been completed for this activity
@@ -35,75 +35,75 @@ const Activity = () => {
     queryKey: ["completed-conversation-types", id, user?.id],
     queryFn: async () => {
       if (!id || !user) return new Set<string>();
-      
+
       // Get conversations for this activity by this user
-      const { data: conversations, error } = await supabase
-        .from("conversations")
-        .select("id, type")
-        .eq("activity_id", id)
-        .eq("user_id", user.id);
-      
+      const { data: conversations, error } = await supabase.
+      from("conversations").
+      select("id, type").
+      eq("activity_id", id).
+      eq("user_id", user.id);
+
       if (error || !conversations) return new Set<string>();
-      
+
       const completed = new Set<string>();
-      
+
       for (const conv of conversations) {
         if (conv.type === "solo") {
           // Solo: completed when user answered at least 3 questions
-          const { count } = await supabase
-            .from("messages")
-            .select("*", { count: "exact", head: true })
-            .eq("conversation_id", conv.id)
-            .eq("role", "user");
+          const { count } = await supabase.
+          from("messages").
+          select("*", { count: "exact", head: true }).
+          eq("conversation_id", conv.id).
+          eq("role", "user");
           if ((count || 0) >= 3) completed.add("solo");
         } else if (conv.type === "together") {
           // Together: completed when each partner answered at least 1
-          const { data: msgs } = await supabase
-            .from("messages")
-            .select("sender_id")
-            .eq("conversation_id", conv.id)
-            .in("role", ["user", "partner"]);
-          const senders = new Set(msgs?.map(m => m.sender_id).filter(Boolean));
+          const { data: msgs } = await supabase.
+          from("messages").
+          select("sender_id").
+          eq("conversation_id", conv.id).
+          in("role", ["user", "partner"]);
+          const senders = new Set(msgs?.map((m) => m.sender_id).filter(Boolean));
           if (senders.size >= 2) completed.add("together");
         } else if (conv.type === "face_to_face") {
           // Face-to-face: completed when each partner recorded at least 1
-          const { data: msgs } = await supabase
-            .from("messages")
-            .select("sender_id")
-            .eq("conversation_id", conv.id)
-            .in("role", ["user", "partner"]);
-          const senders = new Set(msgs?.map(m => m.sender_id).filter(Boolean));
+          const { data: msgs } = await supabase.
+          from("messages").
+          select("sender_id").
+          eq("conversation_id", conv.id).
+          in("role", ["user", "partner"]);
+          const senders = new Set(msgs?.map((m) => m.sender_id).filter(Boolean));
           if (senders.size >= 2) completed.add("face_to_face");
         }
       }
-      
+
       return completed;
     },
-    enabled: !!id && !!user,
+    enabled: !!id && !!user
   });
 
   const { data: lessonCompleted } = useQuery({
     queryKey: ["lesson-completed", id, user?.id],
     queryFn: async () => {
       if (!id || !user) return false;
-      const { data } = await supabase
-        .from("user_activities")
-        .select("status")
-        .eq("activity_id", id)
-        .eq("user_id", user.id)
-        .eq("status", "completed")
-        .maybeSingle();
+      const { data } = await supabase.
+      from("user_activities").
+      select("status").
+      eq("activity_id", id).
+      eq("user_id", user.id).
+      eq("status", "completed").
+      maybeSingle();
       return !!data;
     },
-    enabled: !!id && !!user,
+    enabled: !!id && !!user
   });
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!activity) {
@@ -114,8 +114,8 @@ const Activity = () => {
           Back
         </button>
         <p className="text-center text-muted-foreground">Activity not found</p>
-      </div>
-    );
+      </div>);
+
   }
 
   const config = typeConfig[activity.type];
@@ -147,8 +147,8 @@ const Activity = () => {
 
         {/* Content based on activity type */}
         <div className="px-6 space-y-4">
-          {activity.type === "conversation" && (
-            <>
+          {activity.type === "conversation" &&
+          <>
               <div className="bg-card rounded-2xl p-5 border border-border">
                 <h3 className="font-semibold text-foreground mb-2">Choose how to start</h3>
                 <p className="text-sm text-muted-foreground mb-4">
@@ -157,51 +157,51 @@ const Activity = () => {
 
                 <div className="space-y-3">
                   <Button
-                    variant="outline"
-                    className="w-full justify-start h-auto p-4 rounded-xl"
-                    onClick={() => handleStartConversation("solo")}
-                  >
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4 rounded-xl"
+                  onClick={() => handleStartConversation("solo")}>
+                  
                     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
                       <MessageCircle className="w-5 h-5 text-primary" />
                     </div>
                     <div className="text-left flex-1 min-w-0">
-                      {completedTypes?.has("solo") && (
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
-                      )}
-                      <p className="font-semibold text-foreground">Solo Chat</p>
+                      {completedTypes?.has("solo") &&
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    }
+                      <p className="font-semibold text-foreground">Self Discovery</p>
                       <p className="text-xs text-muted-foreground text-pretty">Reflect on your own first</p>
                     </div>
                   </Button>
 
                   <Button
-                    variant="outline"
-                    className="w-full justify-start h-auto p-4 rounded-xl"
-                    onClick={() => handleStartConversation("together")}
-                  >
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4 rounded-xl"
+                  onClick={() => handleStartConversation("together")}>
+                  
                     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
                       <span className="text-lg">👥</span>
                     </div>
                     <div className="text-left flex-1 min-w-0">
-                      {completedTypes?.has("together") && (
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
-                      )}
-                      <p className="font-semibold text-foreground">Together Chat</p>
+                      {completedTypes?.has("together") &&
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    }
+                      <p className="font-semibold text-foreground">
+</p>
                       <p className="text-xs text-muted-foreground text-pretty">Chat with your partner & guided by AI</p>
                     </div>
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start h-auto p-4 rounded-xl"
-                    onClick={() => handleStartConversation("face_to_face")}
-                  >
+                  <Button variant="outline"
+                className="w-full justify-start h-auto p-4 rounded-xl"
+                onClick={() => handleStartConversation("face_to_face")}>
+                  
                     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
                       <span className="text-lg">💬</span>
                     </div>
                     <div className="text-left flex-1 min-w-0">
-                      {completedTypes?.has("face_to_face") && (
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
-                      )}
+                      {completedTypes?.has("face_to_face") &&
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    }
                       <p className="font-semibold text-foreground">Face-to-Face</p>
                       <p className="text-xs text-muted-foreground text-pretty">In-person with voice recording</p>
                     </div>
@@ -209,10 +209,10 @@ const Activity = () => {
                 </div>
               </div>
             </>
-          )}
+          }
 
-          {activity.type === "lesson" && (
-            <div className="bg-card rounded-2xl p-5 border border-border text-center">
+          {activity.type === "lesson" &&
+          <div className="bg-card rounded-2xl p-5 border border-border text-center">
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4 mx-auto">
                 <BookOpen className="w-6 h-6 text-secondary-foreground" />
               </div>
@@ -224,10 +224,10 @@ const Activity = () => {
                 {lessonCompleted ? "Review Lesson" : "Start Lesson"}
               </Button>
             </div>
-          )}
+          }
 
-          {activity.type === "planning" && (
-            <div className="bg-card rounded-2xl p-5 border border-border">
+          {activity.type === "planning" &&
+          <div className="bg-card rounded-2xl p-5 border border-border">
               <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-4">
                 <PiggyBank className="w-6 h-6 text-primary" />
               </div>
@@ -237,11 +237,11 @@ const Activity = () => {
               </p>
               <Button className="w-full rounded-xl">Start Planning</Button>
             </div>
-          )}
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Activity;
