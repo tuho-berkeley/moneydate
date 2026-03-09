@@ -41,10 +41,12 @@ const BottomNav = () => {
         ref={navRef}
         className="relative flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50"
       >
-        <div
-          className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
-          style={{ left: indicator.left, width: indicator.width }}
-        />
+        {indicator && (
+          <div
+            className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
+            style={{ left: indicator.left, width: indicator.width }}
+          />
+        )}
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           const Icon = tab.icon;
