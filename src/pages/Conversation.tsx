@@ -43,14 +43,18 @@ const Conversation = () => {
     activityDescription: activity.description || "",
   };
 
-  switch (mode) {
-    case "together":
-      return <TogetherChat {...props} />;
-    case "face_to_face":
-      return <FaceToFace {...props} />;
-    default:
-      return <SoloChat {...props} />;
-  }
+  const content = (() => {
+    switch (mode) {
+      case "together":
+        return <TogetherChat {...props} />;
+      case "face_to_face":
+        return <FaceToFace {...props} />;
+      default:
+        return <SoloChat {...props} />;
+    }
+  })();
+
+  return <div className="max-w-lg mx-auto">{content}</div>;
 };
 
 export default Conversation;
