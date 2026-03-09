@@ -113,7 +113,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background pb-28">
       <div className="max-w-lg mx-auto">
         <div className="px-6 pt-8 pb-6">
-          <div className="bg-card rounded-3xl p-6 shadow-soft text-center">
+          <div className="bg-card rounded-p-6 shadow-soft text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-lg font-bold text-primary">
                 {profile?.display_name?.charAt(0)?.toUpperCase() || "?"}
@@ -141,7 +141,7 @@ const Profile = () => {
               <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Shared Goals</h3>
               <div className="space-y-2">
                 {goals.map((goal, i) => (
-                  <div key={i} className="bg-card rounded-2xl p-4 shadow-card flex items-center gap-3">
+                  <div key={i} className="bg-card rounded-2lp4 shadow-card flex items-center gap-3">
                     <span className="text-2xl">{goal.icon}</span>
                     <div className="flex-1">
                       <h4 className="text-sm font-semibold text-foreground">{goal.title}</h4>
@@ -158,7 +158,7 @@ const Profile = () => {
 
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
-            <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
+            <div className="bg-card rounded-2x sadow-card divide-y divide-border overflow-hidden">
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <Moon className="w-5 h-5 text-muted-foreground" />
                 <span className="flex-1 text-sm font-medium text-foreground">Dark Mode</span>
@@ -193,7 +193,7 @@ const Profile = () => {
           <div className="space-y-4 pb-4">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xl border border-destructive/20 hover:bg-destructive/5 transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-destructive text-sm font-medium py-3 rounded-2xlborder border-destructive/20 hover:bg-destructive/5 transition-colors"
             >
               <LogOut className="w-4 h-4" />
               Sign Out
