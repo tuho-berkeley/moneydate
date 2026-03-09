@@ -350,7 +350,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           );
         })}
 
-        {isSending && streamingMessage === null && <AIThinkingBubble />}
+        {isSending && !streamingMessage && <AIThinkingBubble />}
 
         <div ref={messagesEndRef} />
       </div>
