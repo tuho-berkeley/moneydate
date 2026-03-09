@@ -210,12 +210,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         onDone: async () => {
           setStreamingMessage(null);
           if (fullResponse) {
-            await supabase.from("messages").insert({
-              conversation_id: conversation.id,
-              sender_id: null,
-              role: "ai",
-              content: fullResponse,
-            });
+            const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+            for (const segment of segments) {
+              await supabase.from("messages").insert({
+                conversation_id: conversation.id,
+                sender_id: null,
+                role: "ai",
+                content: segment,
+              });
+            }
             queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
           }
           setIsSending(false);
