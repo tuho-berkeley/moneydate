@@ -84,7 +84,7 @@ const ActivityPath = () => {
             <div
               key={activity.id}
               className={`rounded-2xl border p-4 transition-all duration-200 ${statusStyles[activity.status]} ${
-                activity.status === "current" ? "animate-pulse-soft" : ""
+                activity.status === "current" ? "" : ""
               }`}
             >
               <div className="flex items-start gap-3">
