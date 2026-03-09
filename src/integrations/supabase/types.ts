@@ -187,6 +187,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          onboarding_completed: boolean
           updated_at: string
         }
         Insert: {
@@ -195,6 +196,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id: string
+          onboarding_completed?: boolean
           updated_at?: string
         }
         Update: {
@@ -203,6 +205,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          onboarding_completed?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -249,6 +252,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          help_topics: string[] | null
+          id: string
+          money_talk_frequency: string | null
+          relationship_duration: string | null
+          updated_at: string
+          usage_intent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          help_topics?: string[] | null
+          id?: string
+          money_talk_frequency?: string | null
+          relationship_duration?: string | null
+          updated_at?: string
+          usage_intent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          help_topics?: string[] | null
+          id?: string
+          money_talk_frequency?: string | null
+          relationship_duration?: string | null
+          updated_at?: string
+          usage_intent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
