@@ -8,7 +8,7 @@ const ProgressCards = () => {
     <div className="grid grid-cols-3 gap-2">
       <div className="bg-card rounded-lg p-3 shadow-card flex flex-col items-center">
         <p className="text-[10px] text-muted-foreground mb-1">Week Streak</p>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-[8px]">
           <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center">
             <Flame className="w-3 h-3 text-secondary-foreground" />
           </div>
@@ -17,7 +17,7 @@ const ProgressCards = () => {
       </div>
       <div className="bg-card rounded-lg p-3 shadow-card flex flex-col items-center">
         <p className="text-[10px] text-muted-foreground mb-1">Activities</p>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-[8px]">
           <div className="w-6 h-6 rounded-md bg-success-light flex items-center justify-center">
             <MessageCircle className="w-3 h-3 text-success" />
           </div>
@@ -26,15 +26,15 @@ const ProgressCards = () => {
       </div>
       <div className="bg-card rounded-lg p-3 shadow-card flex flex-col items-center">
         <p className="text-[10px] text-muted-foreground mb-1">Compatibility</p>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-[8px]">
           <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center">
             <Heart className="w-3 h-3 text-secondary-foreground" />
           </div>
           <p className="text-xl font-bold text-foreground">78%</p>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ProgressCards;
