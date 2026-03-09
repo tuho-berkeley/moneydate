@@ -1,5 +1,6 @@
 import { Home, BarChart3, Target, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const tabs = [
   { path: "/", label: "Home", icon: Home },
@@ -11,6 +12,9 @@ const tabs = [
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { session } = useAuth();
+
+  if (!session) return null;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">

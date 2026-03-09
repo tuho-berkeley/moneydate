@@ -1,19 +1,41 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import UpNextCard from "@/components/UpNextCard";
 import ProgressCards from "@/components/ProgressCards";
 import ActivityPath from "@/components/ActivityPath";
 
 const Index = () => {
+  const { user } = useAuth();
+  const [displayName, setDisplayName] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.display_name) setDisplayName(data.display_name);
+      });
+  }, [user]);
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning ☀️";
+    if (hour < 18) return "Good afternoon 🌤️";
+    return "Good evening ✨";
+  };
+
   return (
     <div className="min-h-screen bg-background pb-28">
-      {/* Header */}
       <div className="px-6 pt-14 pb-6">
-        <p className="text-sm text-muted-foreground font-medium">Good evening ✨</p>
+        <p className="text-sm text-muted-foreground font-medium">{greeting()}</p>
         <h1 className="font-display text-2xl font-bold text-foreground mt-1">
-          Sarah & James
+          {displayName || "Welcome"}
         </h1>
       </div>
-
-      {/* Content */}
       <div className="px-6 space-y-5">
         <UpNextCard />
         <ProgressCards />
