@@ -125,8 +125,8 @@ const Activity = () => {
             </span>
           </div>
 
-          <h1 className="font-display text-2xl font-bold text-foreground">{activity.title}</h1>
-          {activity.description && <p className="text-muted-foreground mt-2">{activity.description}</p>}
+          <h1 className="font-display text-2xl font-bold text-foreground text-pretty">{activity.title}</h1>
+          {activity.description && <p className="text-muted-foreground mt-2 text-pretty">{activity.description}</p>}
         </div>
 
         {/* Content based on activity type */}
@@ -153,7 +153,7 @@ const Activity = () => {
                         <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                       )}
                       <p className="font-semibold text-foreground">Solo Chat</p>
-                      <p className="text-xs text-muted-foreground">Reflect on your own first</p>
+                      <p className="text-xs text-muted-foreground text-pretty">Reflect on your own first</p>
                     </div>
                   </Button>
 
@@ -170,7 +170,7 @@ const Activity = () => {
                         <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                       )}
                       <p className="font-semibold text-foreground">Together Chat</p>
-                      <p className="text-xs text-muted-foreground">Chat with your partner & guided by AI</p>
+                      <p className="text-xs text-muted-foreground text-pretty">Chat with your partner & guided by AI</p>
                     </div>
                   </Button>
 
@@ -187,7 +187,7 @@ const Activity = () => {
                         <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                       )}
                       <p className="font-semibold text-foreground">Face-to-Face</p>
-                      <p className="text-xs text-muted-foreground">In-person with voice recording</p>
+                      <p className="text-xs text-muted-foreground text-pretty">In-person with voice recording</p>
                     </div>
                   </Button>
                 </div>
