@@ -184,7 +184,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="flex items-center justify-center gap-1.5 pb-6">
+      <div className="fixed top-6 left-0 right-0 z-50 flex items-center justify-center gap-1.5">
         {Array.from({ length: totalQuestions }).map((_, i) => (
           <div
             key={i}
