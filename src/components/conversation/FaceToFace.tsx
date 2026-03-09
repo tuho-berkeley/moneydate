@@ -267,6 +267,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const summarySegments = summaryText
     ? summaryText.split(/\n---\n/).map(s => s.trim()).filter(Boolean)
     : [];
+  const prevSegmentCountRef = useRef(0);
+  const animateFromIdx = prevSegmentCountRef.current;
+  useEffect(() => {
+    prevSegmentCountRef.current = summarySegments.length;
+  }, [summarySegments.length]);
 
   if (showSummary) {
     return (
@@ -285,7 +290,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             summarySegments.map((segment, idx) => (
               <div
                 key={idx}
-                className="animate-fade-in-message"
+                className={idx >= animateFromIdx ? "animate-fade-in-message" : ""}
               >
                 {idx === 0 && <AIMessageLabel type="insight" />}
                 <div className="bg-secondary/50 rounded-2xl p-4">

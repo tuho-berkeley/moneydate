@@ -48,6 +48,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -155,13 +156,27 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       const startIndex = justStreamedRef.current ? 1 : 0;
       if (justStreamedRef.current && newAiMsgs[0]) {
         setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
       }
       justStreamedRef.current = false;
       
       newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
+          setFreshIds(prev => new Set([...prev, msg.id]));
         }, (i + 1) * 700);
+      });
+    }
+
+    // Also mark user messages as fresh if they're new
+    const newUserMsgs = dbMessages.filter(
+      m => m.role === "user" && !prevMessageIdsRef.current.has(m.id)
+    );
+    if (newUserMsgs.length > 0) {
+      setFreshIds(prev => {
+        const next = new Set(prev);
+        newUserMsgs.forEach(m => next.add(m.id));
+        return next;
       });
     }
 
@@ -372,7 +387,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           return (
             <div
               key={msg.id}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-message`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}${freshIds.has(msg.id) || msg.id === "streaming" ? " animate-fade-in-message" : ""}`}
+              onAnimationEnd={() => setFreshIds(prev => { const next = new Set(prev); next.delete(msg.id); return next; })}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}

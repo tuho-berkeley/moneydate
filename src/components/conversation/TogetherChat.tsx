@@ -42,6 +42,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [isSending, setIsSending] = useState(false);
   const [isAIResponding, setIsAIResponding] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const seedingRef = useRef(false);
@@ -285,13 +286,27 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       const startIndex = justStreamedRef.current ? 1 : 0;
       if (justStreamedRef.current && newAiMsgs[0]) {
         setRevealedIds(prev => new Set([...prev, newAiMsgs[0].id]));
+        setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
       }
       justStreamedRef.current = false;
 
       newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
+          setFreshIds(prev => new Set([...prev, msg.id]));
         }, (i + 1) * 700);
+      });
+    }
+
+    // Mark user/partner messages as fresh if new
+    const newNonAiMsgs = dbMessages.filter(
+      m => m.role !== "ai" && !prevMessageIdsRef.current.has(m.id)
+    );
+    if (newNonAiMsgs.length > 0) {
+      setFreshIds(prev => {
+        const next = new Set(prev);
+        newNonAiMsgs.forEach(m => next.add(m.id));
+        return next;
       });
     }
 
@@ -455,7 +470,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               key={msg.id}
               className={`flex ${
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
-              } animate-fade-in-message`}
+              }${freshIds.has(msg.id) || msg.id === "streaming" ? " animate-fade-in-message" : ""}`}
+              onAnimationEnd={() => setFreshIds(prev => { const next = new Set(prev); next.delete(msg.id); return next; })}
             >
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" ? (

@@ -104,8 +104,8 @@ export default {
           "30%": { transform: "translateY(-6px)", opacity: "1" },
         },
         "fade-in-message": {
-          from: { opacity: "0", transform: "translateY(8px) scale(0.97)" },
-          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "pulse-subtle": {
           "0%, 100%": { opacity: "1" },
@@ -117,7 +117,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out forwards",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "fade-in-message": "fade-in-message 1s cubic-bezier(0.16,1,0.3,1) forwards",
+        "fade-in-message": "fade-in-message 0.5s cubic-bezier(0.16,1,0.3,1) forwards",
         "thinking-wave": "thinking-wave 1.2s ease-in-out infinite",
         "pulse-subtle": "pulse-subtle 2.5s ease-in-out infinite",
       },
