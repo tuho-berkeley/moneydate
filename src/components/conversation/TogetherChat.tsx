@@ -40,10 +40,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isAIResponding, setIsAIResponding] = useState(false);
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const seedingRef = useRef(false);
   const aiTriggerRef = useRef(false);
+  const prevMessageIdsRef = useRef<Set<string>>(new Set());
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({
@@ -230,7 +232,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     aiTriggerRef.current = true;
 
     let fullResponse = "";
-    setStreamingMessage("");
 
     await streamChat({
       messages: historyForAI,
@@ -241,7 +242,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       partnerName,
       onDelta: (chunk) => {
         fullResponse += chunk;
-        setStreamingMessage(fullResponse);
+        setStreamingMessage(prev => (prev ?? "") + chunk);
       },
       onDone: async () => {
         setStreamingMessage(null);
@@ -271,9 +272,34 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     });
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
+  // Stagger reveal of new AI messages
+  useEffect(() => {
+    const currentIds = new Set(dbMessages.map(m => m.id));
+    const newAiMsgs = dbMessages.filter(
+      m => m.role === "ai" && !prevMessageIdsRef.current.has(m.id) && !revealedIds.has(m.id)
+    );
+
+    if (newAiMsgs.length > 0) {
+      newAiMsgs.forEach((msg, i) => {
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, msg.id]));
+        }, i * 600);
+      });
+    }
+
+    // On first load, reveal all existing messages immediately
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
+      setRevealedIds(new Set(dbMessages.map(m => m.id)));
+    }
+
+    prevMessageIdsRef.current = currentIds;
+  }, [dbMessages]);
+
   // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
-    ...dbMessages.map((m: DBMessage) => ({
+    ...dbMessages
+      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+      .map((m: DBMessage) => ({
       id: m.id,
       role: m.role,
       content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
@@ -281,7 +307,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
       askedName: m.role === "ai" ? parseAsking(m.content) : null,
     })),
-    ...(streamingMessage !== null
+    ...(streamingMessage
       ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage) }]
       : []),
   ];
@@ -348,7 +374,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // Determine if input should be disabled
   const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || (dbMessages.length === 0 && !streamingMessage);
-  const isLoadingStart = dbMessages.length === 0 && streamingMessage === null && !isAIResponding;
+  
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -387,9 +413,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {isLoadingStart && (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        {/* Show thinking bubble during initial load/seeding */}
+        {dbMessages.length === 0 && !streamingMessage && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Guide
+            </p>
+            <AIThinkingBubble />
           </div>
         )}
 
@@ -451,7 +481,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         )}
 
         {/* AI is thinking */}
-        {isAIResponding && streamingMessage === null && (
+        {isAIResponding && !streamingMessage && dbMessages.length > 0 && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Guide

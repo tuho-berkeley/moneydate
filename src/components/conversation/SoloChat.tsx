@@ -46,9 +46,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [input, setInput] = useState("");
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const prevMessageIdsRef = useRef<Set<string>>(new Set());
 
   // Get or create conversation
   const { data: conversation } = useQuery({
@@ -117,13 +119,37 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       });
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, queryClient]);
 
+  // Stagger reveal of new AI messages
+  useEffect(() => {
+    const currentIds = new Set(dbMessages.map(m => m.id));
+    const newAiMsgs = dbMessages.filter(
+      m => m.role === "ai" && !prevMessageIdsRef.current.has(m.id) && !revealedIds.has(m.id)
+    );
+
+    if (newAiMsgs.length > 0) {
+      newAiMsgs.forEach((msg, i) => {
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, msg.id]));
+        }, i * 600);
+      });
+    }
+
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
+      setRevealedIds(new Set(dbMessages.map(m => m.id)));
+    }
+
+    prevMessageIdsRef.current = currentIds;
+  }, [dbMessages]);
+
   const messages: ChatMessage[] = [
-    ...dbMessages.map((m: DBMessage) => ({
-      id: m.id,
-      role: m.role as "user" | "ai",
-      content: m.content,
-    })),
-    ...(streamingMessage !== null
+    ...dbMessages
+      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+      .map((m: DBMessage) => ({
+        id: m.id,
+        role: m.role as "user" | "ai",
+        content: m.content,
+      })),
+    ...(streamingMessage
       ? [{ id: "streaming", role: "ai" as const, content: streamingMessage, isStreaming: true }]
       : []),
   ];
@@ -186,7 +212,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
     // Stream AI response
     let fullResponse = "";
-    setStreamingMessage("");
 
     const abort = new AbortController();
     abortRef.current = abort;
@@ -207,7 +232,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         conversationType: "solo",
         onDelta: (chunk) => {
           fullResponse += chunk;
-          setStreamingMessage(fullResponse);
+          setStreamingMessage(prev => (prev ?? "") + chunk);
         },
         onDone: async () => {
           setStreamingMessage(null);
@@ -281,10 +306,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && !isSending && (
-          <div className="flex justify-center py-8">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
+        {messages.length === 0 && !streamingMessage && (
+          <AIThinkingBubble />
         )}
 
         {messages.map((msg, idx) => {
@@ -327,7 +350,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           );
         })}
 
-        {isSending && streamingMessage === null && <AIThinkingBubble />}
+        {isSending && !streamingMessage && <AIThinkingBubble />}
 
         <div ref={messagesEndRef} />
       </div>
