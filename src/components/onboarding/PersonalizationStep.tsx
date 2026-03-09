@@ -103,7 +103,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
               </button>
             ))}
           </div>
-          <Button onClick={() => setSubStep(1)} className="w-full rounded-full" size="lg" disabled={!data.relationshipDuration}>
+          <Button onClick={() => setSubStep(2)} className="w-full rounded-full" size="lg" disabled={!data.relationshipDuration}>
             Next
           </Button>
         </div>
