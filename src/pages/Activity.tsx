@@ -125,8 +125,8 @@ const Activity = () => {
             </span>
           </div>
 
-          <h1 className="font-display text-2xl font-bold text-foreground">{activity.title}</h1>
-          {activity.description && <p className="text-muted-foreground mt-2">{activity.description}</p>}
+          <h1 className="font-display text-2xl font-bold text-foreground text-pretty">{activity.title}</h1>
+          {activity.description && <p className="text-muted-foreground mt-2 text-pretty">{activity.description}</p>}
         </div>
 
         {/* Content based on activity type */}
