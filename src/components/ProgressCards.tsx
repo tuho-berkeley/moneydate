@@ -6,7 +6,7 @@ const ProgressCards = () => {
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-center text-center">
+      <div className="bg-card rounded-xl p-3 shadow-card flex flex-col items-start">
         <div className="flex items-center gap-1.5 mb-1">
           <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
             <Flame className="w-3.5 h-3.5 text-secondary-foreground" />
