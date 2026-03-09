@@ -151,6 +151,14 @@ const Profile = () => {
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Preferences</h3>
             <div className="bg-card rounded-2xl shadow-card divide-y divide-border overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3.5">
+                <Moon className="w-5 h-5 text-muted-foreground" />
+                <span className="flex-1 text-sm font-medium text-foreground">Dark Mode</span>
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={toggleDarkMode}
+                />
+              </div>
               {settings.map((setting, i) => {
                 const Icon = setting.icon;
                 return (
