@@ -357,9 +357,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                   {msg.role === "ai" ? (
                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
                       <ReactMarkdown>{displayContent}</ReactMarkdown>
-                      {msg.isStreaming && (
-                        <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
-                      )}
                     </div>
                   ) : (
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
