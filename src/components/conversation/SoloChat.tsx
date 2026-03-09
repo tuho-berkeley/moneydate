@@ -212,7 +212,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
     // Stream AI response
     let fullResponse = "";
-    setStreamingMessage("");
 
     const abort = new AbortController();
     abortRef.current = abort;
