@@ -325,13 +325,35 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         {/* Flippable Flash Card */}
         <div
-          className="w-full max-w-sm cursor-pointer"
+          className="w-full max-w-sm cursor-pointer [perspective:1000px]"
           onClick={() => setIsFlipped((f) => !f)}
         >
-          {!isFlipped ? (
+          {/* Invisible sizer: renders both sides to reserve max height */}
+          <div className="relative w-full">
+            <div className="invisible p-8 space-y-4">
+              <p className="text-xs">&nbsp;</p>
+              <h2 className="font-display text-xl font-semibold leading-snug">
+                {defaultPrompts[currentPrompt].question}
+              </h2>
+              <p className="text-xs">&nbsp;</p>
+            </div>
+            <div className="invisible p-8 space-y-4">
+              <p className="text-xs">&nbsp;</p>
+              <p className="text-sm leading-relaxed">
+                {defaultPrompts[currentPrompt].guidance}
+              </p>
+              <p className="text-xs">&nbsp;</p>
+            </div>
+          </div>
+
+          {/* Actual 3D flip card overlaid on sizer */}
+          <div
+            className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d]"
+            style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+          >
+            {/* Front — Question */}
             <div
-              key={`front-${currentPrompt}`}
-              className="bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center space-y-4 animate-scale-in"
+              className="absolute inset-0 bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden]"
             >
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Discuss Together
@@ -347,10 +369,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 Tap for hint
               </button>
             </div>
-          ) : (
+
+            {/* Back — Hint */}
             <div
-              key={`back-${currentPrompt}`}
-              className="bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center space-y-4 animate-scale-in"
+              className="absolute inset-0 bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden] [transform:rotateY(180deg)]"
             >
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
                 <Lightbulb className="w-3.5 h-3.5" />
@@ -361,7 +383,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               </p>
               <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Partner tabs + Recording — outside the card */}
