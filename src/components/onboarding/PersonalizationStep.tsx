@@ -185,16 +185,26 @@ const PersonalizationStep = ({ data, onChange, onNext, onSkip }: Props) => {
 
   return (
     <div className="w-full max-w-sm flex flex-col h-[calc(100dvh-3rem)]">
-      {/* Progress dots */}
-      <div className="fixed top-6 left-0 right-0 z-50 flex items-center justify-center gap-1.5">
-        {Array.from({ length: totalQuestions }).map((_, i) => (
-          <div
-            key={i}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === subStep ? "w-6 bg-primary" : i < subStep ? "w-1.5 bg-primary/40" : "w-1.5 bg-border"
-            }`}
-          />
-        ))}
+      {/* Top bar: progress dots + skip */}
+      <div className="fixed top-6 left-0 right-0 z-50 flex items-center justify-center px-6">
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: totalQuestions }).map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === subStep ? "w-6 bg-primary" : i < subStep ? "w-1.5 bg-primary/40" : "w-1.5 bg-border"
+              }`}
+            />
+          ))}
+        </div>
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            className="absolute right-6 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Skip all
+          </button>
+        )}
       </div>
 
       {/* Scrollable question content */}
