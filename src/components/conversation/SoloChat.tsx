@@ -270,14 +270,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isSending && (
-          <div className="bg-secondary/50 rounded-2xl p-4 max-w-[85%]">
-            <p className="text-sm text-foreground">
-              Hi! I'm here to guide you through a personal reflection about{" "}
-              <strong>{activityTitle.toLowerCase()}</strong>.
-            </p>
-            <p className="text-sm text-foreground mt-2">
-              Take your time — there are no right or wrong answers. What comes to mind first?
-            </p>
+          <div className="flex justify-center py-8">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
