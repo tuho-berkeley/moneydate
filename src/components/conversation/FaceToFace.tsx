@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import ReactMarkdown from "react-markdown";
+import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
 interface FaceToFaceProps {
   activityId: string;
@@ -77,6 +78,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [showSummary, setShowSummary] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const { markCompleted } = useConversationCompletion(activityId);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -184,10 +186,19 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       partner: activePartner,
       transcript,
     };
-    setResponses((prev) => [...prev, newResponse]);
+    setResponses((prev) => {
+      const updated = [...prev, newResponse];
+      // Face-to-face completion: each partner recorded at least 1 response
+      const hasPartnerA = updated.some(r => r.partner === "partner_a");
+      const hasPartnerB = updated.some(r => r.partner === "partner_b");
+      if (hasPartnerA && hasPartnerB) {
+        markCompleted();
+      }
+      return updated;
+    });
     setRecordingState("idle");
     toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
-  }, [currentPrompt, activePartner]);
+  }, [currentPrompt, activePartner, markCompleted]);
 
   const hasResponse = (promptIdx: number, partner: Partner) => {
     return responses.some((r) => r.promptIndex === promptIdx && r.partner === partner);

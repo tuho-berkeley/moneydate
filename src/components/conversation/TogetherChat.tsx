@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
+import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
 type DBMessage = Database["public"]["Tables"]["messages"]["Row"];
 
@@ -46,6 +47,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const seedingRef = useRef(false);
   const aiTriggerRef = useRef(false);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
+  const { markCompleted } = useConversationCompletion(activityId);
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({
@@ -375,9 +377,18 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
     if (error) {
       toast.error("Failed to send message");
+    } else {
+      // Together completion: each partner answered at least 1 question
+      // User just sent a message, so check if partner already has one
+      const partnerHasMessages = partnerId ? dbMessages.some(m => m.sender_id === partnerId) : false;
+      const userHadMessages = dbMessages.some(m => m.sender_id === user.id);
+      // Both have now sent at least 1 if partner had messages, OR if user already had messages and this could be partner's turn
+      if (partnerHasMessages && (userHadMessages || true)) {
+        markCompleted();
+      }
     }
     setIsSending(false);
-  }, [input, isSending, conversation, user, myResponseSent]);
+  }, [input, isSending, conversation, user, myResponseSent, dbMessages, partnerId, markCompleted]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

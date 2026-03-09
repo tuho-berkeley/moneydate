@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
+import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
 type DBMessage = Database["public"]["Tables"]["messages"]["Row"];
 
@@ -51,6 +52,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
+  const { markCompleted } = useConversationCompletion(activityId);
 
   // Get or create conversation
   const { data: conversation } = useQuery({
@@ -270,6 +272,12 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           setStreamingMessage(null);
           setIsSending(false);
           setIsWaitingForAI(false);
+
+          // Solo completion: user answered at least 3 AI questions
+          const userMessageCount = dbMessages.filter(m => m.role === "user").length + 1; // +1 for the just-sent message
+          if (userMessageCount >= 3) {
+            markCompleted();
+          }
         },
         onError: (error) => {
           toast.error(error);
@@ -285,7 +293,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setStreamingMessage(null);
       setIsSending(false);
     }
-  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient]);
+  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
