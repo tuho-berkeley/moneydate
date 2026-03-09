@@ -295,16 +295,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                     <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
                   )}
                 </div>
+                </div>
               </div>
             ))
           ) : (
-            <div className="bg-accent/30 border border-accent rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-secondary-foreground">
-                  AI Insights
-                </span>
-              </div>
+            <div>
+              <AIMessageLabel type="insight" />
               <AIThinkingBubble />
             </div>
           )}
