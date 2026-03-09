@@ -46,7 +46,7 @@ const Plan = () => {
 
         <div className="px-6 space-y-3">
           {/* Total Progress */}
-          <div className="bg-card rounded- p-6 shadow-soft">
+          <div className="bg-card rounded-3xl p-6 shadow-soft">
             <h3 className="font-display text-lg font-semibold text-foreground mb-1">Total Saved</h3>
             <p className="text-3xl font-bold text-primary">$16,000</p>
             <p className="text-xs text-muted-foreground mt-1">across all goals</p>
@@ -59,7 +59,7 @@ const Plan = () => {
             return (
               <div
                 key={i}
-                className="bg-card rounded-2lp-4 shadow-card"
+                className="bg-card rounded-2xl p-4 shadow-card"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${plan.color}`}>
@@ -84,7 +84,7 @@ const Plan = () => {
           })}
 
           {/* Add Plan Button */}
-          <button className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-border rounded-2x py-4 text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all">
+          <button className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-border rounded-2xl py-4 text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all">
             <Plus className="w-5 h-5" />
             <span className="text-sm font-medium">Create New Plan</span>
           </button>
