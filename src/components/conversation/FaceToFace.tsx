@@ -103,7 +103,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return;
     }
 
-    setResponses({});
+    setResponses([]);
     setCurrentPrompt(0);
     setShowSummary(false);
     setSummaryText("");
