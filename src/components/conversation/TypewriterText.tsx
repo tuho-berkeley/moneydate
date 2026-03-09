@@ -45,7 +45,7 @@ const TypewriterText = ({ content, speed = 18, onComplete }: TypewriterTextProps
     textNodes.forEach((n) => (n.textContent = ""));
 
     let revealed = 0;
-    const charsPerTick = 3;
+    const charsPerTick = 2;
 
     const timer = setInterval(() => {
       revealed = Math.min(revealed + charsPerTick, totalChars);
