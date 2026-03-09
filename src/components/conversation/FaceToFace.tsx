@@ -313,6 +313,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               Done
             </Button>
           )}
+        </div>
+      </div>
+    );
   }
 
   return (
