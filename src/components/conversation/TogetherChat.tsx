@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, Users, Sparkles, RotateCcw, Clock } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
 import { Button } from "@/components/ui/button";
@@ -440,12 +440,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Show thinking bubble during initial load/seeding */}
         {dbMessages.length === 0 && !streamingMessage && (
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Guide
-            </p>
-            <AIThinkingBubble />
-          </div>
+          <AIThinkingBubble />
         )}
 
         {displayMessages.map((msg, idx) => {
@@ -462,7 +457,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                 msg.role === "ai" ? "justify-start" : msg.isMe ? "justify-end" : "justify-start"
               } animate-fade-in-message`}
             >
-              <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[80%]"}>
+              <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" ? (
                   labelType && <AIMessageLabel type={labelType} askedName={labelType === "question" ? msg.askedName ?? undefined : undefined} />
                 ) : (
@@ -475,7 +470,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                 <div
                   className={`rounded-2xl p-4 ${
                     msg.role === "ai"
-                      ? "bg-accent/50 text-foreground border border-accent"
+                      ? "bg-secondary/50 text-foreground"
                       : msg.isMe
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary/50 text-foreground"
@@ -506,12 +501,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
         {/* AI is thinking — show when responding or when unrevealed messages are pending */}
         {((isAIResponding && !streamingMessage) || hasPendingAIReveal) && dbMessages.length > 0 && (
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1 text-primary/70 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Guide
-            </p>
-            <AIThinkingBubble />
-          </div>
+          <AIThinkingBubble />
         )}
 
         <div ref={messagesEndRef} />
