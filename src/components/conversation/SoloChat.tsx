@@ -140,7 +140,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     });
   }, [conversation, dbMessages.length, messagesLoaded, activityTitle, activityDescription, queryClient]);
 
-  // Stagger reveal of new AI messages
+  // Sequential reveal of new AI messages (one at a time, after typewriter completes)
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
     const newAiMsgs = dbMessages.filter(
@@ -148,12 +148,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     );
 
     if (newAiMsgs.length > 0) {
-      newAiMsgs.forEach((msg, i) => {
-        setTimeout(() => {
-          setRevealedIds(prev => new Set([...prev, msg.id]));
-          setFreshIds(prev => new Set([...prev, msg.id]));
-        }, i * 400);
-      });
+      const newIds = newAiMsgs.map(m => m.id);
+      revealQueueRef.current = [...revealQueueRef.current, ...newIds];
+
+      // If nothing is currently being typewritten, reveal the first one
+      if (revealQueueRef.current.length === newIds.length) {
+        const firstId = revealQueueRef.current[0];
+        setRevealedIds(prev => new Set([...prev, firstId]));
+        setFreshIds(prev => new Set([...prev, firstId]));
+      }
     }
 
     // Mark user messages as fresh if new
