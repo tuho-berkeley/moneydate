@@ -248,7 +248,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       },
       onDone: async () => {
         if (fullResponse) {
-          justStreamedRef.current = true;
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
@@ -260,7 +259,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
-        setStreamingMessage(null);
         setIsAIResponding(false);
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
       },
