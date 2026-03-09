@@ -185,7 +185,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
         </div>
         <div className="space-y-3">
           <Button onClick={onNext} className="w-full rounded-full" size="lg">
-            Continue
+            Start Your Journey
           </Button>
           <button onClick={() => setSubStep(2)} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">Back</button>
         </div>
