@@ -452,9 +452,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
       {/* Input */}
       <div className="bg-card border-t border-border p-4 sticky bottom-0">
-        {waitingForPartner ? (
+        {myResponseSent || waitingForPartner ? (
           <div className="text-center text-sm text-muted-foreground py-2">
-            Your response has been sent. Waiting for {partnerName}…
+            {myResponseSent
+              ? `Your response has been sent. Waiting for the guide…`
+              : `Waiting for ${partnerName} to respond…`}
+          </div>
+        ) : isPartnerTurn && !askedPartnerResponded ? (
+          <div className="text-center text-sm text-muted-foreground py-2">
+            Waiting for {partnerName} to respond…
           </div>
         ) : (
           <div className="flex items-end gap-2">
@@ -466,8 +472,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               placeholder={
                 isAIResponding
                   ? "Guide is speaking…"
-                  : waitingForMe
-                    ? "Your partner has answered — your turn!"
+                  : isMyTurn
+                    ? `${myName}, it's your turn to share!`
                     : "Share your thoughts…"
               }
               className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
