@@ -187,7 +187,7 @@ const Activity = () => {
                         <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
                       )}
                       <p className="font-semibold text-foreground">Face-to-Face</p>
-                      <p className="text-xs text-muted-foreground">In-person with voice recording</p>
+                      <p className="text-xs text-muted-foreground text-pretty">In-person with voice recording</p>
                     </div>
                   </Button>
                 </div>
