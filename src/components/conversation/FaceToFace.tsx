@@ -78,6 +78,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [showSummary, setShowSummary] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const { markCompleted } = useConversationCompletion(activityId);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
