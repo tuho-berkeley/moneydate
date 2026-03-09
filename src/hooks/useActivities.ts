@@ -176,12 +176,15 @@ export function useCompleteActivity() {
 
       const { data, error } = await supabase
         .from("user_activities")
-        .upsert({
-          user_id: user.id,
-          activity_id: activityId,
-          status: "completed" as ActivityStatus,
-          completed_at: new Date().toISOString(),
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            activity_id: activityId,
+            status: "completed" as ActivityStatus,
+            completed_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,activity_id" }
+        )
         .select()
         .single();
 
