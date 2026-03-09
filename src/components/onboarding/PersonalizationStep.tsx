@@ -46,8 +46,8 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       return (
         <div className="space-y-6 animate-fade-in" key="q0">
           <div className="text-center space-y-3">
-            <h2 className="font-display text-2xl font-bold text-foreground">How will you use MoneyDate?</h2>
-            <p className="text-muted-foreground text-sm">This helps us personalize your experience</p>
+            <h2 className="font-display text-2xl font-bold text-foreground text-pretty">How will you use MoneyDate?</h2>
+            <p className="text-muted-foreground text-sm text-pretty">This helps us personalize your experience</p>
           </div>
           <div className="space-y-3">
             {intentOptions.map((opt) => {
@@ -68,7 +68,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
                   }`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className={`text-sm font-medium ${selected ? "text-foreground" : "text-muted-foreground"}`}>
+                   <span className={`text-sm font-medium text-pretty ${selected ? "text-foreground" : "text-muted-foreground"}`}>
                     {opt.label}
                   </span>
                 </button>
@@ -86,7 +86,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       return (
         <div className="space-y-6 animate-fade-in" key="q1">
           <div className="text-center space-y-2">
-            <h2 className="font-display text-2xl font-bold text-foreground">How long have you been together?</h2>
+            <h2 className="font-display text-2xl font-bold text-foreground text-pretty">How long have you been together?</h2>
           </div>
           <div className="space-y-3">
             {durationOptions.map((opt) => (
@@ -114,7 +114,7 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       return (
         <div className="space-y-6 animate-fade-in" key="q2">
           <div className="text-center space-y-2">
-            <h2 className="font-display text-2xl font-bold text-foreground">Have you talked about money before?</h2>
+            <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Have you talked about money before?</h2>
           </div>
           <div className="space-y-3">
             {talkOptions.map((opt) => (
@@ -141,8 +141,8 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
     return (
       <div className="space-y-6 animate-fade-in" key="q3">
         <div className="text-center space-y-2">
-          <h2 className="font-display text-2xl font-bold text-foreground">What would you like help with most?</h2>
-          <p className="text-muted-foreground text-sm">Choose as many as you like</p>
+          <h2 className="font-display text-2xl font-bold text-foreground text-pretty">What would you like help with most?</h2>
+          <p className="text-muted-foreground text-sm text-pretty">Choose as many as you like</p>
         </div>
         <div className="space-y-3">
           {helpOptions.map((opt) => {
