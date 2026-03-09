@@ -328,16 +328,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           className="w-full max-w-sm cursor-pointer [perspective:1000px]"
           onClick={() => setIsFlipped((f) => !f)}
         >
-          {/* Invisible sizer: renders both sides to reserve max height */}
-          <div className="relative w-full">
-            <div className="invisible p-8 space-y-4">
+          {/* Invisible sizer: both sides overlap via grid so the taller one sets height */}
+          <div className="relative w-full grid">
+            <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
               <h2 className="font-display text-xl font-semibold leading-snug">
                 {defaultPrompts[currentPrompt].question}
               </h2>
               <p className="text-xs">&nbsp;</p>
             </div>
-            <div className="invisible p-8 space-y-4">
+            <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
               <p className="text-sm leading-relaxed">
                 {defaultPrompts[currentPrompt].guidance}
