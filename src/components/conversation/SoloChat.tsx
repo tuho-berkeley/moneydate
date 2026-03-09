@@ -114,6 +114,26 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
   }, [input]);
 
+  const handleRestart = useCallback(async () => {
+    if (!conversation || isSending) return;
+    abortRef.current?.abort();
+    setStreamingMessage(null);
+    setIsSending(false);
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversation.id);
+
+    if (error) {
+      toast.error("Failed to restart chat");
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    toast.success("Chat restarted");
+  }, [conversation, isSending, queryClient]);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user) return;
 
