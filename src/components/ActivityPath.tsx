@@ -160,9 +160,10 @@ const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick }: St
             </div>
             
             <div className="flex-1 text-left min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground truncate">{stage.title}</h3>
-              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
+                Stage {stageNumber}
+              </p>
+              <h3 className="font-semibold text-foreground truncate">{stage.title}</h3>
               <p className="text-xs text-muted-foreground mt-0.5">{stage.goal}</p>
               
               {/* Progress bar */}
