@@ -32,7 +32,7 @@ const BottomNav = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} />
+              <Icon className="w-4 h-4" strokeWidth={isActive ? 2.2 : 1.8} />
               <span className="text-[10px] font-medium">{tab.label}</span>
             </button>
           );
