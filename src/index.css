@@ -95,6 +95,10 @@
     @apply w-2 h-2 rounded-full bg-primary/60;
     animation: thinking-bounce 1.4s ease-in-out infinite;
   }
+
+  .question-highlight {
+    @apply border-l-[3px] border-primary bg-primary/5;
+  }
 }
 
 @keyframes thinking-bounce {
@@ -105,10 +109,5 @@
   30% {
     transform: translateY(-6px);
     opacity: 1;
-  }
-}
-
-  .question-highlight {
-    @apply border-l-[3px] border-primary bg-primary/5;
   }
 }
