@@ -66,14 +66,15 @@ const Activity = () => {
           const senders = new Set(msgs?.map((m) => m.sender_id).filter(Boolean));
           if (senders.size >= 2) completed.add("together");
         } else if (conv.type === "face_to_face") {
-          // Face-to-face: completed when each partner recorded at least 1
-          const { data: msgs } = await supabase.
-          from("messages").
-          select("sender_id").
-          eq("conversation_id", conv.id).
-          in("role", ["user", "partner"]);
-          const senders = new Set(msgs?.map((m) => m.sender_id).filter(Boolean));
-          if (senders.size >= 2) completed.add("face_to_face");
+          // Face-to-face: check user_activities completion status
+          const { data: ua } = await supabase
+            .from("user_activities")
+            .select("status")
+            .eq("activity_id", id!)
+            .eq("user_id", user!.id)
+            .eq("status", "completed")
+            .maybeSingle();
+          if (ua) completed.add("face_to_face");
         }
       }
 
