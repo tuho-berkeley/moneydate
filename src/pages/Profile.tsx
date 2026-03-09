@@ -113,7 +113,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background pb-28">
       <div className="max-w-lg mx-auto">
         <div className="px-6 pt-8 pb-6">
-          <div className="bg-card rounded-xl p-6 shadow-soft text-center">
+          <div className="bg-card rounded-l p-6 shadow-soft text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-lg font-bold text-primary">
                 {profile?.display_name?.charAt(0)?.toUpperCase() || "?"}
@@ -141,7 +141,7 @@ const Profile = () => {
               <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Shared Goals</h3>
               <div className="space-y-2">
                 {goals.map((goal, i) => (
-                  <div key={i} className="bg-card rounded-2xl p-4 shadow-card flex items-center gap-3">
+                  <div key={i} className="bg-card rounded-2l p-4 shadow-card flex items-center gap-3">
                     <span className="text-2xl">{goal.icon}</span>
                     <div className="flex-1">
                       <h4 className="text-sm font-semibold text-foreground">{goal.title}</h4>
