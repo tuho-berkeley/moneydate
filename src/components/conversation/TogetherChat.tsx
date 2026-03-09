@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
+import TypewriterText from "@/components/conversation/TypewriterText";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
