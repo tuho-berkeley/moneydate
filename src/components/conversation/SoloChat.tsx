@@ -98,28 +98,49 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
-  // Seed starter AI message when conversation has no messages yet
+  // Seed AI starter message via streaming when conversation has no messages yet
   const seedingRef = useRef(false);
   useEffect(() => {
     if (!conversation || !messagesLoaded || seedingRef.current || dbMessages.length > 0) return;
     seedingRef.current = true;
 
-    const starterContent = `Hi! I'm here to guide you through a personal reflection about **${activityTitle.toLowerCase()}**.\n\nTake your time — there are no right or wrong answers. What comes to mind first?`;
+    let fullResponse = "";
+    setIsWaitingForAI(true);
 
-    supabase
-      .from("messages")
-      .insert({
-        conversation_id: conversation.id,
-        sender_id: null,
-        role: "ai",
-        content: starterContent,
-      })
-      .then(({ error }) => {
-        if (!error) {
-          queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    streamChat({
+      messages: [],
+      activityTitle,
+      activityDescription: activityDescription || "",
+      conversationType: "solo",
+      onDelta: (chunk) => {
+        fullResponse += chunk;
+        setStreamingMessage(prev => (prev ?? "") + chunk);
+      },
+      onDone: async () => {
+        if (fullResponse) {
+          justStreamedRef.current = true;
+          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          for (const segment of segments) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: segment,
+            });
+          }
+          await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
-      });
-  }, [conversation, dbMessages.length, messagesLoaded, activityTitle, queryClient]);
+        setStreamingMessage(null);
+        setIsWaitingForAI(false);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setStreamingMessage(null);
+        setIsWaitingForAI(false);
+        seedingRef.current = false;
+      },
+    });
+  }, [conversation, dbMessages.length, messagesLoaded, activityTitle, activityDescription, queryClient]);
 
   // Stagger reveal of new AI messages
   const justStreamedRef = useRef(false);
