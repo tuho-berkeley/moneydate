@@ -292,8 +292,26 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       newAiMsgs.slice(startIndex).forEach((msg, i) => {
         setTimeout(() => {
           setRevealedIds(prev => new Set([...prev, msg.id]));
+          setFreshIds(prev => new Set([...prev, msg.id]));
         }, (i + 1) * 700);
       });
+    }
+
+    // Mark user/partner messages as fresh if new
+    const newNonAiMsgs = dbMessages.filter(
+      m => m.role !== "ai" && !prevMessageIdsRef.current.has(m.id)
+    );
+    if (newNonAiMsgs.length > 0) {
+      setFreshIds(prev => {
+        const next = new Set(prev);
+        newNonAiMsgs.forEach(m => next.add(m.id));
+        return next;
+      });
+    }
+
+    if (justStreamedRef.current && newAiMsgs[0]) {
+      setFreshIds(prev => new Set([...prev, newAiMsgs[0].id]));
+    }
     }
 
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
