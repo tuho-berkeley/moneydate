@@ -171,8 +171,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       });
     }
 
-    // On first load, reveal all existing messages immediately (no animation)
-    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
+    // On first load (returning to existing conversation), reveal all immediately (no animation)
+    // Skip if we're currently seeding — those messages should go through the queue
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
     }
 
