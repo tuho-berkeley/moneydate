@@ -79,9 +79,6 @@ const UpNextCard = () => {
         </span>
       </div>
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center flex-shrink-0">
-          <Icon className="w-6 h-6 text-primary" />
-        </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-lg font-semibold text-foreground mb-1 text-pretty">
             {current.title}
