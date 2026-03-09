@@ -268,11 +268,31 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const summarySegments = summaryText
     ? summaryText.split(/\n---\n/).map(s => s.trim()).filter(Boolean)
     : [];
-  const prevSegmentCountRef = useRef(0);
-  const animateFromIdx = prevSegmentCountRef.current;
+
+  const [revealedSegments, setRevealedSegments] = useState<Set<number>>(new Set());
+  const [freshSegments, setFreshSegments] = useState<Set<number>>(new Set());
+
+  // Stagger reveal segments when summary completes
   useEffect(() => {
-    prevSegmentCountRef.current = summarySegments.length;
-  }, [summarySegments.length]);
+    if (isGeneratingSummary || summarySegments.length === 0) return;
+    // Reveal segments that haven't been revealed yet
+    summarySegments.forEach((_, idx) => {
+      if (!revealedSegments.has(idx)) {
+        setTimeout(() => {
+          setRevealedSegments(prev => new Set([...prev, idx]));
+          setFreshSegments(prev => new Set([...prev, idx]));
+        }, idx * 400);
+      }
+    });
+  }, [isGeneratingSummary, summarySegments.length]);
+
+  const handleSegmentTypewriterComplete = useCallback((idx: number) => {
+    setFreshSegments(prev => {
+      const next = new Set(prev);
+      next.delete(idx);
+      return next;
+    });
+  }, []);
 
   if (showSummary) {
     return (
@@ -287,29 +307,38 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {summarySegments.length > 0 ? (
-            summarySegments.map((segment, idx) => (
-              <div
-                key={idx}
-              >
-                {idx === 0 && <AIMessageLabel type="insight" />}
-                <div className="bg-secondary/50 rounded-2xl p-4">
-                <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 text-foreground">
-                  <ReactMarkdown>{segment}</ReactMarkdown>
-                  {isGeneratingSummary && idx === summarySegments.length - 1 && (
-                    <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
-                  )}
-                </div>
-                </div>
-              </div>
-            ))
-          ) : (
+          {isGeneratingSummary ? (
             <div>
               <AIMessageLabel type="insight" />
               <AIThinkingBubble />
             </div>
-          )}
-          {!isGeneratingSummary && summarySegments.length > 0 && (
+          ) : summarySegments.length > 0 ? (
+            summarySegments.filter((_, idx) => revealedSegments.has(idx)).map((segment, idx) => {
+              const isFresh = freshSegments.has(idx);
+              return (
+                <div
+                  key={idx}
+                  className={isFresh ? "animate-message-appear" : ""}
+                  style={isFresh ? { opacity: 0 } : undefined}
+                >
+                  {idx === 0 && <AIMessageLabel type="insight" />}
+                  <div className="bg-secondary/50 rounded-2xl p-4">
+                    {isFresh ? (
+                      <TypewriterText
+                        content={segment}
+                        onComplete={() => handleSegmentTypewriterComplete(idx)}
+                      />
+                    ) : (
+                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 text-foreground">
+                        <ReactMarkdown>{segment}</ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : null}
+          {!isGeneratingSummary && summarySegments.length > 0 && !freshSegments.size && (
             <Button onClick={() => navigate(-1)} className="w-full rounded-xl mt-4">
               Done
             </Button>
