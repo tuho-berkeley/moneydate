@@ -39,7 +39,7 @@ interface Props {
   onSkip?: () => void;
 }
 
-const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
+const PersonalizationStep = ({ data, onChange, onNext, onSkip }: Props) => {
   const [subStep, setSubStep] = useState(0);
 
   const totalQuestions = 4;
