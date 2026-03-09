@@ -63,14 +63,14 @@ const BottomNav = () => {
   const hasValidIndicator = Boolean(indicator && indicator.width > 0);
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+    <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50">
       <nav
         ref={navRef}
-        className="relative flex items-center gap-1 bg-card/90 backdrop-blur-xl rounded-full px-2 py-1.5 shadow-soft border border-border/50"
+        className="relative flex items-center gap-1.5 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
       >
         {hasValidIndicator && indicator && (
           <div
-            className="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out"
+            className="absolute top-2 bottom-2 bg-primary rounded-full transition-all duration-300 ease-out"
             style={{ left: indicator.left, width: indicator.width }}
           />
         )}
@@ -81,7 +81,7 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`relative z-10 flex flex-col items-center gap-0 px-4 py-1.5 rounded-full transition-colors duration-200 ${
+              className={`relative z-10 flex flex-col items-center gap-0.5 px-5 py-2 rounded-full transition-colors duration-200 ${
                 isActive
                   ? hasValidIndicator
                     ? "text-primary-foreground"
@@ -89,8 +89,8 @@ const BottomNav = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className="w-4 h-4" strokeWidth={isActive ? 2.2 : 1.8} />
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              <Icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} />
+              <span className="text-[11px] font-medium">{tab.label}</span>
             </button>
           );
         })}
