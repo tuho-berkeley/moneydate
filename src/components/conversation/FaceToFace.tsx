@@ -285,17 +285,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             summarySegments.map((segment, idx) => (
               <div
                 key={idx}
-                className="bg-accent/30 border border-accent rounded-2xl p-5 animate-fade-in-message"
+                className="animate-fade-in-message"
               >
-                {idx === 0 && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-secondary-foreground">
-                      AI Insights
-                    </span>
-                  </div>
-                )}
-                <div className="text-sm prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 text-foreground">
+                {idx === 0 && <AIMessageLabel type="insight" />}
+                <div className="bg-secondary/50 rounded-2xl p-4">
+                <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 text-foreground">
                   <ReactMarkdown>{segment}</ReactMarkdown>
                   {isGeneratingSummary && idx === summarySegments.length - 1 && (
                     <span className="inline-block w-1.5 h-4 bg-primary/60 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
