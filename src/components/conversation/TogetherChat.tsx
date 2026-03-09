@@ -42,6 +42,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [isSending, setIsSending] = useState(false);
   const [isAIResponding, setIsAIResponding] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const seedingRef = useRef(false);
