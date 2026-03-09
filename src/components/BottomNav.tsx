@@ -1,7 +1,7 @@
 import { Home, BarChart3, Target, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import { useRef, useState, useEffect, useLayoutEffect, useCallback } from "react";
 
 const tabs = [
   { path: "/", label: "Home", icon: Home },
@@ -16,6 +16,8 @@ const BottomNav = () => {
   const { session } = useAuth();
   const navRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
 
   const updateIndicator = () => {
     if (!navRef.current) return;
@@ -47,7 +49,6 @@ const BottomNav = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    // Recalculate after fonts/layout settle
     const raf = requestAnimationFrame(updateIndicator);
     window.addEventListener("resize", updateIndicator);
     return () => {
@@ -56,6 +57,20 @@ const BottomNav = () => {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY > 80 && currentY > lastScrollY.current) {
+        setHidden(true);
+      } else if (currentY < lastScrollY.current) {
+        setHidden(false);
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (!session) return null;
   if (location.pathname === "/onboarding") return null;
   if (location.pathname.startsWith("/activity/") || location.pathname.startsWith("/conversation/") || location.pathname.startsWith("/lesson/")) return null;
@@ -63,7 +78,7 @@ const BottomNav = () => {
   const hasValidIndicator = Boolean(indicator && indicator.width > 0);
 
   return (
-    <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50">
+    <div className={`fixed bottom-2 left-1/2 -translate-x-1/2 z-50 transition-transform duration-300 ${hidden ? "translate-y-[calc(100%+1rem)]" : ""}`}>
       <nav
         ref={navRef}
         className="relative flex items-center gap-1.5 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
