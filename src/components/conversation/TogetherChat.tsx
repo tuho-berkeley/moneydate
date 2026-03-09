@@ -430,7 +430,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Show thinking bubble during initial load/seeding */}
-        {dbMessages.length === 0 && !streamingMessage && (
+        {dbMessages.length === 0 && isAIResponding && (
           <AIThinkingBubble />
         )}
 
