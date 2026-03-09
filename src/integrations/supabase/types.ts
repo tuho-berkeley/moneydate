@@ -14,16 +14,254 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          description: string | null
+          icon: string
+          id: string
+          order_index: number
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }
+        Insert: {
+          description?: string | null
+          icon?: string
+          id?: string
+          order_index?: number
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }
+        Update: {
+          description?: string | null
+          icon?: string
+          id?: string
+          order_index?: number
+          title?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          activity_id: string | null
+          couple_id: string | null
+          created_at: string
+          id: string
+          type: Database["public"]["Enums"]["conversation_type"]
+          user_id: string
+        }
+        Insert: {
+          activity_id?: string | null
+          couple_id?: string | null
+          created_at?: string
+          id?: string
+          type?: Database["public"]["Enums"]["conversation_type"]
+          user_id: string
+        }
+        Update: {
+          activity_id?: string | null
+          couple_id?: string | null
+          created_at?: string
+          id?: string
+          type?: Database["public"]["Enums"]["conversation_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couples: {
+        Row: {
+          created_at: string
+          id: string
+          invite_code: string
+          partner_since: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_code?: string
+          partner_since?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_code?: string
+          partner_since?: string | null
+        }
+        Relationships: []
+      }
+      financial_plans: {
+        Row: {
+          couple_id: string
+          created_at: string
+          current_amount: number
+          icon: string
+          id: string
+          target_amount: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          current_amount?: number
+          icon?: string
+          id?: string
+          target_amount?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          current_amount?: number
+          icon?: string
+          id?: string
+          target_amount?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_plans_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["message_role"]
+          sender_id: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          couple_id: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          couple_id?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          couple_id?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activities: {
+        Row: {
+          activity_id: string
+          completed_at: string | null
+          id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["activity_status"]
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          completed_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["activity_status"]
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          completed_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["activity_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activities_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_couple_id: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      activity_status: "locked" | "available" | "in_progress" | "completed"
+      activity_type: "conversation" | "lesson" | "planning"
+      conversation_type: "solo" | "together" | "face_to_face"
+      message_role: "user" | "partner" | "ai"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +388,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_status: ["locked", "available", "in_progress", "completed"],
+      activity_type: ["conversation", "lesson", "planning"],
+      conversation_type: ["solo", "together", "face_to_face"],
+      message_role: ["user", "partner", "ai"],
+    },
   },
 } as const
