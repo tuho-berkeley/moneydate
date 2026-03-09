@@ -90,6 +90,27 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     enabled: !!user,
   });
 
+  const handleRestart = useCallback(async () => {
+    if (!conversation) return;
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversation.id);
+
+    if (error) {
+      toast.error("Failed to restart chat");
+      return;
+    }
+
+    setResponses({});
+    setCurrentPrompt(0);
+    setShowSummary(false);
+    setSummaryText("");
+    queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    toast.success("Chat restarted");
+  }, [conversation, queryClient]);
+
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
