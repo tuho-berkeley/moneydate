@@ -272,9 +272,34 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     });
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
+  // Stagger reveal of new AI messages
+  useEffect(() => {
+    const currentIds = new Set(dbMessages.map(m => m.id));
+    const newAiMsgs = dbMessages.filter(
+      m => m.role === "ai" && !prevMessageIdsRef.current.has(m.id) && !revealedIds.has(m.id)
+    );
+
+    if (newAiMsgs.length > 0) {
+      newAiMsgs.forEach((msg, i) => {
+        setTimeout(() => {
+          setRevealedIds(prev => new Set([...prev, msg.id]));
+        }, i * 600);
+      });
+    }
+
+    // On first load, reveal all existing messages immediately
+    if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0) {
+      setRevealedIds(new Set(dbMessages.map(m => m.id)));
+    }
+
+    prevMessageIdsRef.current = currentIds;
+  }, [dbMessages]);
+
   // Build display messages — strip [ASKING:...] tag from AI messages
   const displayMessages = [
-    ...dbMessages.map((m: DBMessage) => ({
+    ...dbMessages
+      .filter(m => m.role !== "ai" || revealedIds.has(m.id))
+      .map((m: DBMessage) => ({
       id: m.id,
       role: m.role,
       content: m.role === "ai" ? stripAskingTag(m.content) : m.content,
@@ -282,7 +307,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       senderName: m.role === "ai" ? "Guide" : m.sender_id === user?.id ? myName : partnerName,
       askedName: m.role === "ai" ? parseAsking(m.content) : null,
     })),
-    ...(streamingMessage !== null
+    ...(streamingMessage
       ? [{ id: "streaming", role: "ai" as const, content: stripAskingTag(streamingMessage), isMe: false, senderName: "Guide", askedName: parseAsking(streamingMessage) }]
       : []),
   ];
