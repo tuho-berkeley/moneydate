@@ -306,10 +306,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && !isSending && (
-          <div className="flex justify-center py-8">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
+        {messages.length === 0 && !streamingMessage && (
+          <AIThinkingBubble />
         )}
 
         {messages.map((msg, idx) => {
