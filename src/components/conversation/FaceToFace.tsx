@@ -247,6 +247,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       },
     });
   }, [conversation, user, responses, activityTitle, activityDescription]);
+  const handleRecordAgain = useCallback(() => {
+    setResponses((prev) => prev.filter((r) => !(r.promptIndex === currentPrompt && r.partner === activePartner)));
+  }, [currentPrompt, activePartner]);
 
   // Split summary into segments for staggered display
   const summarySegments = summaryText
@@ -308,10 +311,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       </div>
     );
   }
-
-  const handleRecordAgain = useCallback(() => {
-    setResponses((prev) => prev.filter((r) => !(r.promptIndex === currentPrompt && r.partner === activePartner)));
-  }, [currentPrompt, activePartner]);
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
