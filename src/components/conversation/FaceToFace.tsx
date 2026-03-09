@@ -366,9 +366,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Discuss Together
           </p>
-          <h2 className="font-display text-xl font-semibold text-foreground leading-snug">
-            {defaultPrompts[currentPrompt]}
-          </h2>
+           <h2 className="font-display text-xl font-semibold text-foreground leading-snug">
+             {defaultPrompts[currentPrompt].question}
+           </h2>
+           <p className="text-sm text-muted-foreground leading-relaxed text-left">
+             {defaultPrompts[currentPrompt].guidance}
+           </p>
 
           {/* Partner tabs */}
           <div className="flex gap-2">
