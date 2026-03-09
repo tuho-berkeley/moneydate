@@ -196,36 +196,42 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       { role: "user" as const, content: userText },
     ];
 
-    await streamChat({
-      messages: historyForAI,
-      activityTitle,
-      activityDescription: activityDescription || "",
-      conversationType: "solo",
-      onDelta: (chunk) => {
-        fullResponse += chunk;
-        setStreamingMessage(fullResponse);
-      },
-      onDone: async () => {
-        setStreamingMessage(null);
-        // Save AI message
-        if (fullResponse) {
-          await supabase.from("messages").insert({
-            conversation_id: conversation.id,
-            sender_id: null,
-            role: "ai",
-            content: fullResponse,
-          });
-          queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
-        }
-        setIsSending(false);
-      },
-      onError: (error) => {
-        toast.error(error);
-        setStreamingMessage(null);
-        setIsSending(false);
-      },
-      signal: abort.signal,
-    });
+    try {
+      await streamChat({
+        messages: historyForAI,
+        activityTitle,
+        activityDescription: activityDescription || "",
+        conversationType: "solo",
+        onDelta: (chunk) => {
+          fullResponse += chunk;
+          setStreamingMessage(fullResponse);
+        },
+        onDone: async () => {
+          setStreamingMessage(null);
+          if (fullResponse) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: fullResponse,
+            });
+            queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+          }
+          setIsSending(false);
+        },
+        onError: (error) => {
+          toast.error(error);
+          setStreamingMessage(null);
+          setIsSending(false);
+        },
+        signal: abort.signal,
+      });
+    } catch (err) {
+      console.error("streamChat error:", err);
+      toast.error("Something went wrong. Please try again.");
+      setStreamingMessage(null);
+      setIsSending(false);
+    }
   }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
