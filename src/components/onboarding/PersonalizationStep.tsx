@@ -46,8 +46,8 @@ const PersonalizationStep = ({ data, onChange, onNext }: Props) => {
       return (
         <div className="space-y-6 animate-fade-in" key="q0">
           <div className="text-center space-y-3">
-            <h2 className="font-display text-2xl font-bold text-foreground">How will you use MoneyDate?</h2>
-            <p className="text-muted-foreground text-sm">This helps us personalize your experience</p>
+            <h2 className="font-display text-2xl font-bold text-foreground text-pretty">How will you use MoneyDate?</h2>
+            <p className="text-muted-foreground text-sm text-pretty">This helps us personalize your experience</p>
           </div>
           <div className="space-y-3">
             {intentOptions.map((opt) => {
