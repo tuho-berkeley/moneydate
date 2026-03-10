@@ -505,7 +505,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
   };
 
-  const inputDisabled = completionReached || showInsights;
+  const inputDisabled = (completionReached && !continueAnyway) || showInsights;
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
@@ -615,17 +615,30 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* Input — with floating Generate Insights button when continuing after completion */}
       {!inputDisabled && (
-        <div className="bg-card border-t border-border p-4 sticky bottom-0">
-          <div className="flex items-end gap-2">
+        <div className="bg-card border-t border-border sticky bottom-0">
+          {continueAnyway && !showInsights && (
+            <div className="px-4 pt-3">
+              <Button
+                onClick={handleGenerateInsights}
+                variant="outline"
+                className="w-full rounded-xl gap-2 border-primary/30 text-primary hover:bg-primary/5"
+                disabled={isGeneratingInsights || isSending}
+              >
+                <Sparkles className="w-4 h-4" />
+                Generate Insights
+              </Button>
+            </div>
+          )}
+          <div className="flex items-end gap-2 p-4 pt-3">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Share your thoughts..."
-              className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
+              className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border py-[0.625rem]"
               rows={1}
             />
             <Button
