@@ -621,11 +621,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setShowClosureButtons(false);
     setCompletionReached(false);
     setContinueAnyway(true);
+    setShowInsights(false);
+    setIsGeneratingInsights(false);
     aiTriggerRef.current = false;
   }, []);
 
   // Determine if input should be disabled
-  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || dbMessages.length === 0 || completionReached || showInsights;
+  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || dbMessages.length === 0 || (completionReached && !continueAnyway) || showInsights;
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
