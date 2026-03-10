@@ -71,7 +71,7 @@ export function useStagesWithActivities() {
         const stageActivities = (activities || []).filter((a) => a.stage_id === stage.id);
         
         // Temporary: Stages 1-3 unlocked, Stages 4-5 locked
-        const isUnlocked = stage.order_index <= 2;
+        const isUnlocked = stage.order_index <= 3;
 
         // Map activities with their user status
         const activitiesWithProgress: ActivityWithProgress[] = stageActivities.map((activity, activityIndex) => {
