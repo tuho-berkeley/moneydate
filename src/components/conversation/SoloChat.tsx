@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
-import { isQualityAnswer, passesPreFilter } from "@/lib/isQualityAnswer";
+import { passesPreFilter } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
@@ -284,16 +284,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient, resetCompletion]);
 
-  // Get the last AI question from messages
-  const getLastAIQuestion = useCallback(() => {
-    for (let i = dbMessages.length - 1; i >= 0; i--) {
-      if (dbMessages[i].role === "ai") return dbMessages[i].content;
-    }
-    return "";
-  }, [dbMessages]);
 
   // Trigger pre-closure AI message
-  const triggerPreClosure = useCallback(async () => {
+  const triggerPreClosure = useCallback(async (latestUserText?: string) => {
     if (!conversation) return;
     setIsWaitingForAI(true);
 
@@ -301,6 +294,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
       content: m.content,
     }));
+
+    // Include latest user message if not yet in dbMessages
+    if (latestUserText) {
+      historyForAI.push({ role: "user", content: latestUserText });
+    }
 
     let fullResponse = "";
     await streamChat({
@@ -311,6 +309,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
+          // Strip any sentences ending with "?" as a safety net
+          fullResponse = fullResponse.replace(/[^.!?\n]*\?/g, "").trim();
+          if (!fullResponse) fullResponse = "Thank you for sharing so openly. 💛";
+
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
@@ -409,10 +411,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     // Refetch to show user message immediately
     await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
 
-    // Check quality answer asynchronously
-    const lastQuestion = getLastAIQuestion();
-    const isQuality = await isQualityAnswer(lastQuestion, userText);
-    if (isQuality) {
+    // Use passesPreFilter for immediate quality counting (same as seed logic)
+    // This ensures consistency between live and reload counts
+    if (passesPreFilter(userText)) {
       qualityCountRef.current += 1;
     }
 
@@ -425,7 +426,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setIsSending(false);
 
       // Trigger pre-closure AI message (no question, just reflection)
-      await triggerPreClosure();
+      await triggerPreClosure(userText);
       return;
     }
 
@@ -482,7 +483,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setIsSending(false);
       setIsWaitingForAI(false);
     }
-  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted, getLastAIQuestion, completionReached, continueAnyway, triggerPreClosure]);
+  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted, completionReached, continueAnyway, triggerPreClosure]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

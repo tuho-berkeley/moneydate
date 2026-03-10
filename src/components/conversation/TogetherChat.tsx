@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
-import { isQualityAnswer, passesPreFilter } from "@/lib/isQualityAnswer";
+import { passesPreFilter } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
@@ -258,22 +258,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     triggerAI(historyForAI);
   }, [aiShouldRespond, isAIResponding]);
 
-  // Get the last AI question
-  const getLastAIQuestion = useCallback(() => {
-    for (let i = dbMessages.length - 1; i >= 0; i--) {
-      if (dbMessages[i].role === "ai") return dbMessages[i].content;
-    }
-    return "";
-  }, [dbMessages]);
-
   // Check quality for the latest non-AI message and handle completion
-  const checkQualityAndCompletion = useCallback(async (senderId: string, messageContent: string) => {
+  const checkQualityAndCompletion = useCallback((senderId: string, messageContent: string) => {
     if (completionReached && !continueAnyway) return;
 
-    const lastQuestion = getLastAIQuestion();
-    const isQuality = await isQualityAnswer(lastQuestion, messageContent);
-
-    if (isQuality) {
+    // Use passesPreFilter for consistency with seed logic
+    if (passesPreFilter(messageContent)) {
       if (senderId === user?.id) {
         myQualityCountRef.current += 1;
       } else {
@@ -285,7 +275,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       setCompletionReached(true);
       markCompleted();
     }
-  }, [user, completionReached, continueAnyway, getLastAIQuestion, markCompleted]);
+  }, [user, completionReached, continueAnyway, markCompleted]);
 
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
     if (!conversation || isAIResponding) return;
@@ -364,6 +354,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
+          // Strip any sentences ending with "?" as a safety net
+          fullResponse = fullResponse.replace(/[^.!?\n]*\?/g, "").trim();
+          if (!fullResponse) fullResponse = "Thank you both for sharing so openly. 💛";
+
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
