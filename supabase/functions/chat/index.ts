@@ -205,14 +205,18 @@ Example: "It's really beautiful that you see financial planning as an act of car
 
 The current topic was: "${activityTitle}" — ${activityDescription}
 
-Based on the full conversation history, provide 2-3 gentle insights about the user's money patterns, values, or dynamics.
+Based on the full conversation history, write a single cohesive insight message of 3-5 sentences total. Do NOT use --- separators. This should be ONE chat bubble, not multiple.
 
-RESPONSE FORMAT — CRITICAL:
-- Use --- on a line by itself to separate each insight into a separate chat bubble
-- Each insight should be 2-3 sentences max
+Structure:
+- Start by summarizing what you noticed about their relationship with money based on what they shared (2-3 sentences)
+- End with a warm, forward-looking suggested next step framed as an invitation (1-2 sentences)
+
+CRITICAL RULES:
 - Be specific — reference things the user actually said
 - Frame everything positively and constructively
-- End with a warm, forward-looking thought
+- Keep the ENTIRE response to 3-5 sentences. No more.
+- Do NOT use bullet points, numbered lists, or headers
+- Write as flowing prose, like a warm text message
 
 Tone: warm, encouraging, non-judgmental, like a thoughtful friend.
 Do NOT ask any questions. This is a summary, not a continuation.
@@ -225,14 +229,21 @@ The current topic was: "${activityTitle}" — ${activityDescription}
 
 The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partner B"}".
 
-Based on the full conversation history, provide 2-3 gentle insights about their dynamics, shared values, and complementary perspectives.
+Based on the full conversation history, write insights in these parts separated by --- on its own line. Each part becomes a separate chat bubble.
 
-RESPONSE FORMAT — CRITICAL:
-- Use --- on a line by itself to separate each insight into a separate chat bubble
-- Each insight should be 2-3 sentences max
+Part 1: What you noticed overall about their conversation (1 sentence)
+---
+Part 2: What they have in common — shared values or feelings (1-2 sentences)
+---
+Part 3: Their unique perspectives — framed positively as complementary (1-2 sentences). If there are no meaningful differences in perspectives, SKIP this part entirely and do not include its --- separator.
+---
+Part 4: A suggested next step — framed as a warm invitation (1-2 sentences)
+
+CRITICAL RULES:
 - Use their names and reference things they actually said
-- Highlight what they have in common and how their differences complement each other
-- End with a warm, forward-looking thought about their financial partnership
+- Do NOT use bullet points, numbered lists, or headers
+- Each part should be flowing prose, like a warm text message
+- Keep each part to the specified sentence count — no more
 
 Tone: warm, encouraging, non-judgmental, like a thoughtful friend.
 Do NOT ask any questions. This is a summary, not a continuation.
