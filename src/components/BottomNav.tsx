@@ -98,7 +98,7 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`relative z-10 flex flex-col items-center gap-0.5 px-5 py-2 rounded-full transition-colors duration-200 ${
+              className={`relative z-10 flex flex-1 flex-col items-center gap-0.5 py-2 rounded-full transition-colors duration-200 ${
                 isActive
                   ? hasValidIndicator
                     ? "text-primary-foreground"
