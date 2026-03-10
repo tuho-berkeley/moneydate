@@ -335,7 +335,12 @@ export type Database = {
       get_couple_id: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
-      activity_status: "locked" | "available" | "in_progress" | "completed"
+      activity_status:
+        | "locked"
+        | "available"
+        | "in_progress"
+        | "completed"
+        | "insights_generated"
       activity_type: "conversation" | "lesson" | "planning"
       conversation_type: "solo" | "together" | "face_to_face"
       message_role: "user" | "partner" | "ai"
@@ -466,7 +471,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      activity_status: ["locked", "available", "in_progress", "completed"],
+      activity_status: [
+        "locked",
+        "available",
+        "in_progress",
+        "completed",
+        "insights_generated",
+      ],
       activity_type: ["conversation", "lesson", "planning"],
       conversation_type: ["solo", "together", "face_to_face"],
       message_role: ["user", "partner", "ai"],
