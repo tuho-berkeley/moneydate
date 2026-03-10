@@ -232,7 +232,7 @@ const ActivityItem = ({ activity, isUpNext, onClick }: ActivityItemProps) => {
       <div className="flex items-center gap-[14px]">
         <div
           className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          activity.userStatus === "completed" ?
+          activity.userStatus === "completed" || activity.userStatus === "insights_generated" ?
           "bg-success-light text-success" :
           activity.userStatus === "available" || activity.userStatus === "in_progress" ?
           "bg-primary text-primary-foreground" :
