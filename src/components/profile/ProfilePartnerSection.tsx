@@ -76,7 +76,7 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
 
         <div className="space-y-2">
             <Input
-            placeholder="Enter invite code"
+            placeholder="ENTER INVITE CODE"
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             className="text-center text-sm font-mono tracking-widest"
