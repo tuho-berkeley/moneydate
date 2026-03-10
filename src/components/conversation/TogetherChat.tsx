@@ -487,6 +487,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           <Share2 className="w-4 h-4" />
+        </button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <button className="text-muted-foreground hover:text-foreground transition-colors" disabled={isSending || displayMessages.length === 0}>
