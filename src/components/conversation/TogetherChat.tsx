@@ -169,6 +169,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     };
   }, [conversation?.id, queryClient]);
 
+  // Check current activity status
+  const { data: activitiesData } = useActivities();
+  const currentActivityStatus = activitiesData?.find(a => a.id === activityId)?.userStatus;
+
   // Seed quality counts from existing messages on load
   const qualitySeededRef = useRef(false);
   useEffect(() => {
@@ -181,10 +185,14 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     console.log(`[TogetherChat] Seeded quality: me=${myQualityCountRef.current}, partner=${partnerQualityCountRef.current}`);
     if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3) {
       setCompletionReached(true);
-      setShowClosureButtons(true);
       markCompleted();
+      if (currentActivityStatus === "insights_generated") {
+        setShowInsights(true);
+      } else {
+        setShowClosureButtons(true);
+      }
     }
-  }, [messagesLoaded, dbMessages, user, markCompleted]);
+  }, [messagesLoaded, dbMessages, user, markCompleted, currentActivityStatus]);
 
   // Determine turn state
   const partnerId = partnerProfile?.id;
