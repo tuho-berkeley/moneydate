@@ -719,7 +719,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                   </p>
                 )}
                 <div
-                  className={`rounded-2xl p-4 overflow-hidden ${
+                  className={`rounded-2xl p-4 ${
                     msg.role === "ai"
                       ? "bg-secondary/50 text-foreground"
                       : "bg-primary text-primary-foreground"
@@ -737,7 +737,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                       </div>
                     )
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
               </div>
