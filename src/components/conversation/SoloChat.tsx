@@ -684,7 +684,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
             className="flex-1 rounded-xl gap-2"
           >
             <MessageCircle className="w-4 h-4" />
-            Follow Up
+            Continue Conversation
           </Button>
         </div>
       )}
