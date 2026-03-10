@@ -71,19 +71,19 @@ const Activity = () => {
 
       const completed = new Set<string>();
 
-      // Check user_activities status — this is the source of truth for completion
-      const { data: ua } = await supabase
-        .from("user_activities")
-        .select("status")
-        .eq("activity_id", id)
-        .eq("user_id", user.id)
-        .in("status", ["completed", "insights_generated"])
-        .maybeSingle();
+      // Check per-conversation: count user messages to determine if that specific
+      // conversation type was actually completed (not just any type)
+      for (const conv of conversations) {
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .neq("role", "ai");
 
-      // If the activity is marked completed, check which conversation types exist
-      // to mark them as completed
-      if (ua) {
-        for (const conv of conversations) {
+        // Solo/face_to_face: 3+ user messages = completed
+        // Together: 6+ user messages (3 per partner) = completed
+        const threshold = conv.type === "together" ? 6 : 3;
+        if ((count || 0) >= threshold) {
           completed.add(conv.type);
         }
       }

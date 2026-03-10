@@ -244,7 +244,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // AI should respond after the asked partner answers
   const lastMessage = dbMessages[dbMessages.length - 1];
-  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded && !completionReached;
+  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded;
 
   // Auto-seed AI starter message
   useEffect(() => {
@@ -255,7 +255,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // Auto-trigger AI after the asked partner responds
   useEffect(() => {
-    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current) return;
+    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current || completionReached) return;
     aiTriggerRef.current = true;
 
     const historyForAI = dbMessages.map((m: DBMessage) => ({
@@ -404,13 +404,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [dbMessages.length]);
 
   // When completion is reached, trigger pre-closure instead of normal AI
+  const preClosureTriggeredRef = useRef(false);
   useEffect(() => {
     if (!completionReached || continueAnyway || showClosureButtons || showInsights) return;
-    if (!aiShouldRespond) return;
-    // Prevent normal AI from triggering
+    if (preClosureTriggeredRef.current) return;
+    if (isAIResponding) return;
+    preClosureTriggeredRef.current = true;
     aiTriggerRef.current = true;
     triggerPreClosure();
-  }, [completionReached, aiShouldRespond, continueAnyway, showClosureButtons, showInsights]);
+  }, [completionReached, continueAnyway, showClosureButtons, showInsights, isAIResponding]);
 
   // Sequential reveal of new AI messages
   useEffect(() => {
@@ -531,6 +533,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setIsGeneratingInsights(false);
     closureMessageIdRef.current = null;
     pendingClosureRef.current = false;
+    preClosureTriggeredRef.current = false;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
