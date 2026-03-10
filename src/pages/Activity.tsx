@@ -57,14 +57,18 @@ const Activity = () => {
           eq("role", "user");
           if ((count || 0) >= 3) completed.add("solo");
         } else if (conv.type === "together") {
-          // Together: completed when each partner answered at least 1
+          // Together: completed when each partner answered at least 2
           const { data: msgs } = await supabase.
           from("messages").
           select("sender_id").
           eq("conversation_id", conv.id).
           in("role", ["user", "partner"]);
-          const senders = new Set(msgs?.map((m) => m.sender_id).filter(Boolean));
-          if (senders.size >= 2) completed.add("together");
+          const senderCounts = new Map<string, number>();
+          msgs?.forEach(m => {
+            if (m.sender_id) senderCounts.set(m.sender_id, (senderCounts.get(m.sender_id) || 0) + 1);
+          });
+          const allHaveTwo = senderCounts.size >= 2 && [...senderCounts.values()].every(c => c >= 2);
+          if (allHaveTwo) completed.add("together");
         } else if (conv.type === "face_to_face") {
           // Face-to-face: check user_activities completion status
           const { data: ua } = await supabase
