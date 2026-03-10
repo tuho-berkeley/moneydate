@@ -228,7 +228,7 @@ const Activity = () => {
                     </div>
                     <div className="text-left flex-1 min-w-0">
                       {completedTypes?.has("face_to_face") &&
-                    <span className="text-[8px] font-bold uppercase tracking-wider text-secondary-foreground">Completed</span>
+                    <span className="flex items-center gap-1 text-[10px] font-semibold text-success"><span className="w-2 h-2 rounded-full bg-success inline-block" />Completed</span>
                     }
                       <p className="font-semibold text-foreground">Face-to-Face</p>
                       <p className="text-xs text-muted-foreground text-pretty">In-person with voice recording</p>
