@@ -145,8 +145,8 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
             <Copy className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <span className="text-sm font-medium text-foreground">Invite Partner</span>
-            <p className="text-xs text-muted-foreground">Share a code with your partner</p>
+            <span className="text-sm font-medium text-foreground uppercase">Invite Partner</span>
+            <p className="text-xs text-muted-foreground uppercase">Share a code with your partner</p>
           </div>
           <ArrowRight className="w-4 h-4 text-muted-foreground" />
         </button>
