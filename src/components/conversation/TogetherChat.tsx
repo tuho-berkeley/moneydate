@@ -251,6 +251,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         if (fullResponse) {
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
+            // Skip segments that are only an [ASKING:...] tag (would render as empty bubble)
+            const stripped = segment.replace(/\[ASKING:[^\]]+\]\s*$/, "").trim();
+            if (!stripped) continue;
             await supabase.from("messages").insert({
               conversation_id: conversation.id,
               sender_id: null,
