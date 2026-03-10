@@ -780,7 +780,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               </div>
             </div>
           );
-        })}
+        });
+        })()}
 
         {/* Waiting indicator */}
         {waitingForPartner && !isAIResponding && !completionReached && (
