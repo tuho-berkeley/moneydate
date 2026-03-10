@@ -468,20 +468,33 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         <button
           onClick={async () => {
             const shareUrl = `${window.location.origin}/conversation/${activityId}?mode=together`;
-            const shareData = {
-              title: activityTitle,
-              text: `Join me for "${activityTitle}" on MoneyDate!`,
-              url: shareUrl,
+            const copyFallback = () => {
+              const ta = document.createElement("textarea");
+              ta.value = shareUrl;
+              ta.style.cssText = "position:fixed;opacity:0";
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              document.body.removeChild(ta);
+              toast.success("Link copied to clipboard!");
             };
-            if (navigator.share) {
+            if (typeof navigator.share === "function") {
               try {
-                await navigator.share(shareData);
+                await navigator.share({
+                  title: activityTitle,
+                  text: `Join me for "${activityTitle}" on MoneyDate!`,
+                  url: shareUrl,
+                });
+                return;
               } catch {
-                // User cancelled share
+                // share cancelled or failed — fall through to copy
               }
-            } else {
+            }
+            try {
               await navigator.clipboard.writeText(shareUrl);
-              toast.success("Link copied!");
+              toast.success("Link copied to clipboard!");
+            } catch {
+              copyFallback();
             }
           }}
           className="flex items-center gap-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-full px-3 py-1.5 text-xs font-medium"
