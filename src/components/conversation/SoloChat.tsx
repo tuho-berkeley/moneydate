@@ -54,7 +54,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted } = useConversationCompletion(activityId);
+  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
 
   // Get or create conversation
   const { data: conversation } = useQuery({
