@@ -258,22 +258,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     triggerAI(historyForAI);
   }, [aiShouldRespond, isAIResponding]);
 
-  // Get the last AI question
-  const getLastAIQuestion = useCallback(() => {
-    for (let i = dbMessages.length - 1; i >= 0; i--) {
-      if (dbMessages[i].role === "ai") return dbMessages[i].content;
-    }
-    return "";
-  }, [dbMessages]);
-
   // Check quality for the latest non-AI message and handle completion
-  const checkQualityAndCompletion = useCallback(async (senderId: string, messageContent: string) => {
+  const checkQualityAndCompletion = useCallback((senderId: string, messageContent: string) => {
     if (completionReached && !continueAnyway) return;
 
-    const lastQuestion = getLastAIQuestion();
-    const isQuality = await isQualityAnswer(lastQuestion, messageContent);
-
-    if (isQuality) {
+    // Use passesPreFilter for consistency with seed logic
+    if (passesPreFilter(messageContent)) {
       if (senderId === user?.id) {
         myQualityCountRef.current += 1;
       } else {
@@ -285,7 +275,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       setCompletionReached(true);
       markCompleted();
     }
-  }, [user, completionReached, continueAnyway, getLastAIQuestion, markCompleted]);
+  }, [user, completionReached, continueAnyway, markCompleted]);
 
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
     if (!conversation || isAIResponding) return;
