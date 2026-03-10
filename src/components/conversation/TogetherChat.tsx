@@ -410,7 +410,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     queryClient.setQueryData(["messages", conversation.id], []);
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
-  }, [conversation, isSending, queryClient]);
+  }, [conversation, isSending, queryClient, resetCompletion]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user || myResponseSent) return;
