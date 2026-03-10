@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Mic, Square, ChevronLeft, ChevronRight, Loader2, Sparkles, RotateCcw, Lightbulb } from "lucide-react";
+import { ArrowLeft, Mic, Square, ChevronLeft, ChevronRight, Loader2, Sparkles, RotateCcw, Lightbulb, Plus } from "lucide-react";
 import { AIMessageLabel } from "@/components/conversation/AIMessageLabel";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import TypewriterText from "@/components/conversation/TypewriterText";
@@ -96,6 +96,39 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     retry: 1,
   });
 
+  const [extraPrompts, setExtraPrompts] = useState<Prompt[]>([]);
+  const [isGeneratingMore, setIsGeneratingMore] = useState(false);
+  const allPrompts = [...prompts, ...extraPrompts];
+
+  const generateOneMore = useCallback(async () => {
+    setIsGeneratingMore(true);
+    try {
+      const currentAll = [...prompts, ...extraPrompts];
+      const resp = await supabase.functions.invoke("chat", {
+        body: {
+          messages: [],
+          activityTitle,
+          activityDescription,
+          conversationType: "generate_one_prompt",
+          existingQuestions: currentAll.map(p => p.question),
+        },
+      });
+      if (resp.error) throw resp.error;
+      const data = resp.data as Prompt;
+      if (data?.question && data?.guidance) {
+        setExtraPrompts(prev => [...prev, data]);
+        setCurrentPrompt(currentAll.length); // navigate to the new prompt
+        setIsFlipped(false);
+      } else {
+        toast.error("Couldn't generate a new question. Try again.");
+      }
+    } catch {
+      toast.error("Failed to generate question. Please try again.");
+    } finally {
+      setIsGeneratingMore(false);
+    }
+  }, [prompts, extraPrompts, activityTitle, activityDescription]);
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
@@ -179,6 +212,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setSummaryText(null);
     setRevealedSegments(new Set());
     setFreshSegments(new Set());
+    setExtraPrompts([]);
     await resetCompletion();
     queryClient.removeQueries({ queryKey: ["face-to-face-prompts", activityId] });
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
@@ -241,7 +275,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     }
 
     // Validate transcript quality using AI
-    const currentQuestion = prompts[currentPrompt].question;
+    const currentQuestion = allPrompts[currentPrompt].question;
     const quality = await isQualityAnswer(currentQuestion, transcript);
 
     if (!quality) {
@@ -289,7 +323,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setIsGeneratingSummary(true);
     setShowSummary(true);
     setSummaryText(null);
-    const formattedResponses = prompts.map((prompt, i) => {
+    const formattedResponses = allPrompts.map((prompt, i) => {
       const a = getResponse(i, "partner_a");
       const b = getResponse(i, "partner_b");
       return `Question: ${prompt.question}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
@@ -495,7 +529,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         </AlertDialog>
         {!loadingPrompts && (
           <span className="text-xs text-muted-foreground font-medium">
-            {currentPrompt + 1}/{prompts.length}
+            {currentPrompt + 1}/{allPrompts.length}
           </span>
         )}
       </div>
@@ -521,16 +555,33 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 <ChevronLeft className="w-4 h-4" /> Previous
               </Button>
 
-              {currentPrompt < prompts.length - 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
-                  className="gap-1"
-                >
-                  Next <ChevronRight className="w-4 h-4" />
-                </Button>
-              )}
+              <div className="flex items-center gap-1">
+                {currentPrompt < allPrompts.length - 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
+                    className="gap-1"
+                  >
+                    Next <ChevronRight className="w-4 h-4" />
+                  </Button>
+                )}
+                {currentPrompt === allPrompts.length - 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={generateOneMore}
+                    disabled={isGeneratingMore}
+                    className="gap-1"
+                  >
+                    {isGeneratingMore ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading...</>
+                    ) : (
+                      <><Plus className="w-3.5 h-3.5" /> More</>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Flippable Flash Card */}
@@ -542,14 +593,14 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 <div className="invisible p-8 space-y-4 [grid-area:1/1]">
                   <p className="text-xs">&nbsp;</p>
                   <h2 className="font-display text-xl font-semibold leading-snug text-pretty">
-                    {prompts[currentPrompt].question}
+                    {allPrompts[currentPrompt].question}
                   </h2>
                   <p className="text-xs">&nbsp;</p>
                 </div>
                 <div className="invisible p-8 space-y-4 [grid-area:1/1]">
                   <p className="text-xs">&nbsp;</p>
                   <p className="text-sm leading-relaxed text-pretty">
-                    {prompts[currentPrompt].guidance}
+                    {allPrompts[currentPrompt].guidance}
                   </p>
                   <p className="text-xs">&nbsp;</p>
                 </div>
@@ -564,7 +615,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                     Discuss Together
                   </p>
                   <h2 className="font-display text-xl font-semibold text-foreground leading-snug text-pretty">
-                    {prompts[currentPrompt].question}
+                    {allPrompts[currentPrompt].question}
                   </h2>
                   <button
                     className="inline-flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
@@ -581,7 +632,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                     Hint
                   </div>
                   <p className="text-sm text-foreground leading-relaxed text-left text-pretty">
-                    {prompts[currentPrompt].guidance}
+                    {allPrompts[currentPrompt].guidance}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
                 </div>
