@@ -264,6 +264,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       return;
     }
 
+    // Clear cache immediately BEFORE resetting refs to prevent re-seeding from stale data
+    queryClient.setQueryData(["messages", conversation.id], []);
+
     seedingRef.current = false;
     qualitySeededRef.current = false;
     qualityCountRef.current = 0;
