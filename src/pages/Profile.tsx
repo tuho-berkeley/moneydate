@@ -166,26 +166,6 @@ const Profile = () => {
               </p>
             )}
             <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
-            {inviteCode && (
-              <div className="mt-3 flex items-center justify-center gap-2">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(inviteCode);
-                    toast.success("Invite code copied!");
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-secondary px-3 py-1.5 rounded-full"
-                >
-                  <Link2 className="w-3.5 h-3.5" />
-                  Invite Code: {inviteCode}
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-secondary px-2.5 py-1.5 rounded-full hover:bg-accent transition-colors"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
