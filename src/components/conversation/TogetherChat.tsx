@@ -156,6 +156,11 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     };
   }, [conversation?.id, queryClient]);
 
+  // Determine turn state
+  const partnerId = partnerProfile?.id;
+  const partnerName = partnerProfile?.display_name || "Partner";
+  const myName = profile?.display_name || "You";
+
   // Reactively check completion when messages change
   useEffect(() => {
     if (!user || !partnerId || !dbMessages || dbMessages.length === 0) return;
@@ -165,11 +170,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       markCompleted();
     }
   }, [dbMessages, user, partnerId, markCompleted]);
-
-  // Determine turn state
-  const partnerId = partnerProfile?.id;
-  const partnerName = partnerProfile?.display_name || "Partner";
-  const myName = profile?.display_name || "You";
 
   // Parse [ASKING:name] tag from last AI message
   const askingTagRegex = /\[ASKING:([^\]]+)\]\s*$/;
