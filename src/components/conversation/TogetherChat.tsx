@@ -49,7 +49,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const aiTriggerRef = useRef(false);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted } = useConversationCompletion(activityId);
+  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({

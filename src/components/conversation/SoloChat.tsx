@@ -250,7 +250,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     await resetCompletion();
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
-  }, [conversation, isSending, queryClient]);
+  }, [conversation, isSending, queryClient, resetCompletion]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user) return;
