@@ -491,7 +491,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           </AlertDialogContent>
         </AlertDialog>
         <span className="text-xs text-muted-foreground font-medium">
-          {currentPrompt + 1}/{defaultPrompts.length}
+          {currentPrompt + 1}/{prompts.length}
         </span>
       </div>
 
