@@ -111,6 +111,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
+  // Check current activity status
+  const { data: activitiesData } = useActivities();
+  const currentActivityStatus = activitiesData?.find(a => a.id === activityId)?.userStatus;
+
   // Seed quality count from existing messages on load
   const qualitySeededRef = useRef(false);
   useEffect(() => {
@@ -122,10 +126,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     console.log(`[SoloChat] Seeded quality count: ${count} from ${userMsgs.length} user messages`);
     if (count >= 3) {
       setCompletionReached(true);
-      setShowClosureButtons(true);
       markCompleted();
+      // If insights already generated, show post-insights state
+      if (currentActivityStatus === "insights_generated") {
+        setShowInsights(true);
+      } else {
+        setShowClosureButtons(true);
+      }
     }
-  }, [messagesLoaded, dbMessages, markCompleted]);
+  }, [messagesLoaded, dbMessages, markCompleted, currentActivityStatus]);
 
 
   const seedingRef = useRef(false);
