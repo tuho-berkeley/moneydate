@@ -554,16 +554,33 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 <ChevronLeft className="w-4 h-4" /> Previous
               </Button>
 
-              {currentPrompt < allPrompts.length - 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
-                  className="gap-1"
-                >
-                  Next <ChevronRight className="w-4 h-4" />
-                </Button>
-              )}
+              <div className="flex items-center gap-1">
+                {currentPrompt < allPrompts.length - 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
+                    className="gap-1"
+                  >
+                    Next <ChevronRight className="w-4 h-4" />
+                  </Button>
+                )}
+                {currentPrompt === allPrompts.length - 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={generateOneMore}
+                    disabled={isGeneratingMore}
+                    className="gap-1"
+                  >
+                    {isGeneratingMore ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading...</>
+                    ) : (
+                      <><Plus className="w-3.5 h-3.5" /> More</>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Flippable Flash Card */}
