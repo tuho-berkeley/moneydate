@@ -386,6 +386,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setShowClosureButtons(false);
     setCompletionReached(false);
     setContinueAnyway(true);
+    setShowInsights(false);
+    setIsGeneratingInsights(false);
   }, []);
 
   const handleSend = useCallback(async () => {
