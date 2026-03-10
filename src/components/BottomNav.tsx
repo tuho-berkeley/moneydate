@@ -83,7 +83,7 @@ const BottomNav = () => {
       <div className="absolute -inset-x-4 -top-16 -bottom-2 bg-gradient-to-t from-background via-background/80 to-transparent rounded-b-3xl pointer-events-none" />
       <nav
         ref={navRef}
-        className="relative flex items-center gap-1.5 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
+        className="relative flex items-center justify-around bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
       >
         {hasValidIndicator && indicator && (
           <div
