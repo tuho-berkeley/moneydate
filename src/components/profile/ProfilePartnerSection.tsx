@@ -50,7 +50,7 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
 
   return (
     <div>
-      <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Your Partner</h3>
+      <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1 uppercase">Your Partner</h3>
       <div className="bg-card rounded-xl shadow-card p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
