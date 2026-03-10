@@ -530,7 +530,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         </button>
         <div className="flex-1">
           <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
-          <p className="text-xs text-muted-foreground">Solo Chat</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-muted-foreground">Solo Chat</p>
+            {completionReached && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-success">
+                <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                Completed
+              </span>
+            )}
+          </div>
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
