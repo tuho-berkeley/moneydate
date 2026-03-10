@@ -115,10 +115,10 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
           maxLength={8}
         />
         <div className="space-y-3">
-          <Button onClick={handleJoin} className="w-full rounded-full" size="lg" disabled={!joinCode.trim()}>
+          <Button onClick={handleJoin} className="w-full rounded-full uppercase" size="lg" disabled={!joinCode.trim()}>
             Connect
           </Button>
-          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full">Back</Button>
+          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full uppercase">Back</Button>
         </div>
       </div>
     );
