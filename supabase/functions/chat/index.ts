@@ -17,6 +17,55 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    // ---------- validate_answer: non-streaming, lightweight model ----------
+    if (conversationType === "validate_answer") {
+      const validatePrompt = `You are evaluating whether a user's response meaningfully engages with the question that was asked.
+
+A quality answer:
+- Actually addresses the topic of the question
+- Shares a thought, feeling, experience, or opinion
+- Goes beyond simple agreement/disagreement
+- Shows some personal reflection
+
+A non-quality answer:
+- Is a filler response (e.g. "sounds good", "I agree", "yeah totally")
+- Doesn't address the question asked
+- Is off-topic or deflective
+- Is too vague to be meaningful (e.g. "I think so too")
+
+Reply with ONLY "yes" or "no". Nothing else.`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: validatePrompt },
+            ...messages,
+          ],
+          max_tokens: 5,
+        }),
+      });
+
+      if (!response.ok) {
+        return new Response(JSON.stringify({ error: "Validation failed" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      const answer = data.choices?.[0]?.message?.content?.trim()?.toLowerCase() || "yes";
+      return new Response(JSON.stringify(answer), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ---------- System prompts for streaming conversation types ----------
     const systemPrompts: Record<string, string> = {
       solo: `You are a supportive financial reflection guide helping a user explore their relationship with money. Think of yourself as a wise, supportive friend texting about money.
 
@@ -132,6 +181,61 @@ Tone and style:
 - Be concise — quality over quantity
 - Never take sides or imply one approach is better
 - Never provide specific investment, tax, or legal advice`,
+
+      // ---------- Pre-closure: warm reflection, NO questions ----------
+      pre_closure: `You are a warm, supportive financial reflection guide. The user has just finished sharing meaningful reflections in a conversation about money.
+
+The current topic is: "${activityTitle}" — ${activityDescription}
+
+Respond with a brief, warm reflection or insight about what the user just shared. Acknowledge their openness and highlight something meaningful from their last message.
+
+CRITICAL RULES:
+- Do NOT ask any questions. No questions at all.
+- Do NOT prompt for further reflection.
+- Keep it to 1-2 sentences max.
+- Be warm, specific (reference what they actually said), and encouraging.
+- Write like a supportive friend texting, not an essay.
+- Use one emoji max.
+
+Example: "It's really beautiful that you see financial planning as an act of care for each other — that kind of mindset is a real strength. 💛"`,
+
+      // ---------- Solo insights: summarize conversation ----------
+      solo_insights: `You are a warm, supportive financial reflection guide. You've just had a meaningful conversation with a user about their relationship with money.
+
+The current topic was: "${activityTitle}" — ${activityDescription}
+
+Based on the full conversation history, provide 2-3 gentle insights about the user's money patterns, values, or dynamics.
+
+RESPONSE FORMAT — CRITICAL:
+- Use --- on a line by itself to separate each insight into a separate chat bubble
+- Each insight should be 2-3 sentences max
+- Be specific — reference things the user actually said
+- Frame everything positively and constructively
+- End with a warm, forward-looking thought
+
+Tone: warm, encouraging, non-judgmental, like a thoughtful friend.
+Do NOT ask any questions. This is a summary, not a continuation.
+Never provide specific investment, tax, or legal advice.`,
+
+      // ---------- Together insights: summarize couple conversation ----------
+      together_insights: `You are a warm, supportive conversation guide. You've just facilitated a meaningful conversation between two partners about their financial relationship.
+
+The current topic was: "${activityTitle}" — ${activityDescription}
+
+The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partner B"}".
+
+Based on the full conversation history, provide 2-3 gentle insights about their dynamics, shared values, and complementary perspectives.
+
+RESPONSE FORMAT — CRITICAL:
+- Use --- on a line by itself to separate each insight into a separate chat bubble
+- Each insight should be 2-3 sentences max
+- Use their names and reference things they actually said
+- Highlight what they have in common and how their differences complement each other
+- End with a warm, forward-looking thought about their financial partnership
+
+Tone: warm, encouraging, non-judgmental, like a thoughtful friend.
+Do NOT ask any questions. This is a summary, not a continuation.
+Never provide specific investment, tax, or legal advice.`,
     };
 
     const systemPrompt = systemPrompts[conversationType] || systemPrompts.solo;

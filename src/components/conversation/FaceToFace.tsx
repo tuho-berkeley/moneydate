@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
+import { isQualityAnswer } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
@@ -133,7 +134,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       const combined = savedMessages.map(m => m.content).join("\n---\n");
       setSummaryText(combined);
       setShowSummary(true);
-      // Reveal all segments instantly (no typewriter for past summaries)
       const segments = combined.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
       setRevealedSegments(new Set(segments.map((_, i) => i)));
     }
@@ -215,6 +215,19 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       setRecordingState("idle");
       return;
     }
+
+    // Validate transcript quality using AI
+    const currentQuestion = defaultPrompts[currentPrompt].question;
+    const quality = await isQualityAnswer(currentQuestion, transcript);
+
+    if (!quality) {
+      toast.error("Didn't quite get your message — could you try again?", {
+        description: "Please share a more detailed response to the question.",
+      });
+      setRecordingState("idle");
+      return;
+    }
+
     const newResponse: PromptResponse = {
       promptIndex: currentPrompt,
       partner: activePartner,
@@ -222,10 +235,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     };
     setResponses((prev) => {
       const updated = [...prev, newResponse];
-      // Face-to-face completion: each partner recorded at least 1 response
-      const hasPartnerA = updated.some(r => r.partner === "partner_a");
-      const hasPartnerB = updated.some(r => r.partner === "partner_b");
-      if (hasPartnerA && hasPartnerB) {
+      // Face-to-face completion: each partner recorded at least 2 quality responses
+      const partnerAQualityCount = updated.filter(r => r.partner === "partner_a").length;
+      const partnerBQualityCount = updated.filter(r => r.partner === "partner_b").length;
+      if (partnerAQualityCount >= 2 && partnerBQualityCount >= 2) {
         markCompleted();
       }
       return updated;
@@ -292,6 +305,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       },
     });
   }, [conversation, user, responses, activityTitle, activityDescription]);
+
   const handleRecordAgain = useCallback(() => {
     setResponses((prev) => prev.filter((r) => !(r.promptIndex === currentPrompt && r.partner === activePartner)));
   }, [currentPrompt, activePartner]);
@@ -304,19 +318,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [revealedSegments, setRevealedSegments] = useState<Set<number>>(new Set());
   const [freshSegments, setFreshSegments] = useState<Set<number>>(new Set());
 
-  // Reveal first segment when summary completes; subsequent ones after typewriter finishes
   const revealQueueRef = useRef<number[]>([]);
 
   useEffect(() => {
     if (isGeneratingSummary || summarySegments.length === 0) return;
-    // Find unrevealed segments
     const unrevealed = summarySegments
       .map((_, idx) => idx)
       .filter(idx => !revealedSegments.has(idx));
     if (unrevealed.length === 0) return;
 
     revealQueueRef.current = unrevealed;
-    // Reveal the first one
     const firstIdx = revealQueueRef.current[0];
     setRevealedSegments(prev => new Set([...prev, firstIdx]));
     setFreshSegments(prev => new Set([...prev, firstIdx]));
@@ -329,7 +340,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return next;
     });
 
-    // Reveal next segment in queue
     const queue = revealQueueRef.current;
     const pos = queue.indexOf(idx);
     if (pos >= 0) {
@@ -454,9 +464,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         </span>
       </div>
 
-      {/* Scrollable content area: navigation + flashcard + transcript */}
+      {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 flex flex-col items-center">
-        {/* Previous / Next navigation — above flashcard */}
+        {/* Previous / Next navigation */}
         <div className="flex items-center justify-between w-full max-w-sm mb-3">
           <Button
             variant="ghost"
@@ -480,7 +490,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           )}
         </div>
 
-        {/* Flippable Flash Card — top aligned */}
+        {/* Flippable Flash Card */}
         <div
           className="w-full max-w-sm cursor-pointer [perspective:1000px]"
           onClick={() => setIsFlipped((f) => !f)}

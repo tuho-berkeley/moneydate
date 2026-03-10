@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock, Share2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock, Share2, Sparkles, MessageCircle } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
 import TypewriterText from "@/components/conversation/TypewriterText";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
+import { isQualityAnswer } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
@@ -50,6 +51,16 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
   const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
+
+  // Quality answer tracking per partner
+  const myQualityCountRef = useRef(0);
+  const partnerQualityCountRef = useRef(0);
+  const [completionReached, setCompletionReached] = useState(false);
+  const [showClosureButtons, setShowClosureButtons] = useState(false);
+  const [continueAnyway, setContinueAnyway] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const closureMessageIdRef = useRef<string | null>(null);
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({
@@ -161,16 +172,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const partnerName = partnerProfile?.display_name || "Partner";
   const myName = profile?.display_name || "You";
 
-  // Reactively check completion when messages change (each partner needs 2+ messages)
-  useEffect(() => {
-    if (!user || !partnerId || !dbMessages || dbMessages.length === 0) return;
-    const userMsgCount = dbMessages.filter(m => m.sender_id === user.id).length;
-    const partnerMsgCount = dbMessages.filter(m => m.sender_id === partnerId).length;
-    if (userMsgCount >= 2 && partnerMsgCount >= 2) {
-      markCompleted();
-    }
-  }, [dbMessages, user, partnerId, markCompleted]);
-
   // Parse [ASKING:name] tag from last AI message
   const askingTagRegex = /\[ASKING:([^\]]+)\]\s*$/;
 
@@ -216,7 +217,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // AI should respond after the asked partner answers
   const lastMessage = dbMessages[dbMessages.length - 1];
-  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded;
+  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded && !completionReached;
 
   // Auto-seed AI starter message
   useEffect(() => {
@@ -240,6 +241,35 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     triggerAI(historyForAI);
   }, [aiShouldRespond, isAIResponding]);
 
+  // Get the last AI question
+  const getLastAIQuestion = useCallback(() => {
+    for (let i = dbMessages.length - 1; i >= 0; i--) {
+      if (dbMessages[i].role === "ai") return dbMessages[i].content;
+    }
+    return "";
+  }, [dbMessages]);
+
+  // Check quality for the latest non-AI message and handle completion
+  const checkQualityAndCompletion = useCallback(async (senderId: string, messageContent: string) => {
+    if (completionReached && !continueAnyway) return;
+
+    const lastQuestion = getLastAIQuestion();
+    const isQuality = await isQualityAnswer(lastQuestion, messageContent);
+
+    if (isQuality) {
+      if (senderId === user?.id) {
+        myQualityCountRef.current += 1;
+      } else {
+        partnerQualityCountRef.current += 1;
+      }
+    }
+
+    if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3 && !continueAnyway) {
+      setCompletionReached(true);
+      markCompleted();
+    }
+  }, [user, completionReached, continueAnyway, getLastAIQuestion, markCompleted]);
+
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
     if (!conversation || isAIResponding) return;
     setIsAIResponding(true);
@@ -261,11 +291,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         if (fullResponse) {
           const rawSegments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           
-          // Extract [ASKING:] tag from the full response (may be on any segment)
           const askingMatch = fullResponse.match(/\[ASKING:[^\]]+\]\s*$/);
           const askingTag = askingMatch ? askingMatch[0] : "";
           
-          // Filter out segments that are only the asking tag
           const segments = rawSegments.filter(s => {
             const stripped = s.replace(/\[ASKING:[^\]]+\]\s*$/, "").trim();
             return stripped.length > 0;
@@ -273,7 +301,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           
           for (let i = 0; i < segments.length; i++) {
             let content = segments[i];
-            // Ensure the last segment has the asking tag
             if (i === segments.length - 1 && askingTag && !content.includes("[ASKING:")) {
               content = content + "\n" + askingTag;
             }
@@ -297,12 +324,80 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     });
   }, [conversation, activityTitle, activityDescription, myName, partnerName]);
 
-  // Sequential reveal of new AI messages (one at a time, after typewriter completes)
+  // Trigger pre-closure AI message
+  const triggerPreClosure = useCallback(async () => {
+    if (!conversation) return;
+    setIsAIResponding(true);
+
+    const historyForAI = dbMessages.map((m: DBMessage) => ({
+      role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
+      content: m.role === "ai"
+        ? m.content
+        : `[${m.sender_id === user?.id ? myName : partnerName}]: ${m.content}`,
+    }));
+
+    let fullResponse = "";
+    await streamChat({
+      messages: historyForAI,
+      activityTitle,
+      activityDescription: activityDescription || "",
+      conversationType: "pre_closure",
+      userName: myName,
+      partnerName,
+      onDelta: (chunk) => { fullResponse += chunk; },
+      onDone: async () => {
+        if (fullResponse && conversation) {
+          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          const insertedIds: string[] = [];
+          for (const segment of segments) {
+            const { data } = await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: segment,
+            }).select("id").single();
+            if (data) insertedIds.push(data.id);
+          }
+          if (insertedIds.length > 0) {
+            closureMessageIdRef.current = insertedIds[insertedIds.length - 1];
+          }
+          await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+        }
+        setIsAIResponding(false);
+        setTimeout(() => { aiTriggerRef.current = false; }, 500);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setIsAIResponding(false);
+        aiTriggerRef.current = false;
+        setShowClosureButtons(true);
+      },
+    });
+  }, [conversation, dbMessages, activityTitle, activityDescription, myName, partnerName, user, queryClient]);
+
+  // Check completion after each new user/partner message
+  useEffect(() => {
+    if (!user || !dbMessages.length) return;
+    const lastMsg = dbMessages[dbMessages.length - 1];
+    if (lastMsg.role !== "user" && lastMsg.role !== "partner") return;
+    if (!lastMsg.sender_id) return;
+    // Only check the latest message
+    checkQualityAndCompletion(lastMsg.sender_id, lastMsg.content);
+  }, [dbMessages.length]);
+
+  // When completion is reached, trigger pre-closure instead of normal AI
+  useEffect(() => {
+    if (!completionReached || continueAnyway || showClosureButtons || showInsights) return;
+    if (!aiShouldRespond) return;
+    // Prevent normal AI from triggering
+    aiTriggerRef.current = true;
+    triggerPreClosure();
+  }, [completionReached, aiShouldRespond, continueAnyway, showClosureButtons, showInsights]);
+
+  // Sequential reveal of new AI messages
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
 
-    // On first load (returning to existing conversation), reveal all immediately (no animation)
-    // Skip if seeding — those should go through the sequential queue
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
       prevMessageIdsRef.current = currentIds;
@@ -317,7 +412,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       const newIds = newAiMsgs.map(m => m.id);
       revealQueueRef.current = [...revealQueueRef.current, ...newIds];
 
-      // If nothing is currently being typewritten, reveal the first one
       if (revealQueueRef.current.length === newIds.length) {
         const firstId = revealQueueRef.current[0];
         setRevealedIds(prev => new Set([...prev, firstId]));
@@ -325,7 +419,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       }
     }
 
-    // Mark user/partner messages as fresh if new
     const newNonAiMsgs = dbMessages.filter(
       m => m.role !== "ai" && !prevMessageIdsRef.current.has(m.id)
     );
@@ -340,7 +433,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     prevMessageIdsRef.current = currentIds;
   }, [dbMessages]);
 
-  // Build display messages — strip [ASKING:...] tag from AI messages
+  // Build display messages
   const displayMessages = dbMessages
     .filter(m => m.role !== "ai" || revealedIds.has(m.id))
     .map((m: DBMessage) => ({
@@ -354,7 +447,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [displayMessages]);
+  }, [displayMessages, showClosureButtons]);
 
   const handleTypewriterComplete = useCallback((msgId: string) => {
     setFreshIds(prev => {
@@ -363,7 +456,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       return next;
     });
 
-    // Reveal next segment in queue
+    // If this was the pre-closure message, show closure buttons
+    if (msgId === closureMessageIdRef.current) {
+      setShowClosureButtons(true);
+      closureMessageIdRef.current = null;
+    }
+
     const queue = revealQueueRef.current;
     const idx = queue.indexOf(msgId);
     if (idx >= 0) {
@@ -391,6 +489,14 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setIsAIResponding(false);
     seedingRef.current = false;
     aiTriggerRef.current = false;
+    myQualityCountRef.current = 0;
+    partnerQualityCountRef.current = 0;
+    setCompletionReached(false);
+    setShowClosureButtons(false);
+    setContinueAnyway(false);
+    setShowInsights(false);
+    setIsGeneratingInsights(false);
+    closureMessageIdRef.current = null;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
@@ -406,7 +512,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       return;
     }
 
-    // Immediately clear cached messages so auto-seed effect triggers reliably
     queryClient.setQueryData(["messages", conversation.id], []);
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
@@ -439,9 +544,65 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     }
   };
 
+  // Generate insights
+  const handleGenerateInsights = useCallback(async () => {
+    if (!conversation) return;
+    setShowClosureButtons(false);
+    setShowInsights(true);
+    setIsGeneratingInsights(true);
+    setIsAIResponding(true);
+
+    const historyForAI = dbMessages.map((m: DBMessage) => ({
+      role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
+      content: m.role === "ai"
+        ? m.content
+        : `[${m.sender_id === user?.id ? myName : partnerName}]: ${m.content}`,
+    }));
+
+    let fullResponse = "";
+    await streamChat({
+      messages: historyForAI,
+      activityTitle,
+      activityDescription: activityDescription || "",
+      conversationType: "together_insights",
+      userName: myName,
+      partnerName,
+      onDelta: (chunk) => { fullResponse += chunk; },
+      onDone: async () => {
+        if (fullResponse && conversation) {
+          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          for (const segment of segments) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: segment,
+            });
+          }
+          await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+        }
+        setIsAIResponding(false);
+        setIsGeneratingInsights(false);
+        setTimeout(() => { aiTriggerRef.current = false; }, 500);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setIsAIResponding(false);
+        setIsGeneratingInsights(false);
+      },
+    });
+  }, [conversation, dbMessages, activityTitle, activityDescription, myName, partnerName, user, queryClient]);
+
+  // Continue conversation
+  const handleContinueConversation = useCallback(() => {
+    setShowClosureButtons(false);
+    setCompletionReached(false);
+    setContinueAnyway(true);
+    aiTriggerRef.current = false;
+  }, []);
+
   // Determine if input should be disabled
-  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || dbMessages.length === 0;
-  
+  const inputDisabled = isAIResponding || myResponseSent || isPartnerTurn || dbMessages.length === 0 || completionReached || showInsights;
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
@@ -480,7 +641,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                 });
                 return;
               } catch {
-                // share cancelled or failed — fall through to copy
+                // share cancelled or failed
               }
             }
             try {
@@ -518,7 +679,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Show thinking bubble during initial load/seeding */}
         {dbMessages.length === 0 && isAIResponding && (
           <AIThinkingBubble />
         )}
@@ -575,7 +735,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         })}
 
         {/* Waiting indicator */}
-        {waitingForPartner && !isAIResponding && (
+        {waitingForPartner && !isAIResponding && !completionReached && (
           <div className="flex justify-center">
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
               <Clock className="w-3.5 h-3.5" />
@@ -584,55 +744,88 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           </div>
         )}
 
-        {/* AI is thinking — show when responding or when unrevealed messages are pending */}
+        {/* AI is thinking */}
         {isAIResponding && dbMessages.length > 0 && (
           <AIThinkingBubble />
+        )}
+
+        {/* Closure buttons */}
+        {showClosureButtons && !showInsights && (
+          <div className="flex flex-col gap-2 max-w-[85%] mx-auto animate-fade-in">
+            <Button
+              onClick={handleGenerateInsights}
+              className="w-full rounded-xl gap-2"
+              disabled={isGeneratingInsights}
+            >
+              <Sparkles className="w-4 h-4" />
+              Generate Insights
+            </Button>
+            <Button
+              onClick={handleContinueConversation}
+              variant="outline"
+              className="w-full rounded-xl gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Continue Conversation
+            </Button>
+          </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="bg-card border-t border-border p-4 sticky bottom-0">
-        {myResponseSent || waitingForPartner ? (
-          <div className="text-center text-sm text-muted-foreground py-2">
-            {myResponseSent
-              ? `Your response has been sent. Waiting for the guide…`
-              : `Waiting for ${partnerName} to respond…`}
-          </div>
-        ) : isPartnerTurn && !askedPartnerResponded ? (
-          <div className="text-center text-sm text-muted-foreground py-2">
-            Waiting for {partnerName} to respond…
-          </div>
-        ) : (
-          <div className="flex items-end gap-2">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                isAIResponding
-                  ? "Hold on a moment…"
-                  : isMyTurn
-                    ? `${myName}, it's your turn to share!`
-                    : "Share your thoughts…"
-              }
-              className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
-              rows={1}
-              disabled={inputDisabled}
-            />
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim() || isSending || inputDisabled}
-              size="icon"
-              className="h-11 w-11 rounded-xl flex-shrink-0"
-            >
-              {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            </Button>
-          </div>
-        )}
-      </div>
+      {!completionReached && !showInsights ? (
+        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+          {myResponseSent || waitingForPartner ? (
+            <div className="text-center text-sm text-muted-foreground py-2">
+              {myResponseSent
+                ? `Your response has been sent. Waiting for the guide…`
+                : `Waiting for ${partnerName} to respond…`}
+            </div>
+          ) : isPartnerTurn && !askedPartnerResponded ? (
+            <div className="text-center text-sm text-muted-foreground py-2">
+              Waiting for {partnerName} to respond…
+            </div>
+          ) : (
+            <div className="flex items-end gap-2">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  isAIResponding
+                    ? "Hold on a moment…"
+                    : isMyTurn
+                      ? `${myName}, it's your turn to share!`
+                      : "Share your thoughts…"
+                }
+                className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
+                rows={1}
+                disabled={inputDisabled}
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isSending || inputDisabled}
+                size="icon"
+                className="h-11 w-11 rounded-xl flex-shrink-0"
+              >
+                {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : showInsights && !isGeneratingInsights && !isAIResponding && freshIds.size === 0 ? (
+        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+          <Button
+            onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
+            className="w-full rounded-xl"
+          >
+            Complete
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 };

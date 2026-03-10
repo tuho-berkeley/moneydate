@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw, Sparkles, MessageCircle } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
 import TypewriterText from "@/components/conversation/TypewriterText";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
+import { isQualityAnswer } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
@@ -55,6 +56,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
   const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
+
+  // Quality answer tracking
+  const qualityCountRef = useRef(0);
+  const [completionReached, setCompletionReached] = useState(false);
+  const [showClosureButtons, setShowClosureButtons] = useState(false);
+  const [continueAnyway, setContinueAnyway] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const closureMessageIdRef = useRef<string | null>(null);
 
   // Get or create conversation
   const { data: conversation } = useQuery({
@@ -144,8 +154,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   useEffect(() => {
     const currentIds = new Set(dbMessages.map(m => m.id));
 
-    // On first load (returning to existing conversation), reveal all immediately (no animation)
-    // Skip if we're currently seeding — those messages should go through the queue
     if (prevMessageIdsRef.current.size === 0 && dbMessages.length > 0 && !seedingRef.current) {
       setRevealedIds(new Set(dbMessages.map(m => m.id)));
       prevMessageIdsRef.current = currentIds;
@@ -160,7 +168,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       const newIds = newAiMsgs.map(m => m.id);
       revealQueueRef.current = [...revealQueueRef.current, ...newIds];
 
-      // If nothing is currently being typewritten, reveal the first one
       if (revealQueueRef.current.length === newIds.length) {
         const firstId = revealQueueRef.current[0];
         setRevealedIds(prev => new Set([...prev, firstId]));
@@ -168,7 +175,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       }
     }
 
-    // Mark user messages as fresh if new
     const newUserMsgs = dbMessages.filter(
       m => m.role === "user" && !prevMessageIdsRef.current.has(m.id)
     );
@@ -191,12 +197,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       content: m.content,
     }));
 
-  // Show thinking bubble only while waiting for AI (not during staggered reveal)
   const showThinking = isWaitingForAI;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, showThinking]);
+  }, [messages, showThinking, showClosureButtons]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -211,6 +216,12 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       next.delete(msgId);
       return next;
     });
+
+    // If this was the pre-closure message, show closure buttons
+    if (msgId === closureMessageIdRef.current) {
+      setShowClosureButtons(true);
+      closureMessageIdRef.current = null;
+    }
 
     // Reveal next segment in queue
     const queue = revealQueueRef.current;
@@ -244,6 +255,13 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
 
     seedingRef.current = false;
+    qualityCountRef.current = 0;
+    setCompletionReached(false);
+    setShowClosureButtons(false);
+    setContinueAnyway(false);
+    setShowInsights(false);
+    setIsGeneratingInsights(false);
+    closureMessageIdRef.current = null;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
@@ -251,6 +269,112 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient, resetCompletion]);
+
+  // Get the last AI question from messages
+  const getLastAIQuestion = useCallback(() => {
+    for (let i = dbMessages.length - 1; i >= 0; i--) {
+      if (dbMessages[i].role === "ai") return dbMessages[i].content;
+    }
+    return "";
+  }, [dbMessages]);
+
+  // Trigger pre-closure AI message
+  const triggerPreClosure = useCallback(async () => {
+    if (!conversation) return;
+    setIsWaitingForAI(true);
+
+    const historyForAI = dbMessages.map((m: DBMessage) => ({
+      role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
+      content: m.content,
+    }));
+
+    let fullResponse = "";
+    await streamChat({
+      messages: historyForAI,
+      activityTitle,
+      activityDescription: activityDescription || "",
+      conversationType: "pre_closure",
+      onDelta: (chunk) => { fullResponse += chunk; },
+      onDone: async () => {
+        if (fullResponse && conversation) {
+          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          const insertedIds: string[] = [];
+          for (const segment of segments) {
+            const { data } = await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: segment,
+            }).select("id").single();
+            if (data) insertedIds.push(data.id);
+          }
+          // Track the last pre-closure message to trigger button display
+          if (insertedIds.length > 0) {
+            closureMessageIdRef.current = insertedIds[insertedIds.length - 1];
+          }
+          await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+        }
+        setIsWaitingForAI(false);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setIsWaitingForAI(false);
+        // Show buttons anyway on error
+        setShowClosureButtons(true);
+      },
+    });
+  }, [conversation, dbMessages, activityTitle, activityDescription, queryClient]);
+
+  // Generate insights
+  const handleGenerateInsights = useCallback(async () => {
+    if (!conversation) return;
+    setShowClosureButtons(false);
+    setShowInsights(true);
+    setIsGeneratingInsights(true);
+    setIsWaitingForAI(true);
+
+    const historyForAI = dbMessages.map((m: DBMessage) => ({
+      role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
+      content: m.content,
+    }));
+
+    let fullResponse = "";
+    await streamChat({
+      messages: historyForAI,
+      activityTitle,
+      activityDescription: activityDescription || "",
+      conversationType: "solo_insights",
+      onDelta: (chunk) => { fullResponse += chunk; },
+      onDone: async () => {
+        if (fullResponse && conversation) {
+          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          for (const segment of segments) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: segment,
+            });
+          }
+          await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+        }
+        setIsWaitingForAI(false);
+        setIsGeneratingInsights(false);
+      },
+      onError: (error) => {
+        toast.error(error);
+        setIsWaitingForAI(false);
+        setIsGeneratingInsights(false);
+      },
+    });
+  }, [conversation, dbMessages, activityTitle, activityDescription, queryClient]);
+
+  // Continue conversation
+  const handleContinueConversation = useCallback(() => {
+    setShowClosureButtons(false);
+    setCompletionReached(false);
+    setContinueAnyway(true);
+  }, []);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user) return;
@@ -273,13 +397,33 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       return;
     }
 
-    // Refetch to show user message immediately, then show thinking
+    // Refetch to show user message immediately
     await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+
+    // Check quality answer asynchronously
+    const lastQuestion = getLastAIQuestion();
+    const isQuality = await isQualityAnswer(lastQuestion, userText);
+    if (isQuality) {
+      qualityCountRef.current += 1;
+    }
+
+    const qualityThresholdMet = qualityCountRef.current >= 3 && !continueAnyway;
+
+    if (qualityThresholdMet && !completionReached) {
+      // Mark completed and trigger pre-closure
+      setCompletionReached(true);
+      markCompleted();
+      setIsSending(false);
+
+      // Trigger pre-closure AI message (no question, just reflection)
+      await triggerPreClosure();
+      return;
+    }
+
+    // Normal AI response
     setIsWaitingForAI(true);
 
-    // Buffer AI response silently
     let fullResponse = "";
-
     const abort = new AbortController();
     abortRef.current = abort;
 
@@ -315,12 +459,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           }
           setIsSending(false);
           setIsWaitingForAI(false);
-
-          // Solo completion: user answered at least 3 AI questions
-          const userMessageCount = dbMessages.filter(m => m.role === "user").length + 1;
-          if (userMessageCount >= 3) {
-            markCompleted();
-          }
         },
         onError: (error) => {
           toast.error(error);
@@ -335,7 +473,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setIsSending(false);
       setIsWaitingForAI(false);
     }
-  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted]);
+  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted, getLastAIQuestion, completionReached, continueAnyway, triggerPreClosure]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -343,6 +481,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       handleSend();
     }
   };
+
+  const inputDisabled = completionReached || showInsights;
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
@@ -427,31 +567,67 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
         {showThinking && messages.length > 0 && <AIThinkingBubble />}
 
+        {/* Closure buttons — shown after pre-closure message typewriter completes */}
+        {showClosureButtons && !showInsights && (
+          <div className="flex flex-col gap-2 max-w-[85%] mx-auto animate-fade-in">
+            <Button
+              onClick={handleGenerateInsights}
+              className="w-full rounded-xl gap-2"
+              disabled={isGeneratingInsights}
+            >
+              <Sparkles className="w-4 h-4" />
+              Generate Insights
+            </Button>
+            <Button
+              onClick={handleContinueConversation}
+              variant="outline"
+              className="w-full rounded-xl gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Continue Conversation
+            </Button>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="bg-card border-t border-border p-4 sticky bottom-0">
-        <div className="flex items-end gap-2">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Share your thoughts..."
-            className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
-            rows={1}
-          />
+      {!inputDisabled && (
+        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+          <div className="flex items-end gap-2">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Share your thoughts..."
+              className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-border"
+              rows={1}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isSending}
+              size="icon"
+              className="h-11 w-11 rounded-xl flex-shrink-0"
+            >
+              {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Show "done" footer when insights are shown and all messages revealed */}
+      {showInsights && !isGeneratingInsights && !isWaitingForAI && freshIds.size === 0 && (
+        <div className="bg-card border-t border-border p-4 sticky bottom-0">
           <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isSending}
-            size="icon"
-            className="h-11 w-11 rounded-xl flex-shrink-0"
+            onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
+            className="w-full rounded-xl"
           >
-            {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+            Complete
           </Button>
         </div>
-      </div>
+      )}
     </div>
   );
 };
