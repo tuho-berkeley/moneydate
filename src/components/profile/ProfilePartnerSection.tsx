@@ -57,8 +57,8 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
             <Users className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">No partner connected</p>
-            <p className="text-xs text-muted-foreground">Invite or join with a code</p>
+            <p className="text-sm font-medium text-foreground uppercase">No partner connected</p>
+            <p className="text-xs text-muted-foreground uppercase">Invite or join with a code</p>
           </div>
         </div>
 
