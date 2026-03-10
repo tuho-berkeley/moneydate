@@ -506,7 +506,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <div className="relative w-full grid">
             <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
-              <h2 className="font-display text-xl font-semibold leading-snug">
+              <h2 className="font-display text-xl font-semibold leading-snug text-pretty">
                 {defaultPrompts[currentPrompt].question}
               </h2>
               <p className="text-xs">&nbsp;</p>
