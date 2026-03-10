@@ -465,6 +465,28 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             Together Chat
           </div>
         </div>
+        <button
+          onClick={async () => {
+            const shareUrl = `${window.location.origin}/conversation/${activityId}?mode=together`;
+            const shareData = {
+              title: activityTitle,
+              text: `Join me for "${activityTitle}" on MoneyDate!`,
+              url: shareUrl,
+            };
+            if (navigator.share) {
+              try {
+                await navigator.share(shareData);
+              } catch {
+                // User cancelled share
+              }
+            } else {
+              await navigator.clipboard.writeText(shareUrl);
+              toast.success("Link copied!");
+            }
+          }}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Share2 className="w-4 h-4" />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <button className="text-muted-foreground hover:text-foreground transition-colors" disabled={isSending || displayMessages.length === 0}>
