@@ -233,12 +233,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       return next;
     });
 
-    // If this was the pre-closure message, show closure buttons
-    if (msgId === closureMessageIdRef.current) {
-      setShowClosureButtons(true);
-      closureMessageIdRef.current = null;
-    }
-
     // Reveal next segment in queue
     const queue = revealQueueRef.current;
     const idx = queue.indexOf(msgId);
