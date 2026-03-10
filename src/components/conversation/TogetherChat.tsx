@@ -140,7 +140,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `conversation_id=eq.${conversation.id}`,
@@ -160,6 +160,16 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const partnerId = partnerProfile?.id;
   const partnerName = partnerProfile?.display_name || "Partner";
   const myName = profile?.display_name || "You";
+
+  // Reactively check completion when messages change
+  useEffect(() => {
+    if (!user || !partnerId || !dbMessages || dbMessages.length === 0) return;
+    const userHasMsg = dbMessages.some(m => m.sender_id === user.id);
+    const partnerHasMsg = dbMessages.some(m => m.sender_id === partnerId);
+    if (userHasMsg && partnerHasMsg) {
+      markCompleted();
+    }
+  }, [dbMessages, user, partnerId, markCompleted]);
 
   // Parse [ASKING:name] tag from last AI message
   const askingTagRegex = /\[ASKING:([^\]]+)\]\s*$/;
