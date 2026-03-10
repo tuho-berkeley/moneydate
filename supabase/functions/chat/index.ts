@@ -6,6 +6,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const FORMATTING_RULES = `CRITICAL FORMATTING RULES:
+- Use plain text only. No markdown, no asterisks, no backslashes, no special formatting.
+- Write apostrophes normally (e.g., "What's" not "What\\'s").
+- Do not use bold, italic, or any markdown syntax in questions or guidance.`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
