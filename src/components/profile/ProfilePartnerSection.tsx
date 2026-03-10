@@ -84,7 +84,7 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
               onClick={() => setShowJoin(true)}
               variant="outline"
               size="sm"
-              className="w-full rounded-full gap-1.5"
+              className="rounded-full gap-1.5"
             >
               <ArrowRight className="w-3.5 h-3.5" />
               Join with Code
