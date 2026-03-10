@@ -293,7 +293,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   }, [dbMessages]);
 
   // Trigger pre-closure AI message
-  const triggerPreClosure = useCallback(async () => {
+  const triggerPreClosure = useCallback(async (latestUserText?: string) => {
     if (!conversation) return;
     setIsWaitingForAI(true);
 
@@ -301,6 +301,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
       content: m.content,
     }));
+
+    // Include latest user message if not yet in dbMessages
+    if (latestUserText) {
+      historyForAI.push({ role: "user", content: latestUserText });
+    }
 
     let fullResponse = "";
     await streamChat({
@@ -311,6 +316,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
+          // Strip any sentences ending with "?" as a safety net
+          fullResponse = fullResponse.replace(/[^.!?\n]*\?/g, "").trim();
+          if (!fullResponse) fullResponse = "Thank you for sharing so openly. 💛";
+
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
