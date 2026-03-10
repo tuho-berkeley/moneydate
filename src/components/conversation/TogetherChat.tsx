@@ -140,7 +140,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `conversation_id=eq.${conversation.id}`,
@@ -155,6 +155,16 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       supabase.removeChannel(channel);
     };
   }, [conversation?.id, queryClient]);
+
+  // Reactively check completion when messages change
+  useEffect(() => {
+    if (!user || !partnerId || !dbMessages || dbMessages.length === 0) return;
+    const userHasMsg = dbMessages.some(m => m.sender_id === user.id);
+    const partnerHasMsg = dbMessages.some(m => m.sender_id === partnerId);
+    if (userHasMsg && partnerHasMsg) {
+      markCompleted();
+    }
+  }, [dbMessages, user, partnerId, markCompleted]);
 
   // Determine turn state
   const partnerId = partnerProfile?.id;
