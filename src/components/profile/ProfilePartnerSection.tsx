@@ -110,7 +110,7 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
               placeholder="ENTER INVITE CODE"
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              className="text-center text-sm font-mono tracking-widest uppercase"
+              className="text-center text-base font-mono tracking-widest uppercase"
               maxLength={8}
             />
             <div className="flex gap-2">
