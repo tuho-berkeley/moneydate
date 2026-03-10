@@ -727,11 +727,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           <AIThinkingBubble />
         )}
 
-        {displayMessages.map((msg, idx) => {
+        {(() => {
+          // Find last user/partner message index so typewriter only applies to AI messages after it
+          const lastUserIdx = displayMessages.reduce((acc, m, i) => m.role !== "ai" ? i : acc, -1);
+
+          return displayMessages.map((msg, idx) => {
           const isFirstAI = msg.role === "ai" && idx === 0;
           const labelType = msg.role === "ai" ? getAILabelType(msg.content, isFirstAI) : null;
           const displayContent = labelType === "question" ? highlightQuestions(msg.content) : msg.content;
-          const isFresh = freshIds.has(msg.id);
+          const isFresh = freshIds.has(msg.id) && idx > lastUserIdx;
 
           return (
             <div
@@ -776,7 +780,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               </div>
             </div>
           );
-        })}
+        });
+        })()}
 
         {/* Waiting indicator */}
         {waitingForPartner && !isAIResponding && !completionReached && (
