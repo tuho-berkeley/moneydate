@@ -569,7 +569,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 Hint
               </div>
               <p className="text-sm text-foreground leading-relaxed text-left">
-                {defaultPrompts[currentPrompt].guidance}
+                {prompts[currentPrompt].guidance}
               </p>
               <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
             </div>
