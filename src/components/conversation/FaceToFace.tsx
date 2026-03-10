@@ -156,9 +156,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setSummaryText(null);
     setRevealedSegments(new Set());
     setFreshSegments(new Set());
+    await resetCompletion();
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
-  }, [conversation, queryClient]);
+  }, [conversation, queryClient, resetCompletion]);
 
   const startRecording = useCallback(async () => {
     try {
