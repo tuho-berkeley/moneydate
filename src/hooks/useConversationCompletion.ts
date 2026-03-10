@@ -16,11 +16,9 @@ export function useConversationCompletion(activityId: string) {
 
     // Check if already completed in database — skip toast if so
     const alreadyCompleted = activitiesData?.some(
-      (stage) => stage.activities.some(
-        (a) => a.id === activityId && a.userStatus === "completed"
-      )
+      (a) => a.id === activityId && a.userStatus === "completed"
     );
-    if (existing) {
+    if (alreadyCompleted) {
       completedRef.current = true;
       return;
     }
