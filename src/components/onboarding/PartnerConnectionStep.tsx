@@ -50,7 +50,7 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
     const { data: couple, error } = await supabase
       .from("couples")
       .select("id")
-      .eq("invite_code", joinCode.trim().toUpperCase())
+      .eq("invite_code", joinCode.trim().toLowerCase())
       .single();
 
     if (error || !couple) {
