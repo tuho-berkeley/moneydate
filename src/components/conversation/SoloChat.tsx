@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
-import { isQualityAnswer } from "@/lib/isQualityAnswer";
+import { isQualityAnswer, passesPreFilter } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
