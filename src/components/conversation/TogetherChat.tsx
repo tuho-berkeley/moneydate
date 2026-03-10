@@ -185,6 +185,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     partnerQualityCountRef.current = partnerMsgs.filter(m => passesPreFilter(m.content)).length;
     console.log(`[TogetherChat] Seeded quality: me=${myQualityCountRef.current}, partner=${partnerQualityCountRef.current}`);
     if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3) {
+      completionReachedRef.current = true;
       setCompletionReached(true);
       markCompleted();
       if (currentActivityStatus === "insights_generated") {
