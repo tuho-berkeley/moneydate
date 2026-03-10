@@ -388,10 +388,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               );
             })
           ) : null}
-          {!isGeneratingSummary && summarySegments.length > 0 && !freshSegments.size && (
+          {!isGeneratingSummary && summarySegments.length > 0 && revealedSegments.size >= summarySegments.length && !freshSegments.size && (
             <div className="space-y-3 mt-4">
               <Button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="w-full rounded-xl">
-                Done
+                Complete
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
