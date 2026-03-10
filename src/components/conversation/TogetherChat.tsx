@@ -529,6 +529,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     aiTriggerRef.current = false;
     myQualityCountRef.current = 0;
     partnerQualityCountRef.current = 0;
+    completionReachedRef.current = false;
     setCompletionReached(false);
     setShowClosureButtons(false);
     setContinueAnyway(false);
