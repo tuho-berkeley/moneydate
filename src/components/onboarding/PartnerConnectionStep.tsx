@@ -77,13 +77,13 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
     return (
       <div className="w-full max-w-sm space-y-6 animate-fade-in">
         <div className="text-center space-y-3">
-          <h2 className="font-display text-2xl font-bold text-foreground text-pretty uppercase">Invite your partner</h2>
-          <p className="text-muted-foreground text-sm text-pretty uppercase">
+          <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Invite your partner</h2>
+          <p className="text-muted-foreground text-sm text-pretty">
             Share this code with your partner to connect your accounts.
           </p>
         </div>
         <div className="flex items-center gap-3 p-4 bg-card rounded-2xl border border-border">
-          <span className="flex-1 text-center text-2xl font-mono font-bold tracking-widest text-foreground">
+          <span className="flex-1 text-center text-2xl font-mono font-bold tracking-widest text-foreground uppercase">
             {inviteCode || "..."}
           </span>
           <button onClick={copyCode} className="p-2 rounded-xl bg-muted hover:bg-accent transition-colors">
@@ -91,8 +91,8 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
           </button>
         </div>
         <div className="space-y-3">
-          <Button onClick={onNext} className="w-full rounded-full uppercase" size="lg">Continue</Button>
-          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full uppercase">Back</Button>
+          <Button onClick={onNext} className="w-full rounded-full" size="lg">Continue</Button>
+          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full">Back</Button>
         </div>
       </div>
     );
