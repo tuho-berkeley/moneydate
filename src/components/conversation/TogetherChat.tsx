@@ -394,6 +394,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
+    await resetCompletion();
 
     const { error } = await supabase
       .from("messages")
