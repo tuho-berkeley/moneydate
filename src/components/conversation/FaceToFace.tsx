@@ -288,7 +288,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setIsGeneratingSummary(true);
     setShowSummary(true);
     setSummaryText(null);
-    const formattedResponses = defaultPrompts.map((prompt, i) => {
+    const formattedResponses = prompts.map((prompt, i) => {
       const a = getResponse(i, "partner_a");
       const b = getResponse(i, "partner_b");
       return `Question: ${prompt.question}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
