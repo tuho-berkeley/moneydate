@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Copy, ArrowRight, Share2 } from "lucide-react";
+import { Users, ArrowRight, Share2, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,12 +63,29 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
         </div>
 
         {!showJoin ? (
-          <div className="flex gap-2">
-            <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5">
-              <Share2 className="w-3.5 h-3.5" />
-              Share Invite
-            </Button>
-            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5">
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteCode);
+                  toast.success("Invite code copied!");
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 text-sm font-medium text-primary bg-secondary px-3 py-2 rounded-full hover:bg-accent transition-colors"
+              >
+                <Link2 className="w-3.5 h-3.5" />
+                Partner code: {inviteCode}
+              </button>
+              <Button onClick={onShare} size="sm" className="rounded-full gap-1.5 px-4">
+                <Share2 className="w-3.5 h-3.5" />
+                Share
+              </Button>
+            </div>
+            <Button
+              onClick={() => setShowJoin(true)}
+              variant="outline"
+              size="sm"
+              className="w-full rounded-full gap-1.5"
+            >
               <ArrowRight className="w-3.5 h-3.5" />
               Join with Code
             </Button>
