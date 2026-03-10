@@ -161,12 +161,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const partnerName = partnerProfile?.display_name || "Partner";
   const myName = profile?.display_name || "You";
 
-  // Reactively check completion when messages change
+  // Reactively check completion when messages change (each partner needs 2+ messages)
   useEffect(() => {
     if (!user || !partnerId || !dbMessages || dbMessages.length === 0) return;
-    const userHasMsg = dbMessages.some(m => m.sender_id === user.id);
-    const partnerHasMsg = dbMessages.some(m => m.sender_id === partnerId);
-    if (userHasMsg && partnerHasMsg) {
+    const userMsgCount = dbMessages.filter(m => m.sender_id === user.id).length;
+    const partnerMsgCount = dbMessages.filter(m => m.sender_id === partnerId).length;
+    if (userMsgCount >= 2 && partnerMsgCount >= 2) {
       markCompleted();
     }
   }, [dbMessages, user, partnerId, markCompleted]);
