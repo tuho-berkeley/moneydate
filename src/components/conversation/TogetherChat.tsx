@@ -600,10 +600,20 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setIsGeneratingInsights(true);
     setIsAIResponding(true);
 
-    const historyForAI = dbMessages.map((m: DBMessage) => ({
+    // Filter out pre-closure/insight messages — only include the actual conversation
+    // Pre-closure messages are AI messages that appear after the last user/partner message
+    const lastUserMsgIdx = dbMessages.reduce((acc, m, i) => (m.role !== "ai" ? i : acc), -1);
+    const conversationMessages = dbMessages.filter((m, i) => {
+      // Keep all user/partner messages
+      if (m.role !== "ai") return true;
+      // Keep AI messages that come before or at the last user message (they're part of the conversation)
+      return i <= lastUserMsgIdx;
+    });
+
+    const historyForAI = conversationMessages.map((m: DBMessage) => ({
       role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
       content: m.role === "ai"
-        ? m.content
+        ? stripAskingTag(m.content)
         : `[${m.sender_id === user?.id ? myName : partnerName}]: ${m.content}`,
     }));
 
