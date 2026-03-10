@@ -799,21 +799,34 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      {!completionReached && !showInsights ? (
-        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+      {/* Input — with floating Generate Insights button when continuing after completion */}
+      {!inputDisabled ? (
+        <div className="bg-card border-t border-border sticky bottom-0">
+          {continueAnyway && !showInsights && (
+            <div className="px-4 pt-3">
+              <Button
+                onClick={handleGenerateInsights}
+                variant="outline"
+                className="w-full rounded-xl gap-2 border-primary/30 text-primary hover:bg-primary/5"
+                disabled={isGeneratingInsights || isSending}
+              >
+                <Sparkles className="w-4 h-4" />
+                Generate Insights
+              </Button>
+            </div>
+          )}
           {myResponseSent || waitingForPartner ? (
-            <div className="text-center text-sm text-muted-foreground py-2">
+            <div className="text-center text-sm text-muted-foreground py-2 p-4">
               {myResponseSent
                 ? `Your response has been sent. Waiting for the guide…`
                 : `Waiting for ${partnerName} to respond…`}
             </div>
           ) : isPartnerTurn && !askedPartnerResponded ? (
-            <div className="text-center text-sm text-muted-foreground py-2">
+            <div className="text-center text-sm text-muted-foreground py-2 p-4">
               Waiting for {partnerName} to respond…
             </div>
           ) : (
-            <div className="flex items-end gap-2">
+            <div className="flex items-end gap-2 p-4 pt-3">
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -841,16 +854,43 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             </div>
           )}
         </div>
-      ) : showInsights && !isGeneratingInsights && !isAIResponding && freshIds.size === 0 ? (
-        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+      ) : null}
+
+      {/* Show "done" footer when insights are shown */}
+      {showInsights && !isGeneratingInsights && !isAIResponding && (
+        <div className="bg-card border-t border-border p-4 sticky bottom-0 flex gap-3">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Start Over
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Start over?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will clear all messages and start fresh. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleRestart}>Start Over</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button
-            onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
-            className="w-full rounded-xl"
+            onClick={handleContinueConversation}
+            className="flex-1 rounded-xl gap-2"
           >
-            Complete
+            <MessageCircle className="w-4 h-4" />
+            Continue Conversation
           </Button>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
