@@ -473,12 +473,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       return next;
     });
 
-    // If this was the pre-closure message, show closure buttons
-    if (msgId === closureMessageIdRef.current) {
-      setShowClosureButtons(true);
-      closureMessageIdRef.current = null;
-    }
-
     const queue = revealQueueRef.current;
     const idx = queue.indexOf(msgId);
     if (idx >= 0) {
