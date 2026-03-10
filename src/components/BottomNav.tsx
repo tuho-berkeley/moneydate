@@ -83,7 +83,7 @@ const BottomNav = () => {
       <div className="absolute -inset-x-4 -top-16 -bottom-2 bg-gradient-to-t from-background via-background/80 to-transparent rounded-b-3xl pointer-events-none" />
       <nav
         ref={navRef}
-        className="relative flex items-center gap-1.5 bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
+        className="relative flex items-center justify-around bg-card/90 backdrop-blur-xl rounded-full px-3 py-2 shadow-soft border border-border/50"
       >
         {hasValidIndicator && indicator && (
           <div
@@ -98,7 +98,7 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`relative z-10 flex flex-col items-center gap-0.5 px-5 py-2 rounded-full transition-colors duration-200 ${
+              className={`relative z-10 flex flex-1 flex-col items-center gap-0.5 py-2 rounded-full transition-colors duration-200 ${
                 isActive
                   ? hasValidIndicator
                     ? "text-primary-foreground"
