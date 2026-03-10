@@ -395,6 +395,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       return;
     }
 
+    // Immediately clear cached messages so auto-seed effect triggers reliably
+    queryClient.setQueryData(["messages", conversation.id], []);
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient]);
