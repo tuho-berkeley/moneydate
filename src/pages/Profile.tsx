@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Heart, Bell, FileText, Eye, Link2, ChevronRight, LogOut, Trash2, Moon, Share2, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import ProfilePartnerSection from "@/components/profile/ProfilePartnerSection";
 
 const settings = [
@@ -28,10 +29,6 @@ const settings = [
 const Profile = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<{ display_name: string; couple_id: string | null } | null>(null);
-  const [inviteCode, setInviteCode] = useState("");
-  const [partner, setPartner] = useState<{ display_name: string } | null>(null);
-  const [goals, setGoals] = useState<{ icon: string; title: string; progress: number }[]>([]);
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
 
   const toggleDarkMode = (checked: boolean) => {
@@ -40,56 +37,68 @@ const Profile = () => {
     localStorage.setItem("theme", checked ? "dark" : "light");
   };
 
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchData = async () => {
-      const { data: profileData } = await supabase
+  const { data: profileData } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
+      const { data } = await supabase
         .from("profiles")
         .select("display_name, couple_id")
         .eq("id", user.id)
         .single();
+      return data;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      if (profileData) {
-        setProfile(profileData);
-        if (profileData.couple_id) {
-          // Fetch invite code
-          const { data: couple } = await supabase
-            .from("couples")
-            .select("invite_code")
-            .eq("id", profileData.couple_id)
-            .single();
-          if (couple) setInviteCode(couple.invite_code);
+  const { data: coupleData } = useQuery({
+    queryKey: ["couple", profileData?.couple_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("couples")
+        .select("invite_code")
+        .eq("id", profileData!.couple_id!)
+        .single();
+      return data;
+    },
+    enabled: !!profileData?.couple_id,
+    staleTime: 5 * 60 * 1000,
+  });
 
-          // Fetch partner profile
-          const { data: partnerProfiles } = await supabase
-            .from("profiles")
-            .select("display_name")
-            .eq("couple_id", profileData.couple_id)
-            .neq("id", user.id);
-          if (partnerProfiles && partnerProfiles.length > 0) {
-            setPartner(partnerProfiles[0]);
-          }
+  const { data: partner } = useQuery({
+    queryKey: ["partner", profileData?.couple_id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("couple_id", profileData!.couple_id!)
+        .neq("id", user!.id);
+      return data && data.length > 0 ? data[0] : null;
+    },
+    enabled: !!profileData?.couple_id && !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-          // Fetch financial plans
-          const { data: plans } = await supabase
-            .from("financial_plans")
-            .select("*")
-            .eq("couple_id", profileData.couple_id);
-          if (plans) {
-            setGoals(
-              plans.map((p) => ({
-                icon: p.icon,
-                title: p.title,
-                progress: p.target_amount > 0 ? Math.round(Number(p.current_amount) / Number(p.target_amount) * 100) : 0,
-              }))
-            );
-          }
-        }
-      }
-    };
-    fetchData();
-  }, [user]);
+  const { data: goals = [] } = useQuery({
+    queryKey: ["financial-plans", profileData?.couple_id],
+    queryFn: async () => {
+      const { data: plans } = await supabase
+        .from("financial_plans")
+        .select("*")
+        .eq("couple_id", profileData!.couple_id!);
+      return (plans || []).map((p) => ({
+        icon: p.icon,
+        title: p.title,
+        progress: p.target_amount > 0 ? Math.round(Number(p.current_amount) / Number(p.target_amount) * 100) : 0,
+      }));
+    },
+    enabled: !!profileData?.couple_id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const profile = profileData || null;
+  const inviteCode = coupleData?.invite_code || "";
 
   const handleSignOut = async () => {
     await signOut();
