@@ -437,7 +437,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
+          <h1 className="font-semibold text-foreground text-sm text-pretty">{activityTitle}</h1>
           <div className="flex items-center gap-2">
             <p className="text-xs text-muted-foreground">Face-to-Face</p>
             {showSummary && (
@@ -506,7 +506,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <div className="relative w-full grid">
             <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
-              <h2 className="font-display text-xl font-semibold leading-snug">
+              <h2 className="font-display text-xl font-semibold leading-snug text-pretty">
                 {defaultPrompts[currentPrompt].question}
               </h2>
               <p className="text-xs">&nbsp;</p>
@@ -528,7 +528,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Discuss Together
               </p>
-              <h2 className="font-display text-xl font-semibold text-foreground leading-snug">
+              <h2 className="font-display text-xl font-semibold text-foreground leading-snug text-pretty">
                 {defaultPrompts[currentPrompt].question}
               </h2>
               <button
