@@ -13,8 +13,9 @@ const EMOJI_ONLY = /^[\p{Emoji}\s]+$/u;
 
 /**
  * Fast client-side pre-filter: immediately rejects obvious non-answers.
+ * Exported so callers can seed quality counts from historical messages.
  */
-function passesPreFilter(text: string): boolean {
+export function passesPreFilter(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length < 10) return false;
   if (EMOJI_ONLY.test(trimmed)) return false;
