@@ -737,7 +737,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                       </div>
                     )
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{msg.content}</p>
                   )}
                 </div>
               </div>
