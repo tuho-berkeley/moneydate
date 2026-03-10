@@ -180,6 +180,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setRevealedSegments(new Set());
     setFreshSegments(new Set());
     await resetCompletion();
+    queryClient.removeQueries({ queryKey: ["face-to-face-prompts", activityId] });
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, queryClient, resetCompletion]);
