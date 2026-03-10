@@ -144,9 +144,10 @@ interface StageCardProps {
   isOpen: boolean;
   onToggle: () => void;
   onActivityClick: (activity: ActivityWithProgress) => void;
+  upNextId?: string;
 }
 
-const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick }: StageCardProps) => {
+const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick, upNextId }: StageCardProps) => {
   const isComplete = stage.completedCount === stage.totalCount && stage.totalCount > 0;
   const progressPercent = stage.totalCount > 0 ? stage.completedCount / stage.totalCount * 100 : 0;
 
