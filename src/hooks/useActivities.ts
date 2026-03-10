@@ -70,19 +70,8 @@ export function useStagesWithActivities() {
       const stagesWithActivities: StageWithActivities[] = (stages || []).map((stage, stageIndex) => {
         const stageActivities = (activities || []).filter((a) => a.stage_id === stage.id);
         
-        // Determine if this stage is unlocked
-        // First stage is always unlocked, others require previous stage completion
-        let isUnlocked = stageIndex === 0;
-        
-        if (stageIndex > 0) {
-          const prevStage = stages[stageIndex - 1];
-          const prevStageActivities = (activities || []).filter((a) => a.stage_id === prevStage.id);
-          const allPrevCompleted = prevStageActivities.every((a) => {
-            const ua = progressMap.get(a.id);
-            return ua?.status === "completed";
-          });
-          isUnlocked = allPrevCompleted;
-        }
+        // Temporary: Stages 1-3 unlocked, Stages 4-5 locked
+        const isUnlocked = stage.order_index <= 2;
 
         // Map activities with their user status
         const activitiesWithProgress: ActivityWithProgress[] = stageActivities.map((activity, activityIndex) => {
