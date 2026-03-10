@@ -5,9 +5,12 @@ import UpNextCard from "@/components/UpNextCard";
 import ProgressCards from "@/components/ProgressCards";
 import ActivityPath from "@/components/ActivityPath";
 
+const SCROLL_KEY = "homepage_scrollY";
+
 const Index = () => {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState("");
+  const restoredRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -24,6 +27,37 @@ const Index = () => {
       setDisplayName(name);
     });
   }, [user]);
+
+  // Save scroll position on scroll (debounced)
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handleScroll = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+      }, 100);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Restore scroll position after content renders
+  useEffect(() => {
+    if (restoredRef.current) return;
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (!saved || saved === "0") return;
+    const y = parseInt(saved, 10);
+    if (isNaN(y)) return;
+    // Wait for DOM to settle
+    const raf = requestAnimationFrame(() => {
+      window.scrollTo(0, y);
+      restoredRef.current = true;
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [displayName]); // trigger after profile loads
 
   const greeting = () => {
     const hour = new Date().getHours();
