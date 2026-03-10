@@ -110,7 +110,23 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
-  // Seed AI starter message — buffer silently, then reveal
+  // Seed quality count from existing messages on load
+  const qualitySeededRef = useRef(false);
+  useEffect(() => {
+    if (qualitySeededRef.current || !messagesLoaded || dbMessages.length === 0) return;
+    qualitySeededRef.current = true;
+    const userMsgs = dbMessages.filter(m => m.role === "user");
+    const count = userMsgs.filter(m => passesPreFilter(m.content)).length;
+    qualityCountRef.current = count;
+    console.log(`[SoloChat] Seeded quality count: ${count} from ${userMsgs.length} user messages`);
+    if (count >= 3) {
+      setCompletionReached(true);
+      setShowClosureButtons(true);
+      markCompleted();
+    }
+  }, [messagesLoaded, dbMessages, markCompleted]);
+
+
   const seedingRef = useRef(false);
   useEffect(() => {
     if (!conversation || !messagesLoaded || seedingRef.current || dbMessages.length > 0) return;
