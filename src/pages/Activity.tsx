@@ -77,7 +77,7 @@ const Activity = () => {
         .select("status")
         .eq("activity_id", id)
         .eq("user_id", user.id)
-        .eq("status", "completed")
+        .in("status", ["completed", "insights_generated"])
         .maybeSingle();
 
       // If the activity is marked completed, check which conversation types exist
@@ -102,7 +102,7 @@ const Activity = () => {
       select("status").
       eq("activity_id", id).
       eq("user_id", user.id).
-      eq("status", "completed").
+      in("status", ["completed", "insights_generated"]).
       maybeSingle();
       return !!data;
     },

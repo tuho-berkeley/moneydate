@@ -16,6 +16,7 @@ const typeConfig: Record<ActivityType, {label: string;icon: typeof MessageCircle
 
 const statusStyles: Record<ActivityStatus, string> = {
   completed: "bg-card border-border shadow-card",
+  insights_generated: "bg-card border-border shadow-card",
   available: "bg-card border-primary/30 shadow-soft",
   in_progress: "bg-card border-primary/20 shadow-card",
   locked: "bg-muted/50 border-border/50 opacity-60"
@@ -211,7 +212,8 @@ interface ActivityItemProps {
 
 const ActivityItem = ({ activity, isUpNext, onClick }: ActivityItemProps) => {
   const config = typeConfig[activity.type];
-  const Icon = activity.userStatus === "completed" ?
+  const isCompleted = activity.userStatus === "completed" || activity.userStatus === "insights_generated";
+  const Icon = isCompleted ?
   Check :
   activity.userStatus === "locked" ?
   Lock :
@@ -230,7 +232,7 @@ const ActivityItem = ({ activity, isUpNext, onClick }: ActivityItemProps) => {
       <div className="flex items-center gap-[14px]">
         <div
           className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          activity.userStatus === "completed" ?
+          activity.userStatus === "completed" || activity.userStatus === "insights_generated" ?
           "bg-success-light text-success" :
           activity.userStatus === "available" || activity.userStatus === "in_progress" ?
           "bg-primary text-primary-foreground" :

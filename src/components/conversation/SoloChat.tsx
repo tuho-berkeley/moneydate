@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useActivities } from "@/hooks/useActivities";
 import { ArrowLeft, Send, Loader2, RotateCcw, Sparkles, MessageCircle } from "lucide-react";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
@@ -55,7 +56,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
+  const { markCompleted, markInsightsGenerated, resetCompletion } = useConversationCompletion(activityId);
 
   // Quality answer tracking
   const qualityCountRef = useRef(0);
@@ -110,6 +111,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
+  // Check current activity status
+  const { data: activitiesData } = useActivities();
+  const currentActivityStatus = activitiesData?.find(a => a.id === activityId)?.userStatus;
+
   // Seed quality count from existing messages on load
   const qualitySeededRef = useRef(false);
   useEffect(() => {
@@ -121,10 +126,15 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     console.log(`[SoloChat] Seeded quality count: ${count} from ${userMsgs.length} user messages`);
     if (count >= 3) {
       setCompletionReached(true);
-      setShowClosureButtons(true);
       markCompleted();
+      // If insights already generated, show post-insights state
+      if (currentActivityStatus === "insights_generated") {
+        setShowInsights(true);
+      } else {
+        setShowClosureButtons(true);
+      }
     }
-  }, [messagesLoaded, dbMessages, markCompleted]);
+  }, [messagesLoaded, dbMessages, markCompleted, currentActivityStatus]);
 
 
   const seedingRef = useRef(false);
@@ -369,6 +379,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
+        markInsightsGenerated();
         setIsWaitingForAI(false);
         setIsGeneratingInsights(false);
       },
@@ -385,6 +396,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setShowClosureButtons(false);
     setCompletionReached(false);
     setContinueAnyway(true);
+    setShowInsights(false);
+    setIsGeneratingInsights(false);
   }, []);
 
   const handleSend = useCallback(async () => {
@@ -629,12 +642,36 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
       {/* Show "done" footer when insights are shown and all messages revealed */}
       {showInsights && !isGeneratingInsights && !isWaitingForAI && freshIds.size === 0 && (
-        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+        <div className="bg-card border-t border-border p-4 sticky bottom-0 flex gap-3">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Start Over
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Start over?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will clear all messages and start fresh. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleRestart}>Start Over</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button
-            onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
-            className="w-full rounded-xl"
+            onClick={handleContinueConversation}
+            className="flex-1 rounded-xl gap-2"
           >
-            Complete
+            <MessageCircle className="w-4 h-4" />
+            Follow Up
           </Button>
         </div>
       )}
