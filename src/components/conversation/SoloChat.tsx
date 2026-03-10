@@ -232,8 +232,13 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      const el = textareaRef.current;
+      // Use scrollHeight without collapsing to avoid layout thrash
+      el.style.height = "0";
+      el.style.overflow = "hidden";
+      const newHeight = Math.min(el.scrollHeight, 120);
+      el.style.height = `${newHeight}px`;
+      el.style.overflow = newHeight >= 120 ? "auto" : "hidden";
     }
   }, [input]);
 
