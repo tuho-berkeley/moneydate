@@ -134,7 +134,7 @@ const Activity = () => {
   const Icon = config.icon;
 
   const handleStartConversation = (mode: "solo" | "together" | "face_to_face") => {
-    navigate(`/conversation/${activity.id}?mode=${mode}`);
+    navigate(`/conversation/${(activity as any).slug}?mode=${mode}`);
   };
 
   return (
