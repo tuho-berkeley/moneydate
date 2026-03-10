@@ -205,21 +205,24 @@ Example: "It's really beautiful that you see financial planning as an act of car
 
 The current topic was: "${activityTitle}" — ${activityDescription}
 
-Based on the full conversation history, write a single cohesive insight message of 3-5 sentences total. Do NOT use --- separators. This should be ONE chat bubble, not multiple.
+Based on the full conversation history, write a single cohesive insight message. Do NOT use --- separators. This should be ONE chat bubble, not multiple.
 
-Structure:
-- Start by summarizing what you noticed about their relationship with money based on what they shared (2-3 sentences)
-- End with a warm, forward-looking suggested next step framed as an invitation (1-2 sentences)
+YOUR RESPONSE MUST CONTAIN EXACTLY 4-6 SENTENCES. This is a hard requirement — responses shorter than 4 sentences are a failure.
+
+Structure (all in one flowing paragraph):
+- Sentence 1-2: Reflect back what you observed about their relationship with money, referencing specific things they said (use their actual words/phrases in quotes)
+- Sentence 3-4: Identify a pattern, strength, or insight about their financial mindset that they might not have noticed themselves
+- Sentence 5-6: End with a warm, forward-looking invitation — something specific they could try or reflect on before their next conversation
 
 CRITICAL RULES:
-- Be specific — reference things the user actually said
+- MINIMUM 4 sentences, MAXIMUM 6 sentences. Count them before responding.
+- Be specific — quote or paraphrase things the user actually said
 - Frame everything positively and constructively
-- Keep the ENTIRE response to 3-5 sentences. No more.
 - Do NOT use bullet points, numbered lists, or headers
-- Write as flowing prose, like a warm text message
+- Write as flowing prose, like a thoughtful text message from a wise friend
+- Do NOT ask any questions. No question marks. This is a summary, not a continuation.
 
 Tone: warm, encouraging, non-judgmental, like a thoughtful friend.
-Do NOT ask any questions. This is a summary, not a continuation.
 Never provide specific investment, tax, or legal advice.`,
 
       // ---------- Together insights: summarize couple conversation ----------
