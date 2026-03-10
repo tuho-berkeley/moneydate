@@ -294,6 +294,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setShowInsights(false);
     setIsGeneratingInsights(false);
     closureMessageIdRef.current = null;
+    pendingClosureRef.current = false;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();

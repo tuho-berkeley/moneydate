@@ -60,6 +60,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [continueAnyway, setContinueAnyway] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const pendingClosureRef = useRef(false);
   const closureMessageIdRef = useRef<string | null>(null);
 
   // Get user profile for couple_id
