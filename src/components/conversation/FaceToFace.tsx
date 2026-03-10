@@ -96,6 +96,39 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     retry: 1,
   });
 
+  const [extraPrompts, setExtraPrompts] = useState<Prompt[]>([]);
+  const [isGeneratingMore, setIsGeneratingMore] = useState(false);
+  const allPrompts = [...prompts, ...extraPrompts];
+
+  const generateOneMore = useCallback(async () => {
+    setIsGeneratingMore(true);
+    try {
+      const currentAll = [...prompts, ...extraPrompts];
+      const resp = await supabase.functions.invoke("chat", {
+        body: {
+          messages: [],
+          activityTitle,
+          activityDescription,
+          conversationType: "generate_one_prompt",
+          existingQuestions: currentAll.map(p => p.question),
+        },
+      });
+      if (resp.error) throw resp.error;
+      const data = resp.data as Prompt;
+      if (data?.question && data?.guidance) {
+        setExtraPrompts(prev => [...prev, data]);
+        setCurrentPrompt(currentAll.length); // navigate to the new prompt
+        setIsFlipped(false);
+      } else {
+        toast.error("Couldn't generate a new question. Try again.");
+      }
+    } catch {
+      toast.error("Failed to generate question. Please try again.");
+    } finally {
+      setIsGeneratingMore(false);
+    }
+  }, [prompts, extraPrompts, activityTitle, activityDescription]);
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
