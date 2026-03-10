@@ -212,7 +212,8 @@ interface ActivityItemProps {
 
 const ActivityItem = ({ activity, isUpNext, onClick }: ActivityItemProps) => {
   const config = typeConfig[activity.type];
-  const Icon = activity.userStatus === "completed" ?
+  const isCompleted = activity.userStatus === "completed" || activity.userStatus === "insights_generated";
+  const Icon = isCompleted ?
   Check :
   activity.userStatus === "locked" ?
   Lock :
