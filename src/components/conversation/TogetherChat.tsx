@@ -249,16 +249,29 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       },
       onDone: async () => {
         if (fullResponse) {
-          const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
-          for (const segment of segments) {
-            // Skip segments that are only an [ASKING:...] tag (would render as empty bubble)
-            const stripped = segment.replace(/\[ASKING:[^\]]+\]\s*$/, "").trim();
-            if (!stripped) continue;
+          const rawSegments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+          
+          // Extract [ASKING:] tag from the full response (may be on any segment)
+          const askingMatch = fullResponse.match(/\[ASKING:[^\]]+\]\s*$/);
+          const askingTag = askingMatch ? askingMatch[0] : "";
+          
+          // Filter out segments that are only the asking tag
+          const segments = rawSegments.filter(s => {
+            const stripped = s.replace(/\[ASKING:[^\]]+\]\s*$/, "").trim();
+            return stripped.length > 0;
+          });
+          
+          for (let i = 0; i < segments.length; i++) {
+            let content = segments[i];
+            // Ensure the last segment has the asking tag
+            if (i === segments.length - 1 && askingTag && !content.includes("[ASKING:")) {
+              content = content + "\n" + askingTag;
+            }
             await supabase.from("messages").insert({
               conversation_id: conversation.id,
               sender_id: null,
               role: "ai",
-              content: segment,
+              content,
             });
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
