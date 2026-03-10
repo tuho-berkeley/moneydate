@@ -150,7 +150,7 @@ const Profile = () => {
               </div>
               {partner && (
                 <>
-                  <span className="text-muted-foreground text-lg">❤️</span>
+                  <Heart className="w-5 h-5 text-primary fill-primary" />
                   <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-lg font-bold text-primary">
                     {partner.display_name?.charAt(0)?.toUpperCase() || "?"}
                   </div>
