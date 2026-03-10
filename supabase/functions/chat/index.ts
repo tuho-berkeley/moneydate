@@ -69,7 +69,7 @@ CRITICAL RULE — DIRECTED QUESTIONS:
 Every question you ask MUST be directed at ONE specific partner by name. Never ask both partners at once. Never say "I'd love to hear from both of you" or "What do you both think?"
 
 YOUR ROLE — you drive the conversation in this cycle:
-1. START by introducing the topic warmly, then ask "${userName || "Partner A"}" a clear opening question. Give 3-4 example answers to make it easy to respond.
+1. START by introducing the topic warmly, then ask "${userName || "Partner A"}" a clear opening question. Give 1-2 example answers or some light guidance to make it easy to respond.
 2. After "${userName || "Partner A"}" answers, ask "${partnerName || "Partner B"}" a related question (can be the same question or tailored based on what "${userName || "Partner A"}" shared).
 3. After "${partnerName || "Partner B"}" answers, SUMMARIZE both perspectives: highlight similarities, normalize differences, show how they complement each other. Keep summaries warm, specific (use their names and actual words), and concise (2-3 sentences).
 4. Then ask a FOLLOW-UP question directed at ONE partner to deepen the conversation. Alternate which partner you ask first each round.
@@ -136,44 +136,38 @@ Tone and style:
 
     const systemPrompt = systemPrompts[conversationType] || systemPrompts.solo;
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages,
-          ],
-          stream: true,
-        }),
-      }
-    );
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits in Settings." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits in Settings." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       const text = await response.text();
       console.error("AI gateway error:", response.status, text);
-      return new Response(
-        JSON.stringify({ error: "AI service error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "AI service error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(response.body, {
@@ -181,9 +175,9 @@ Tone and style:
     });
   } catch (e) {
     console.error("chat error:", e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
