@@ -42,6 +42,7 @@ const Activity = () => {
     enabled: !!user,
   });
 
+  const id = activity?.id;
   const { data: completedTypes } = useQuery({
     queryKey: ["completed-conversation-types", id, user?.id, profile?.couple_id],
     queryFn: async () => {
