@@ -554,7 +554,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 <ChevronLeft className="w-4 h-4" /> Previous
               </Button>
 
-              {currentPrompt < prompts.length - 1 && (
+              {currentPrompt < allPrompts.length - 1 && (
                 <Button
                   variant="ghost"
                   size="sm"
