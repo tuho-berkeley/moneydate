@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Copy, ArrowRight, Share2 } from "lucide-react";
+import { Users, Copy, ArrowRight, Share2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ interface Props {
 
 const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
   const [showJoin, setShowJoin] = useState(false);
+  const [showInviteOptions, setShowInviteOptions] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [joining, setJoining] = useState(false);
   const { user } = useAuth();
@@ -48,6 +49,17 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
     setTimeout(() => window.location.reload(), 1000);
   };
 
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(inviteCode);
+    toast.success("Invite code copied!");
+    setShowInviteOptions(false);
+  };
+
+  const handleShareMessage = () => {
+    onShare();
+    setShowInviteOptions(false);
+  };
+
   return (
     <div>
       <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Your Partner</h3>
@@ -62,26 +74,45 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
           </div>
         </div>
 
-        {!showJoin ?
-        <div className="flex gap-2">
-            <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5">
-              <Share2 className="w-3.5 h-3.5" />
-              Share Invite
+        {showInviteOptions ? (
+          <div className="space-y-2">
+            <button
+              onClick={handleCopyCode}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-background hover:bg-muted transition-colors text-left"
+            >
+              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                <Copy className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Copy Code</p>
+                <p className="text-xs text-muted-foreground font-mono tracking-widest uppercase">{inviteCode}</p>
+              </div>
+            </button>
+            <button
+              onClick={handleShareMessage}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-background hover:bg-muted transition-colors text-left"
+            >
+              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                <Share2 className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Send Message</p>
+                <p className="text-xs text-muted-foreground">Share invite link via message</p>
+              </div>
+            </button>
+            <Button onClick={() => setShowInviteOptions(false)} variant="ghost" size="sm" className="w-full rounded-full">
+              Cancel
             </Button>
-            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5">
-              <ArrowRight className="w-3.5 h-3.5" />
-              Join with Code
-            </Button>
-          </div> :
-
-        <div className="space-y-2">
+          </div>
+        ) : showJoin ? (
+          <div className="space-y-2">
             <Input
-            placeholder="ENTER INVITE CODE"
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-            className="text-center text-sm font-mono tracking-widest uppercase"
-            maxLength={8} />
-          
+              placeholder="ENTER INVITE CODE"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              className="text-center text-sm font-mono tracking-widest uppercase"
+              maxLength={8}
+            />
             <div className="flex gap-2">
               <Button onClick={handleJoin} size="sm" className="flex-1 rounded-full" disabled={!joinCode.trim() || joining}>
                 {joining ? "Connecting..." : "Connect"}
@@ -91,10 +122,21 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
               </Button>
             </div>
           </div>
-        }
+        ) : (
+          <div className="flex gap-2">
+            <Button onClick={() => setShowInviteOptions(true)} variant="default" size="sm" className="flex-1 rounded-full gap-1.5">
+              <Users className="w-3.5 h-3.5" />
+              Invite Partner
+            </Button>
+            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5">
+              <ArrowRight className="w-3.5 h-3.5" />
+              Join with Code
+            </Button>
+          </div>
+        )}
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default ProfilePartnerSection;
