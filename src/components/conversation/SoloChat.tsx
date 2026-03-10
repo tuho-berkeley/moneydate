@@ -505,7 +505,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
   };
 
-  const inputDisabled = completionReached || showInsights;
+  const inputDisabled = (completionReached && !continueAnyway) || showInsights;
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
