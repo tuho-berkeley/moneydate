@@ -283,6 +283,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     }
 
     if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3 && !continueAnyway) {
+      completionReachedRef.current = true;
       setCompletionReached(true);
       markCompleted();
     }
