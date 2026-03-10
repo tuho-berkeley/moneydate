@@ -409,10 +409,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     // Refetch to show user message immediately
     await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
 
-    // Check quality answer asynchronously
-    const lastQuestion = getLastAIQuestion();
-    const isQuality = await isQualityAnswer(lastQuestion, userText);
-    if (isQuality) {
+    // Use passesPreFilter for immediate quality counting (same as seed logic)
+    // This ensures consistency between live and reload counts
+    if (passesPreFilter(userText)) {
       qualityCountRef.current += 1;
     }
 
