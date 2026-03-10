@@ -60,6 +60,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const [continueAnyway, setContinueAnyway] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const pendingClosureRef = useRef(false);
   const closureMessageIdRef = useRef<string | null>(null);
 
   // Get user profile for couple_id
@@ -371,8 +372,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         }
         setIsAIResponding(false);
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
-        // Show closure buttons after pre-closure completes
-        setShowClosureButtons(true);
+        // Defer closure buttons until typewriter animation finishes
+        pendingClosureRef.current = true;
       },
       onError: (error) => {
         toast.error(error);
@@ -474,7 +475,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           setRevealedIds(prev => new Set([...prev, nextId]));
           setFreshIds(prev => new Set([...prev, nextId]));
         }, 300);
+      } else if (pendingClosureRef.current) {
+        pendingClosureRef.current = false;
+        setTimeout(() => setShowClosureButtons(true), 300);
       }
+    } else if (pendingClosureRef.current && revealQueueRef.current.length === 0) {
+      pendingClosureRef.current = false;
+      setTimeout(() => setShowClosureButtons(true), 300);
     }
   }, []);
 
@@ -514,6 +521,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setShowInsights(false);
     setIsGeneratingInsights(false);
     closureMessageIdRef.current = null;
+    pendingClosureRef.current = false;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();

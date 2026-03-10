@@ -66,6 +66,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [showInsights, setShowInsights] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const closureMessageIdRef = useRef<string | null>(null); // kept for restart cleanup
+  const pendingClosureRef = useRef(false);
 
   // Get or create conversation
   const { data: conversation } = useQuery({
@@ -254,7 +255,14 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           setRevealedIds(prev => new Set([...prev, nextId]));
           setFreshIds(prev => new Set([...prev, nextId]));
         }, 300);
+      } else if (pendingClosureRef.current) {
+        // Queue empty and closure pending — show buttons after last typewriter finishes
+        pendingClosureRef.current = false;
+        setTimeout(() => setShowClosureButtons(true), 300);
       }
+    } else if (pendingClosureRef.current && revealQueueRef.current.length === 0) {
+      pendingClosureRef.current = false;
+      setTimeout(() => setShowClosureButtons(true), 300);
     }
   }, []);
 
@@ -286,6 +294,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setShowInsights(false);
     setIsGeneratingInsights(false);
     closureMessageIdRef.current = null;
+    pendingClosureRef.current = false;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
@@ -335,8 +344,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
         setIsWaitingForAI(false);
-        // Show closure buttons after pre-closure completes
-        setShowClosureButtons(true);
+        // Defer closure buttons until typewriter animation finishes
+        pendingClosureRef.current = true;
       },
       onError: (error) => {
         toast.error(error);
