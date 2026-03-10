@@ -50,25 +50,25 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
 
   return (
     <div>
-      <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1 uppercase">Your Partner</h3>
+      <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Your Partner</h3>
       <div className="bg-card rounded-xl shadow-card p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
             <Users className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-foreground uppercase">No partner connected</p>
-            <p className="text-xs text-muted-foreground uppercase">Invite or join with a code</p>
+            <p className="text-sm font-medium text-foreground">No partner connected</p>
+            <p className="text-xs text-muted-foreground">Invite or join with a code</p>
           </div>
         </div>
 
         {!showJoin ?
         <div className="flex gap-2">
-            <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5 uppercase">
+            <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5">
               <Share2 className="w-3.5 h-3.5" />
               Share Invite
             </Button>
-            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5 uppercase">
+            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5">
               <ArrowRight className="w-3.5 h-3.5" />
               Join with Code
             </Button>
@@ -79,14 +79,14 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
             placeholder="ENTER INVITE CODE"
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-            className="text-center text-sm font-mono tracking-widest"
+            className="text-center text-sm font-mono tracking-widest uppercase"
             maxLength={8} />
           
             <div className="flex gap-2">
-              <Button onClick={handleJoin} size="sm" className="flex-1 rounded-full uppercase" disabled={!joinCode.trim() || joining}>
-                {joining ? "CONNECTING..." : "CONNECT"}
+              <Button onClick={handleJoin} size="sm" className="flex-1 rounded-full" disabled={!joinCode.trim() || joining}>
+                {joining ? "Connecting..." : "Connect"}
               </Button>
-              <Button onClick={() => setShowJoin(false)} variant="ghost" size="sm" className="rounded-full uppercase">
+              <Button onClick={() => setShowJoin(false)} variant="ghost" size="sm" className="rounded-full">
                 Cancel
               </Button>
             </div>

@@ -130,8 +130,8 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
         <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto">
           <Users className="w-8 h-8 text-primary" />
         </div>
-        <h2 className="font-display text-2xl font-bold text-foreground text-pretty uppercase">Connect with your partner</h2>
-        <p className="text-muted-foreground text-sm text-pretty uppercase">
+        <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Connect with your partner</h2>
+        <p className="text-muted-foreground text-sm text-pretty">
           MoneyDate works best together, but you can explore solo first.
         </p>
       </div>
@@ -145,8 +145,8 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
             <Copy className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <span className="text-sm font-medium text-foreground uppercase">Invite Partner</span>
-            <p className="text-xs text-muted-foreground uppercase">Share a code with your partner</p>
+            <span className="text-sm font-medium text-foreground">Invite Partner</span>
+            <p className="text-xs text-muted-foreground">Share a code with your partner</p>
           </div>
           <ArrowRight className="w-4 h-4 text-muted-foreground" />
         </button>
@@ -159,14 +159,14 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
             <Users className="w-5 h-5 text-accent-foreground" />
           </div>
           <div className="flex-1">
-            <span className="text-sm font-medium text-foreground uppercase">Join with Code</span>
-            <p className="text-xs text-muted-foreground uppercase">Enter your partner's invite code</p>
+            <span className="text-sm font-medium text-foreground">Join with Code</span>
+            <p className="text-xs text-muted-foreground">Enter your partner's invite code</p>
           </div>
           <ArrowRight className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
 
-      <button onClick={onSkip} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors uppercase">
+      <button onClick={onSkip} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">
         Skip for now
       </button>
     </div>
