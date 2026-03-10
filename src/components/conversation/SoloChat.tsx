@@ -548,7 +548,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
               <div className={msg.role === "ai" ? "max-w-[90%]" : "max-w-[85%]"}>
                 {msg.role === "ai" && labelType && <AIMessageLabel type={labelType} />}
                 <div
-                  className={`rounded-2xl p-4 ${
+                  className={`rounded-2xl p-4 overflow-hidden ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary/50 text-foreground"
@@ -566,7 +566,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                       </div>
                     )
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{msg.content}</p>
                   )}
                 </div>
               </div>
