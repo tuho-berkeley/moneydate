@@ -57,6 +57,15 @@ const ActivityPath = () => {
     });
   };
 
+  // Find the "up next" activity (first available or in_progress)
+  let upNextId: string | undefined;
+  for (const stage of stages || []) {
+    const found = stage.activities.find(
+      (a) => a.userStatus === "in_progress" || a.userStatus === "available"
+    );
+    if (found) { upNextId = found.id; break; }
+  }
+
   const handleStartActivity = (activity: ActivityWithProgress) => {
     if (activity.userStatus === "locked") return;
 
