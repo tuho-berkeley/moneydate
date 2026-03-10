@@ -54,7 +54,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted } = useConversationCompletion(activityId);
+  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
 
   // Get or create conversation
   const { data: conversation } = useQuery({
@@ -247,9 +247,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
+    await resetCompletion();
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
-  }, [conversation, isSending, queryClient]);
+  }, [conversation, isSending, queryClient, resetCompletion]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user) return;

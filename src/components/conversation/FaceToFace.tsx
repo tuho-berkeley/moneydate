@@ -80,7 +80,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [showSummary, setShowSummary] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-  const { markCompleted } = useConversationCompletion(activityId);
+  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -156,9 +156,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setSummaryText(null);
     setRevealedSegments(new Set());
     setFreshSegments(new Set());
+    await resetCompletion();
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
-  }, [conversation, queryClient]);
+  }, [conversation, queryClient, resetCompletion]);
 
   const startRecording = useCallback(async () => {
     try {

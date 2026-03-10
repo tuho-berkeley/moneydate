@@ -49,7 +49,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const aiTriggerRef = useRef(false);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted } = useConversationCompletion(activityId);
+  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
 
   // Get user profile for couple_id
   const { data: profile } = useQuery({
@@ -394,6 +394,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
+    await resetCompletion();
 
     const { error } = await supabase
       .from("messages")
@@ -409,7 +410,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     queryClient.setQueryData(["messages", conversation.id], []);
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
-  }, [conversation, isSending, queryClient]);
+  }, [conversation, isSending, queryClient, resetCompletion]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || !conversation || !user || myResponseSent) return;
@@ -427,18 +428,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
     if (error) {
       toast.error("Failed to send message");
-    } else {
-      // Together completion: each partner answered at least 1 question
-      // User just sent a message, so check if partner already has one
-      const partnerHasMessages = partnerId ? dbMessages.some(m => m.sender_id === partnerId) : false;
-      const userHadMessages = dbMessages.some(m => m.sender_id === user.id);
-      // Both have now sent at least 1 if partner had messages, OR if user already had messages and this could be partner's turn
-      if (partnerHasMessages && (userHadMessages || true)) {
-        markCompleted();
-      }
     }
     setIsSending(false);
-  }, [input, isSending, conversation, user, myResponseSent, dbMessages, partnerId, markCompleted]);
+  }, [input, isSending, conversation, user, myResponseSent]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
