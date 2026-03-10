@@ -468,9 +468,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         <button
           onClick={async () => {
             const shareUrl = `${window.location.origin}/conversation/${activityId}?mode=together`;
+            const shareText = `Join me for "${activityTitle}" on MoneyDate! 💚\n${shareUrl}`;
             const copyFallback = () => {
               const ta = document.createElement("textarea");
-              ta.value = shareUrl;
+              ta.value = shareText;
               ta.style.cssText = "position:fixed;opacity:0";
               document.body.appendChild(ta);
               ta.select();
@@ -482,7 +483,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               try {
                 await navigator.share({
                   title: activityTitle,
-                  text: `Join me for "${activityTitle}" on MoneyDate!`,
+                  text: `Join me for "${activityTitle}" on MoneyDate! 💚`,
                   url: shareUrl,
                 });
                 return;
@@ -491,7 +492,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               }
             }
             try {
-              await navigator.clipboard.writeText(shareUrl);
+              await navigator.clipboard.writeText(shareText);
               toast.success("Link copied to clipboard!");
             } catch {
               copyFallback();
