@@ -663,7 +663,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       )}
 
       {/* Show "done" footer when insights are shown and all messages revealed */}
-      {showInsights && !isGeneratingInsights && !isWaitingForAI && freshIds.size === 0 && (
+      {showInsights && !isGeneratingInsights && !isWaitingForAI && (
         <div className="bg-card border-t border-border p-4 sticky bottom-0 flex gap-3">
           <AlertDialog>
             <AlertDialogTrigger asChild>
