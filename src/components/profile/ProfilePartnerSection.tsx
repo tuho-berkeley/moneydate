@@ -21,11 +21,11 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
     if (!joinCode.trim() || !user) return;
     setJoining(true);
 
-    const { data: couple, error } = await supabase
-      .from("couples")
-      .select("id")
-      .eq("invite_code", joinCode.trim().toUpperCase())
-      .single();
+    const { data: couple, error } = await supabase.
+    from("couples").
+    select("id").
+    eq("invite_code", joinCode.trim().toUpperCase()).
+    single();
 
     if (error || !couple) {
       toast.error("Invalid code. Please check and try again.");
@@ -33,10 +33,10 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
       return;
     }
 
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({ couple_id: couple.id } as any)
-      .eq("id", user.id);
+    const { error: updateError } = await supabase.
+    from("profiles").
+    update({ couple_id: couple.id } as any).
+    eq("id", user.id);
 
     if (updateError) {
       toast.error("Could not join. Please try again.");
@@ -50,7 +50,7 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
 
   return (
     <div>
-      <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Partner</h3>
+      <h3 className="font-display text-lg font-semibold text-foreground mb-3 px-1">Your Partner</h3>
       <div className="bg-card rounded-xl shadow-card p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
@@ -62,8 +62,8 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
           </div>
         </div>
 
-        {!showJoin ? (
-          <div className="flex gap-2">
+        {!showJoin ?
+        <div className="flex gap-2">
             <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5">
               <Share2 className="w-3.5 h-3.5" />
               Share Invite
@@ -72,16 +72,16 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
               <ArrowRight className="w-3.5 h-3.5" />
               Join with Code
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-2">
+          </div> :
+
+        <div className="space-y-2">
             <Input
-              placeholder="Enter invite code"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              className="text-center text-sm font-mono tracking-widest"
-              maxLength={8}
-            />
+            placeholder="Enter invite code"
+            value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            className="text-center text-sm font-mono tracking-widest"
+            maxLength={8} />
+          
             <div className="flex gap-2">
               <Button onClick={handleJoin} size="sm" className="flex-1 rounded-full" disabled={!joinCode.trim() || joining}>
                 {joining ? "Connecting..." : "Connect"}
@@ -91,10 +91,10 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
               </Button>
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ProfilePartnerSection;
