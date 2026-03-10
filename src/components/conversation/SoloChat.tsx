@@ -271,6 +271,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
 
     seedingRef.current = false;
+    qualitySeededRef.current = false;
     qualityCountRef.current = 0;
     setCompletionReached(false);
     setShowClosureButtons(false);

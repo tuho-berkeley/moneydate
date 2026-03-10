@@ -505,6 +505,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setIsSending(false);
     setIsAIResponding(false);
     seedingRef.current = false;
+    qualitySeededRef.current = false;
     aiTriggerRef.current = false;
     myQualityCountRef.current = 0;
     partnerQualityCountRef.current = 0;
