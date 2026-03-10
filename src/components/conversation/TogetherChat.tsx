@@ -372,8 +372,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         }
         setIsAIResponding(false);
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
-        // Show closure buttons after pre-closure completes
-        setShowClosureButtons(true);
+        // Defer closure buttons until typewriter animation finishes
+        pendingClosureRef.current = true;
       },
       onError: (error) => {
         toast.error(error);
