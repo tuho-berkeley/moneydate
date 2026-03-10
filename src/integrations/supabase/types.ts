@@ -20,6 +20,7 @@ export type Database = {
           icon: string
           id: string
           order_index: number
+          slug: string
           stage_id: string | null
           title: string
           type: Database["public"]["Enums"]["activity_type"]
@@ -30,6 +31,7 @@ export type Database = {
           icon?: string
           id?: string
           order_index?: number
+          slug: string
           stage_id?: string | null
           title: string
           type: Database["public"]["Enums"]["activity_type"]
@@ -40,6 +42,7 @@ export type Database = {
           icon?: string
           id?: string
           order_index?: number
+          slug?: string
           stage_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["activity_type"]
