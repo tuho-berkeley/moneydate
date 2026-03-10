@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
-import { isQualityAnswer } from "@/lib/isQualityAnswer";
+import { isQualityAnswer, passesPreFilter } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import type { Database } from "@/integrations/supabase/types";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
@@ -110,7 +110,23 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     enabled: !!conversation,
   });
 
-  // Seed AI starter message — buffer silently, then reveal
+  // Seed quality count from existing messages on load
+  const qualitySeededRef = useRef(false);
+  useEffect(() => {
+    if (qualitySeededRef.current || !messagesLoaded || dbMessages.length === 0) return;
+    qualitySeededRef.current = true;
+    const userMsgs = dbMessages.filter(m => m.role === "user");
+    const count = userMsgs.filter(m => passesPreFilter(m.content)).length;
+    qualityCountRef.current = count;
+    console.log(`[SoloChat] Seeded quality count: ${count} from ${userMsgs.length} user messages`);
+    if (count >= 3) {
+      setCompletionReached(true);
+      setShowClosureButtons(true);
+      markCompleted();
+    }
+  }, [messagesLoaded, dbMessages, markCompleted]);
+
+
   const seedingRef = useRef(false);
   useEffect(() => {
     if (!conversation || !messagesLoaded || seedingRef.current || dbMessages.length > 0) return;
@@ -255,6 +271,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     }
 
     seedingRef.current = false;
+    qualitySeededRef.current = false;
     qualityCountRef.current = 0;
     setCompletionReached(false);
     setShowClosureButtons(false);
