@@ -343,8 +343,8 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
         setIsWaitingForAI(false);
-        // Show closure buttons after pre-closure completes
-        setShowClosureButtons(true);
+        // Defer closure buttons until typewriter animation finishes
+        pendingClosureRef.current = true;
       },
       onError: (error) => {
         toast.error(error);
