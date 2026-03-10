@@ -547,7 +547,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 </div>
                 <div className="invisible p-8 space-y-4 [grid-area:1/1]">
                   <p className="text-xs">&nbsp;</p>
-                  <p className="text-sm leading-relaxed">
+                  <p className="text-sm leading-relaxed text-pretty">
                     {prompts[currentPrompt].guidance}
                   </p>
                   <p className="text-xs">&nbsp;</p>
@@ -579,7 +579,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                     <Lightbulb className="w-3.5 h-3.5" />
                     Hint
                   </div>
-                  <p className="text-sm text-foreground leading-relaxed text-left">
+                  <p className="text-sm text-foreground leading-relaxed text-left text-pretty">
                     {prompts[currentPrompt].guidance}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
