@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -31,6 +31,8 @@ const Onboarding = () => {
   });
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const partnerCode = searchParams.get("code") || "";
   const { session, loading } = useAuth();
 
   useEffect(() => {
@@ -143,7 +145,7 @@ const Onboarding = () => {
           />
         );
       case 3:
-        return <PartnerConnectionStep onNext={next} onSkip={next} />;
+        return <PartnerConnectionStep onNext={next} onSkip={next} initialCode={partnerCode} />;
       case 4:
         return <TrustStep onFinish={finishOnboarding} />;
       default:
