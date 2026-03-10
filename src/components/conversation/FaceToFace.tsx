@@ -582,7 +582,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 <div className="invisible p-8 space-y-4 [grid-area:1/1]">
                   <p className="text-xs">&nbsp;</p>
                   <p className="text-sm leading-relaxed text-pretty">
-                    {prompts[currentPrompt].guidance}
+                    {allPrompts[currentPrompt].guidance}
                   </p>
                   <p className="text-xs">&nbsp;</p>
                 </div>
