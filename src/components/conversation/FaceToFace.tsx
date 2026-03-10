@@ -597,7 +597,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                     Discuss Together
                   </p>
                   <h2 className="font-display text-xl font-semibold text-foreground leading-snug text-pretty">
-                    {prompts[currentPrompt].question}
+                    {allPrompts[currentPrompt].question}
                   </h2>
                   <button
                     className="inline-flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
