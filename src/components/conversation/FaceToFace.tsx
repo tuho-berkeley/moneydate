@@ -452,6 +452,15 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     );
   }
 
+  if (isLoadingPrompts) {
+    return (
+      <div className="h-[100dvh] bg-background flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Preparing questions...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
