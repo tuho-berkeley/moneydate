@@ -396,15 +396,30 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     });
   }, [conversation, dbMessages, activityTitle, activityDescription, myName, partnerName, user, queryClient]);
 
-  // Check completion after each new user/partner message
-  useEffect(() => {
-    if (!user || !dbMessages.length) return;
+  // Check completion synchronously during render (not in effect) so the ref
+  // is set BEFORE the AI-trigger effect evaluates in the same render cycle.
+  const lastCheckedLengthRef = useRef(0);
+  if (dbMessages.length > lastCheckedLengthRef.current && user) {
+    lastCheckedLengthRef.current = dbMessages.length;
     const lastMsg = dbMessages[dbMessages.length - 1];
-    if (lastMsg.role !== "user" && lastMsg.role !== "partner") return;
-    if (!lastMsg.sender_id) return;
-    // Only check the latest message
-    checkQualityAndCompletion(lastMsg.sender_id, lastMsg.content);
-  }, [dbMessages.length]);
+    if ((lastMsg.role === "user" || lastMsg.role === "partner") && lastMsg.sender_id) {
+      // Inline completion check — sets completionReachedRef synchronously
+      if (!completionReachedRef.current && !continueAnyway) {
+        if (passesPreFilter(lastMsg.content)) {
+          if (lastMsg.sender_id === user.id) {
+            myQualityCountRef.current += 1;
+          } else {
+            partnerQualityCountRef.current += 1;
+          }
+        }
+        if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3) {
+          completionReachedRef.current = true;
+          setCompletionReached(true);
+          markCompleted();
+        }
+      }
+    }
+  }
 
   // When completion is reached, trigger pre-closure instead of normal AI
   const preClosureTriggeredRef = useRef(false);
