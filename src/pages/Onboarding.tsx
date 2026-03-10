@@ -31,6 +31,8 @@ const Onboarding = () => {
   });
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const partnerCode = searchParams.get("code") || "";
   const { session, loading } = useAuth();
 
   useEffect(() => {
