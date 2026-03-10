@@ -57,6 +57,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const myQualityCountRef = useRef(0);
   const partnerQualityCountRef = useRef(0);
   const [completionReached, setCompletionReached] = useState(false);
+  const completionReachedRef = useRef(false);
   const [showClosureButtons, setShowClosureButtons] = useState(false);
   const [continueAnyway, setContinueAnyway] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
