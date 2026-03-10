@@ -203,6 +203,7 @@ const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick, upNe
             <ActivityItem
               key={activity.id}
               activity={activity}
+              isUpNext={activity.id === upNextId}
               onClick={() => onActivityClick(activity)} />
 
             )}
