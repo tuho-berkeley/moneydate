@@ -64,7 +64,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [continueAnyway, setContinueAnyway] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
-  const closureMessageIdRef = useRef<string | null>(null);
+  const closureMessageIdRef = useRef<string | null>(null); // kept for restart cleanup
 
   // Get or create conversation
   const { data: conversation } = useQuery({
@@ -233,12 +233,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       return next;
     });
 
-    // If this was the pre-closure message, show closure buttons
-    if (msgId === closureMessageIdRef.current) {
-      setShowClosureButtons(true);
-      closureMessageIdRef.current = null;
-    }
-
     // Reveal next segment in queue
     const queue = revealQueueRef.current;
     const idx = queue.indexOf(msgId);
@@ -269,6 +263,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       toast.error("Failed to restart chat");
       return;
     }
+
+    // Clear cache immediately BEFORE resetting refs to prevent re-seeding from stale data
+    queryClient.setQueryData(["messages", conversation.id], []);
 
     seedingRef.current = false;
     qualitySeededRef.current = false;
@@ -315,28 +312,23 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       onDone: async () => {
         if (fullResponse && conversation) {
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
-          const insertedIds: string[] = [];
           for (const segment of segments) {
-            const { data } = await supabase.from("messages").insert({
+            await supabase.from("messages").insert({
               conversation_id: conversation.id,
               sender_id: null,
               role: "ai",
               content: segment,
-            }).select("id").single();
-            if (data) insertedIds.push(data.id);
-          }
-          // Track the last pre-closure message to trigger button display
-          if (insertedIds.length > 0) {
-            closureMessageIdRef.current = insertedIds[insertedIds.length - 1];
+            });
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
         setIsWaitingForAI(false);
+        // Show closure buttons after pre-closure completes
+        setShowClosureButtons(true);
       },
       onError: (error) => {
         toast.error(error);
         setIsWaitingForAI(false);
-        // Show buttons anyway on error
         setShowClosureButtons(true);
       },
     });

@@ -365,23 +365,20 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       onDone: async () => {
         if (fullResponse && conversation) {
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
-          const insertedIds: string[] = [];
           for (const segment of segments) {
-            const { data } = await supabase.from("messages").insert({
+            await supabase.from("messages").insert({
               conversation_id: conversation.id,
               sender_id: null,
               role: "ai",
               content: segment,
-            }).select("id").single();
-            if (data) insertedIds.push(data.id);
-          }
-          if (insertedIds.length > 0) {
-            closureMessageIdRef.current = insertedIds[insertedIds.length - 1];
+            });
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
         setIsAIResponding(false);
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
+        // Show closure buttons after pre-closure completes
+        setShowClosureButtons(true);
       },
       onError: (error) => {
         toast.error(error);
@@ -473,12 +470,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       return next;
     });
 
-    // If this was the pre-closure message, show closure buttons
-    if (msgId === closureMessageIdRef.current) {
-      setShowClosureButtons(true);
-      closureMessageIdRef.current = null;
-    }
-
     const queue = revealQueueRef.current;
     const idx = queue.indexOf(msgId);
     if (idx >= 0) {
@@ -504,6 +495,20 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     if (!conversation || isSending) return;
     setIsSending(false);
     setIsAIResponding(false);
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversation.id);
+
+    if (error) {
+      toast.error("Failed to restart chat");
+      return;
+    }
+
+    // Clear cache immediately BEFORE resetting refs to prevent re-seeding from stale data
+    queryClient.setQueryData(["messages", conversation.id], []);
+
     seedingRef.current = false;
     qualitySeededRef.current = false;
     aiTriggerRef.current = false;
@@ -519,18 +524,6 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
     await resetCompletion();
-
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("conversation_id", conversation.id);
-
-    if (error) {
-      toast.error("Failed to restart chat");
-      return;
-    }
-
-    queryClient.setQueryData(["messages", conversation.id], []);
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient, resetCompletion]);

@@ -189,13 +189,14 @@ The current topic is: "${activityTitle}" — ${activityDescription}
 
 Respond with a brief, warm reflection or insight about what the user just shared. Acknowledge their openness and highlight something meaningful from their last message.
 
-CRITICAL RULES:
-- Do NOT ask any questions. No questions at all.
-- Do NOT prompt for further reflection.
-- Keep it to 1-2 sentences max.
-- Be warm, specific (reference what they actually said), and encouraging.
-- Write like a supportive friend texting, not an essay.
-- Use one emoji max.
+ABSOLUTE RULES — VIOLATING ANY OF THESE IS A FAILURE:
+1. ZERO questions. Not a single question mark. No rhetorical questions. No "what do you think?" No "have you considered?" NOTHING that ends with "?"
+2. ZERO prompts for further action. No "try thinking about..." No "you might want to explore..." No "next time, consider..."
+3. This is a CLOSING statement. It is final. It wraps up the conversation.
+4. Keep it to 1-2 sentences max.
+5. Be warm, specific (reference what they actually said), and encouraging.
+6. Write like a supportive friend texting, not an essay.
+7. Use one emoji max.
 
 Example: "It's really beautiful that you see financial planning as an act of care for each other — that kind of mindset is a real strength. 💛"`,
 
