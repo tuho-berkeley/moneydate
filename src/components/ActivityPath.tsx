@@ -248,7 +248,7 @@ const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
               {config.label}
             </span>
           </div>
-          <h4 className="font-medium text-sm text-foreground line-clamp-2">{activity.title}</h4>
+          <h4 className="font-medium text-sm text-foreground line-clamp-2 text-pretty">{activity.title}</h4>
         </div>
         
         {showStartButton && (
