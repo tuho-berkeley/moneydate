@@ -31,19 +31,43 @@ const Activity = () => {
   });
 
   // Check which conversation types have been completed for this activity
+  // Get user's couple_id for together conversation lookup
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("couple_id").eq("id", user.id).single();
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const { data: completedTypes } = useQuery({
-    queryKey: ["completed-conversation-types", id, user?.id],
+    queryKey: ["completed-conversation-types", id, user?.id, profile?.couple_id],
     queryFn: async () => {
       if (!id || !user) return new Set<string>();
 
-      // Get conversations for this activity by this user
-      const { data: conversations, error } = await supabase.
-      from("conversations").
-      select("id, type").
-      eq("activity_id", id).
-      eq("user_id", user.id);
+      // Get solo/face_to_face conversations by this user
+      const { data: ownConvos } = await supabase
+        .from("conversations")
+        .select("id, type")
+        .eq("activity_id", id)
+        .eq("user_id", user.id);
 
-      if (error || !conversations) return new Set<string>();
+      // Get together conversations by couple_id
+      const { data: coupleConvos } = profile?.couple_id
+        ? await supabase
+            .from("conversations")
+            .select("id, type")
+            .eq("activity_id", id)
+            .eq("couple_id", profile.couple_id)
+            .eq("type", "together")
+        : { data: [] };
+
+      // Merge and deduplicate
+      const allConvos = new Map<string, { id: string; type: string }>();
+      [...(ownConvos || []), ...(coupleConvos || [])].forEach(c => allConvos.set(c.id, c));
+      const conversations = [...allConvos.values()];
 
       const completed = new Set<string>();
 
@@ -84,7 +108,7 @@ const Activity = () => {
 
       return completed;
     },
-    enabled: !!id && !!user
+    enabled: !!id && !!user && profile !== undefined
   });
 
   const { data: lessonCompleted } = useQuery({
