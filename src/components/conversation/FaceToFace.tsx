@@ -499,95 +499,102 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-4 flex flex-col items-center">
-        {/* Previous / Next navigation */}
-        <div className="flex items-center justify-between w-full max-w-sm mb-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => { setCurrentPrompt((p) => Math.max(0, p - 1)); setIsFlipped(false); }}
-            disabled={currentPrompt === 0}
-            className="gap-1"
-          >
-            <ChevronLeft className="w-4 h-4" /> Previous
-          </Button>
-
-          {currentPrompt < prompts.length - 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
-              className="gap-1"
-            >
-              Next <ChevronRight className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-
-        {/* Flippable Flash Card */}
-        <div
-          className="w-full max-w-sm cursor-pointer [perspective:1000px]"
-          onClick={() => setIsFlipped((f) => !f)}
-        >
-          <div className="relative w-full grid">
-            <div className="invisible p-8 space-y-4 [grid-area:1/1]">
-              <p className="text-xs">&nbsp;</p>
-              <h2 className="font-display text-xl font-semibold leading-snug text-pretty">
-                {prompts[currentPrompt].question}
-              </h2>
-              <p className="text-xs">&nbsp;</p>
-            </div>
-            <div className="invisible p-8 space-y-4 [grid-area:1/1]">
-              <p className="text-xs">&nbsp;</p>
-              <p className="text-sm leading-relaxed">
-                {prompts[currentPrompt].guidance}
-              </p>
-              <p className="text-xs">&nbsp;</p>
-            </div>
+        {loadingPrompts ? (
+          <div className="w-full max-w-sm flex flex-col items-center justify-center flex-1 gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Preparing questions...</p>
           </div>
-
-          <div
-            className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d]"
-            style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
-          >
-            <div className="absolute inset-0 bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden]">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Discuss Together
-              </p>
-              <h2 className="font-display text-xl font-semibold text-foreground leading-snug text-pretty">
-                {prompts[currentPrompt].question}
-              </h2>
-              <button
-                className="inline-flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
-                onClick={(e) => { e.stopPropagation(); setIsFlipped(true); }}
+        ) : (
+          <>
+            {/* Previous / Next navigation */}
+            <div className="flex items-center justify-between w-full max-w-sm mb-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setCurrentPrompt((p) => Math.max(0, p - 1)); setIsFlipped(false); }}
+                disabled={currentPrompt === 0}
+                className="gap-1"
               >
-                <Lightbulb className="w-3.5 h-3.5" />
-                Tap for hint
-              </button>
+                <ChevronLeft className="w-4 h-4" /> Previous
+              </Button>
+
+              {currentPrompt < prompts.length - 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setCurrentPrompt((p) => p + 1); setIsFlipped(false); }}
+                  className="gap-1"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </Button>
+              )}
             </div>
 
-            <div className="absolute inset-0 bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Lightbulb className="w-3.5 h-3.5" />
-                Hint
+            {/* Flippable Flash Card */}
+            <div
+              className="w-full max-w-sm cursor-pointer [perspective:1000px]"
+              onClick={() => setIsFlipped((f) => !f)}
+            >
+              <div className="relative w-full grid">
+                <div className="invisible p-8 space-y-4 [grid-area:1/1]">
+                  <p className="text-xs">&nbsp;</p>
+                  <h2 className="font-display text-xl font-semibold leading-snug text-pretty">
+                    {prompts[currentPrompt].question}
+                  </h2>
+                  <p className="text-xs">&nbsp;</p>
+                </div>
+                <div className="invisible p-8 space-y-4 [grid-area:1/1]">
+                  <p className="text-xs">&nbsp;</p>
+                  <p className="text-sm leading-relaxed">
+                    {prompts[currentPrompt].guidance}
+                  </p>
+                  <p className="text-xs">&nbsp;</p>
+                </div>
               </div>
-              <p className="text-sm text-foreground leading-relaxed text-left">
-                {prompts[currentPrompt].guidance}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Transcript area */}
-        {hasResponse(currentPrompt, activePartner) && (
-          <div className="w-full max-w-sm mt-4 bg-secondary/50 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-              {activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response
-            </p>
-            <p className="text-sm text-foreground">
-              {getResponse(currentPrompt, activePartner)?.transcript}
-            </p>
-          </div>
+              <div
+                className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d]"
+                style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+              >
+                <div className="absolute inset-0 bg-card rounded-3xl border border-border shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Discuss Together
+                  </p>
+                  <h2 className="font-display text-xl font-semibold text-foreground leading-snug text-pretty">
+                    {prompts[currentPrompt].question}
+                  </h2>
+                  <button
+                    className="inline-flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
+                    onClick={(e) => { e.stopPropagation(); setIsFlipped(true); }}
+                  >
+                    <Lightbulb className="w-3.5 h-3.5" />
+                    Tap for hint
+                  </button>
+                </div>
+
+                <div className="absolute inset-0 bg-accent/40 rounded-3xl border border-accent shadow-soft p-8 w-full text-center flex flex-col items-center justify-center space-y-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+                    <Lightbulb className="w-3.5 h-3.5" />
+                    Hint
+                  </div>
+                  <p className="text-sm text-foreground leading-relaxed text-left">
+                    {prompts[currentPrompt].guidance}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Transcript area */}
+            {hasResponse(currentPrompt, activePartner) && (
+              <div className="w-full max-w-sm mt-4 bg-secondary/50 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                  {activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response
+                </p>
+                <p className="text-sm text-foreground">
+                  {getResponse(currentPrompt, activePartner)?.transcript}
+                </p>
+              </div>
         )}
       </div>
 
