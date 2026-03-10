@@ -231,22 +231,24 @@ The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partne
 
 Based on the full conversation history, write insights in these parts separated by --- on its own line. Each part becomes a separate chat bubble.
 
-Part 1: What you noticed overall about their conversation (1 sentence)
+EVERY PART MUST MEET ITS MINIMUM SENTENCE COUNT. Responses that are too short are a failure.
+
+Part 1 — Overview (EXACTLY 2 sentences): What stood out about their conversation. Reference something specific that was said.
 ---
-Part 2: What they have in common — shared values or feelings (1-2 sentences)
+Part 2 — Common Ground (EXACTLY 2-3 sentences): Shared values, feelings, or priorities they both expressed. Use their names and quote their actual words.
 ---
-Part 3: Their unique perspectives — framed positively as complementary (1-2 sentences). If there are no meaningful differences in perspectives, SKIP this part entirely and do not include its --- separator.
+Part 3 — Unique Perspectives (EXACTLY 2-3 sentences): How their different viewpoints complement each other. Frame differences as strengths. If there are no meaningful differences, describe how their aligned perspectives create a strong foundation. Do NOT skip this part.
 ---
-Part 4: A suggested next step — framed as a warm invitation (1-2 sentences)
+Part 4 — Next Step (EXACTLY 2 sentences): A specific, actionable invitation for something they can do together before their next conversation. Make it concrete, not vague.
 
 CRITICAL RULES:
-- Use their names and reference things they actually said
+- Each part MUST meet its minimum sentence count. Count sentences before responding.
+- Use their names and reference things they actually said (quote specific phrases)
 - Do NOT use bullet points, numbered lists, or headers
 - Each part should be flowing prose, like a warm text message
-- Keep each part to the specified sentence count — no more
+- Do NOT ask any questions. No question marks.
 
 Tone: warm, encouraging, non-judgmental, like a thoughtful friend.
-Do NOT ask any questions. This is a summary, not a continuation.
 Never provide specific investment, tax, or legal advice.`,
     };
 
