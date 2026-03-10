@@ -368,7 +368,14 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setIsGeneratingInsights(true);
     setIsWaitingForAI(true);
 
-    const historyForAI = dbMessages.map((m: DBMessage) => ({
+    // Filter out pre-closure/insight messages — only include the actual conversation
+    const lastUserMsgIdx = dbMessages.reduce((acc, m, i) => (m.role === "user" ? i : acc), -1);
+    const conversationMessages = dbMessages.filter((m, i) => {
+      if (m.role !== "ai") return true;
+      return i <= lastUserMsgIdx;
+    });
+
+    const historyForAI = conversationMessages.map((m: DBMessage) => ({
       role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
       content: m.content,
     }));
