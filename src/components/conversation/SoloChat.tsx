@@ -64,7 +64,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const [continueAnyway, setContinueAnyway] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
-  const closureMessageIdRef = useRef<string | null>(null);
+  const closureMessageIdRef = useRef<string | null>(null); // kept for restart cleanup
 
   // Get or create conversation
   const { data: conversation } = useQuery({
