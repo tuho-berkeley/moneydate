@@ -484,9 +484,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               toast.success("Link copied!");
             }
           }}
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-full px-3 py-1.5 text-xs font-medium"
         >
-          <Share2 className="w-4 h-4" />
+          <Share2 className="w-3.5 h-3.5" />
+          Share
         </button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
