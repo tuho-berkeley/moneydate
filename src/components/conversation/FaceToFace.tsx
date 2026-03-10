@@ -528,7 +528,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         </AlertDialog>
         {!loadingPrompts && (
           <span className="text-xs text-muted-foreground font-medium">
-            {currentPrompt + 1}/{prompts.length}
+            {currentPrompt + 1}/{allPrompts.length}
           </span>
         )}
       </div>
