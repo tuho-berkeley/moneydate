@@ -404,13 +404,15 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [dbMessages.length]);
 
   // When completion is reached, trigger pre-closure instead of normal AI
+  const preClosureTriggeredRef = useRef(false);
   useEffect(() => {
     if (!completionReached || continueAnyway || showClosureButtons || showInsights) return;
-    if (!aiShouldRespond) return;
-    // Prevent normal AI from triggering
+    if (preClosureTriggeredRef.current) return;
+    if (isAIResponding) return;
+    preClosureTriggeredRef.current = true;
     aiTriggerRef.current = true;
     triggerPreClosure();
-  }, [completionReached, aiShouldRespond, continueAnyway, showClosureButtons, showInsights]);
+  }, [completionReached, continueAnyway, showClosureButtons, showInsights, isAIResponding]);
 
   // Sequential reveal of new AI messages
   useEffect(() => {
