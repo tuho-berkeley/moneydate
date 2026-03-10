@@ -492,9 +492,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <span className="text-xs text-muted-foreground font-medium">
-          {currentPrompt + 1}/{prompts.length}
-        </span>
+        {!loadingPrompts && (
+          <span className="text-xs text-muted-foreground font-medium">
+            {currentPrompt + 1}/{prompts.length}
+          </span>
+        )}
       </div>
 
       {/* Scrollable content area */}
