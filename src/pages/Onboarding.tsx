@@ -145,7 +145,7 @@ const Onboarding = () => {
           />
         );
       case 3:
-        return <PartnerConnectionStep onNext={next} onSkip={next} />;
+        return <PartnerConnectionStep onNext={next} onSkip={next} initialCode={partnerCode} />;
       case 4:
         return <TrustStep onFinish={finishOnboarding} />;
       default:
