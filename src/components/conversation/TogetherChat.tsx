@@ -256,7 +256,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // Auto-trigger AI after the asked partner responds
   useEffect(() => {
-    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current || completionReached) return;
+    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current || completionReached || completionReachedRef.current) return;
     aiTriggerRef.current = true;
 
     const historyForAI = dbMessages.map((m: DBMessage) => ({
