@@ -57,6 +57,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const myQualityCountRef = useRef(0);
   const partnerQualityCountRef = useRef(0);
   const [completionReached, setCompletionReached] = useState(false);
+  const completionReachedRef = useRef(false);
   const [showClosureButtons, setShowClosureButtons] = useState(false);
   const [continueAnyway, setContinueAnyway] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
@@ -184,6 +185,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     partnerQualityCountRef.current = partnerMsgs.filter(m => passesPreFilter(m.content)).length;
     console.log(`[TogetherChat] Seeded quality: me=${myQualityCountRef.current}, partner=${partnerQualityCountRef.current}`);
     if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3) {
+      completionReachedRef.current = true;
       setCompletionReached(true);
       markCompleted();
       if (currentActivityStatus === "insights_generated") {
@@ -255,7 +257,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // Auto-trigger AI after the asked partner responds
   useEffect(() => {
-    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current || completionReached) return;
+    if (!aiShouldRespond || isAIResponding || aiTriggerRef.current || completionReached || completionReachedRef.current) return;
     aiTriggerRef.current = true;
 
     const historyForAI = dbMessages.map((m: DBMessage) => ({
@@ -282,13 +284,14 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     }
 
     if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3 && !continueAnyway) {
+      completionReachedRef.current = true;
       setCompletionReached(true);
       markCompleted();
     }
   }, [user, completionReached, continueAnyway, markCompleted]);
 
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
-    if (!conversation || isAIResponding) return;
+    if (!conversation || isAIResponding || completionReachedRef.current) return;
     setIsAIResponding(true);
     aiTriggerRef.current = true;
 
@@ -526,6 +529,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     aiTriggerRef.current = false;
     myQualityCountRef.current = 0;
     partnerQualityCountRef.current = 0;
+    completionReachedRef.current = false;
     setCompletionReached(false);
     setShowClosureButtons(false);
     setContinueAnyway(false);
