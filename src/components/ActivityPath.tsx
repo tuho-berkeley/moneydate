@@ -216,10 +216,11 @@ const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick, upNe
 
 interface ActivityItemProps {
   activity: ActivityWithProgress;
+  isUpNext: boolean;
   onClick: () => void;
 }
 
-const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
+const ActivityItem = ({ activity, isUpNext, onClick }: ActivityItemProps) => {
   const config = typeConfig[activity.type];
   const Icon = activity.userStatus === "completed" ?
   Check :
@@ -228,7 +229,7 @@ const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
   config.icon;
 
   const isClickable = activity.userStatus !== "locked";
-  const showStartButton = activity.userStatus === "available" || activity.userStatus === "in_progress";
+  const showStartButton = isUpNext;
 
   return (
     <div
