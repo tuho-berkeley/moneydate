@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Copy, ArrowRight, Share2 } from "lucide-react";
+import { Users, ArrowRight, Share2, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
