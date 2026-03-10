@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 
 const labels = [
   "Thinking…",
-  "Reflecting on that…",
-  "Preparing a question…",
-  "Considering your words…",
+  "Contemplating…",
+  "Reflecting…",
+  "Processing…",
 ];
 
 const AIThinkingBubble = () => {
