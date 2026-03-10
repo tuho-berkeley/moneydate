@@ -55,7 +55,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   const abortRef = useRef<AbortController | null>(null);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
+  const { markCompleted, markInsightsGenerated, resetCompletion } = useConversationCompletion(activityId);
 
   // Quality answer tracking
   const qualityCountRef = useRef(0);
