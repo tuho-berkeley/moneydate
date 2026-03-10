@@ -630,12 +630,36 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
 
       {/* Show "done" footer when insights are shown and all messages revealed */}
       {showInsights && !isGeneratingInsights && !isWaitingForAI && freshIds.size === 0 && (
-        <div className="bg-card border-t border-border p-4 sticky bottom-0">
+        <div className="bg-card border-t border-border p-4 sticky bottom-0 flex gap-3">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Start Over
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Start over?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will clear all messages and start fresh. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleRestart}>Start Over</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button
-            onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
-            className="w-full rounded-xl"
+            onClick={handleContinueConversation}
+            className="flex-1 rounded-xl gap-2"
           >
-            Complete
+            <MessageCircle className="w-4 h-4" />
+            Follow Up
           </Button>
         </div>
       )}
