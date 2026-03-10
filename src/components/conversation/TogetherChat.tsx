@@ -244,7 +244,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   // AI should respond after the asked partner answers
   const lastMessage = dbMessages[dbMessages.length - 1];
-  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded && !completionReached;
+  const aiShouldRespond = dbMessages.length > 0 && lastMessage?.role !== "ai" && askedPartnerResponded;
 
   // Auto-seed AI starter message
   useEffect(() => {
