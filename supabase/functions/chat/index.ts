@@ -29,6 +29,11 @@ Each prompt should:
 - Progress naturally from lighter/introductory to deeper/more reflective
 - Be open-ended and encourage personal sharing
 
+CRITICAL FORMATTING RULES:
+- Use plain text only. No markdown, no asterisks, no backslashes, no special formatting.
+- Write apostrophes normally (e.g., "What's" not "What\\'s").
+- Do not use bold, italic, or any markdown syntax in questions or guidance.
+
 For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps the couple understand what kind of answer is expected and gives examples of things they might discuss.`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
