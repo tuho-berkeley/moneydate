@@ -96,7 +96,7 @@ export function useStagesWithActivities() {
           };
         });
 
-        const completedCount = activitiesWithProgress.filter((a) => a.userStatus === "completed").length;
+        const completedCount = activitiesWithProgress.filter((a) => a.userStatus === "completed" || a.userStatus === "insights_generated").length;
 
         return {
           ...stage,
