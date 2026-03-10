@@ -247,6 +247,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
+    await resetCompletion();
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient]);
