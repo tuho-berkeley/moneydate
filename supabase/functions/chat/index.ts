@@ -24,17 +24,19 @@ serve(async (req) => {
 The activity is: "${activityTitle}" — ${activityDescription}
 
 Each prompt should:
-- Be a thought-provoking question tailored specifically to this topic
-- Help the couple explore their values, experiences, and perspectives related to this topic
-- Progress naturally from lighter/introductory to deeper/more reflective
-- Be open-ended and encourage personal sharing
+- Be thought-provoking yet intuitive — easy to understand and interesting to answer
+- Spark genuine curiosity and personal sharing between partners
+- Avoid complex, academic, or overly analytical questions
+- Feel like something a close friend would ask over coffee, not a therapist or textbook
+- Progress naturally from lighter/fun to deeper/more meaningful
+- Use simple, everyday language
 
 CRITICAL FORMATTING RULES:
 - Use plain text only. No markdown, no asterisks, no backslashes, no special formatting.
 - Write apostrophes normally (e.g., "What's" not "What\\'s").
 - Do not use bold, italic, or any markdown syntax in questions or guidance.
 
-For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps the couple understand what kind of answer is expected and gives examples of things they might discuss.`;
+For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps the couple understand what kind of answer is expected and gives relatable examples they can easily connect with.`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
