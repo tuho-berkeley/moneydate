@@ -108,7 +108,7 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
           </p>
         </div>
         <Input
-          placeholder="Enter invite code"
+          placeholder="ENTER INVITE CODE"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
           className="text-center text-lg font-mono tracking-widest"
