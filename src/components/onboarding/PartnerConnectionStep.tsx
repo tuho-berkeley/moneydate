@@ -9,12 +9,13 @@ import { Users, Copy, ArrowRight } from "lucide-react";
 interface Props {
   onNext: () => void;
   onSkip: () => void;
+  initialCode?: string;
 }
 
-const PartnerConnectionStep = ({ onNext, onSkip }: Props) => {
-  const [mode, setMode] = useState<"choose" | "invite" | "join">("choose");
+const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
+  const [mode, setMode] = useState<"choose" | "invite" | "join">(initialCode ? "join" : "choose");
   const [inviteCode, setInviteCode] = useState("");
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode, setJoinCode] = useState(initialCode?.toUpperCase() || "");
   const { user } = useAuth();
 
   useEffect(() => {
