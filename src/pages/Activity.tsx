@@ -15,19 +15,19 @@ const typeConfig: Record<ActivityType, {label: string;icon: typeof MessageCircle
 };
 
 const Activity = () => {
-  const { id } = useParams<{id: string;}>();
+  const { slug } = useParams<{slug: string;}>();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const { data: activity, isLoading } = useQuery({
-    queryKey: ["activity", id],
+    queryKey: ["activity", slug],
     queryFn: async () => {
-      if (!id) throw new Error("No activity ID");
-      const { data, error } = await supabase.from("activities").select("*").eq("id", id).single();
+      if (!slug) throw new Error("No activity slug");
+      const { data, error } = await supabase.from("activities").select("*").eq("slug" as any, slug).single();
       if (error) throw error;
       return data;
     },
-    enabled: !!id
+    enabled: !!slug
   });
 
   // Check which conversation types have been completed for this activity
