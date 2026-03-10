@@ -433,7 +433,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setIsSending(false);
 
       // Trigger pre-closure AI message (no question, just reflection)
-      await triggerPreClosure();
+      await triggerPreClosure(userText);
       return;
     }
 
