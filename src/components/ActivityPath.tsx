@@ -129,7 +129,8 @@ const ActivityPath = () => {
           stageNumber={index + 1}
           isOpen={isStageOpen(stage.id)}
           onToggle={() => toggleStage(stage.id)}
-          onActivityClick={handleStartActivity} />
+          onActivityClick={handleStartActivity}
+          upNextId={upNextId} />
 
         )}
       </div>
