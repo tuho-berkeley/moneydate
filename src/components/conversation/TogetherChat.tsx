@@ -509,9 +509,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                   className={`rounded-2xl p-4 ${
                     msg.role === "ai"
                       ? "bg-secondary/50 text-foreground"
-                      : msg.isMe
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-accent text-accent-foreground"
+                      : "bg-primary text-primary-foreground"
                   }`}
                 >
                   {msg.role === "ai" ? (
