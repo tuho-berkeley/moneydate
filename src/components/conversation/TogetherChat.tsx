@@ -521,6 +521,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     setShowInsights(false);
     setIsGeneratingInsights(false);
     closureMessageIdRef.current = null;
+    pendingClosureRef.current = false;
     setRevealedIds(new Set());
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
