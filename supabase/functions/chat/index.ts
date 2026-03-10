@@ -36,10 +36,7 @@ Each prompt should:
 - Progress naturally from lighter/fun to deeper/more meaningful
 - Use simple, everyday language
 
-CRITICAL FORMATTING RULES:
-- Use plain text only. No markdown, no asterisks, no backslashes, no special formatting.
-- Write apostrophes normally (e.g., "What's" not "What\\'s").
-- Do not use bold, italic, or any markdown syntax in questions or guidance.
+${FORMATTING_RULES}
 
 For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps the couple understand what kind of answer is expected and gives relatable examples they can easily connect with.`;
 
