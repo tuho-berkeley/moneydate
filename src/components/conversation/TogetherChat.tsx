@@ -511,7 +511,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                       ? "bg-secondary/50 text-foreground"
                       : msg.isMe
                         ? "bg-primary text-primary-foreground"
-                        : "bg-secondary/50 text-foreground"
+                        : "bg-accent text-accent-foreground"
                   }`}
                 >
                   {msg.role === "ai" ? (
