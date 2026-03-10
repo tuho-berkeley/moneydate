@@ -595,6 +595,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                   {getResponse(currentPrompt, activePartner)?.transcript}
                 </p>
               </div>
+            )}
+          </>
         )}
       </div>
 
