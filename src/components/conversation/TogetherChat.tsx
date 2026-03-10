@@ -475,7 +475,13 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           setRevealedIds(prev => new Set([...prev, nextId]));
           setFreshIds(prev => new Set([...prev, nextId]));
         }, 300);
+      } else if (pendingClosureRef.current) {
+        pendingClosureRef.current = false;
+        setTimeout(() => setShowClosureButtons(true), 300);
       }
+    } else if (pendingClosureRef.current && revealQueueRef.current.length === 0) {
+      pendingClosureRef.current = false;
+      setTimeout(() => setShowClosureButtons(true), 300);
     }
   }, []);
 
