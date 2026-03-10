@@ -501,8 +501,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      const el = textareaRef.current;
+      el.style.height = "0";
+      el.style.overflow = "hidden";
+      const newHeight = Math.min(el.scrollHeight, 120);
+      el.style.height = `${newHeight}px`;
+      el.style.overflow = newHeight >= 120 ? "auto" : "hidden";
     }
   }, [input]);
 
