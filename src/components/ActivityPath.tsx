@@ -31,7 +31,9 @@ const ActivityPath = () => {
     (s) => s.isUnlocked && s.completedCount < s.totalCount
   )?.id || stages?.[0]?.id;
 
-  const [openStageId, setOpenStageId] = useState<string | null>(null);
+  const [openStageId, setOpenStageId] = useState<string | null>(() => {
+    return sessionStorage.getItem("activityPath_openStageId") || null;
+  });
 
   const isStageOpen = (stageId: string) => {
     // If user hasn't toggled anything yet, auto-open the current stage
@@ -41,9 +43,10 @@ const ActivityPath = () => {
 
   const toggleStage = (stageId: string) => {
     setOpenStageId((prev) => {
-      // If clicking the currently open stage (or the auto-opened one), close it
       const currentlyOpen = prev === null ? currentStageId : prev;
-      return currentlyOpen === stageId ? "__closed__" : stageId;
+      const next = currentlyOpen === stageId ? "__closed__" : stageId;
+      sessionStorage.setItem("activityPath_openStageId", next);
+      return next;
     });
   };
 
