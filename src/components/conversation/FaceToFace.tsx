@@ -437,7 +437,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
+          <h1 className="font-semibold text-foreground text-sm text-pretty">{activityTitle}</h1>
           <div className="flex items-center gap-2">
             <p className="text-xs text-muted-foreground">Face-to-Face</p>
             {showSummary && (
