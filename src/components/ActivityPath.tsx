@@ -16,6 +16,7 @@ const typeConfig: Record<ActivityType, {label: string;icon: typeof MessageCircle
 
 const statusStyles: Record<ActivityStatus, string> = {
   completed: "bg-card border-border shadow-card",
+  insights_generated: "bg-card border-border shadow-card",
   available: "bg-card border-primary/30 shadow-soft",
   in_progress: "bg-card border-primary/20 shadow-card",
   locked: "bg-muted/50 border-border/50 opacity-60"
