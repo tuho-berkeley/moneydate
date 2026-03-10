@@ -290,7 +290,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   }, [user, completionReached, continueAnyway, markCompleted]);
 
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
-    if (!conversation || isAIResponding) return;
+    if (!conversation || isAIResponding || completionReachedRef.current) return;
     setIsAIResponding(true);
     aiTriggerRef.current = true;
 
