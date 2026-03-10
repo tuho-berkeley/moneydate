@@ -50,7 +50,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   const aiTriggerRef = useRef(false);
   const prevMessageIdsRef = useRef<Set<string>>(new Set());
   const revealQueueRef = useRef<string[]>([]);
-  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
+  const { markCompleted, markInsightsGenerated, resetCompletion } = useConversationCompletion(activityId);
 
   // Quality answer tracking per partner
   const myQualityCountRef = useRef(0);
