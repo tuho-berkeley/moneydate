@@ -603,6 +603,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
+        markInsightsGenerated();
         setIsAIResponding(false);
         setIsGeneratingInsights(false);
         setTimeout(() => { aiTriggerRef.current = false; }, 500);
