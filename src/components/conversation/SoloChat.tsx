@@ -284,13 +284,6 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient, resetCompletion]);
 
-  // Get the last AI question from messages
-  const getLastAIQuestion = useCallback(() => {
-    for (let i = dbMessages.length - 1; i >= 0; i--) {
-      if (dbMessages[i].role === "ai") return dbMessages[i].content;
-    }
-    return "";
-  }, [dbMessages]);
 
   // Trigger pre-closure AI message
   const triggerPreClosure = useCallback(async (latestUserText?: string) => {
