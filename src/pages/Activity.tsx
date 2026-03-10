@@ -108,7 +108,7 @@ const Activity = () => {
 
       return completed;
     },
-    enabled: !!id && !!user
+    enabled: !!id && !!user && profile !== undefined
   });
 
   const { data: lessonCompleted } = useQuery({
