@@ -111,6 +111,83 @@ For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps t
       });
     }
 
+    // ---------- generate_one_prompt: generate a single additional question ----------
+    if (conversationType === "generate_one_prompt") {
+      const existingList = (existingQuestions || []).map((q: string, i: number) => `${i + 1}. ${q}`).join("\n");
+      const onePromptSystem = `You are a relationship and financial conversation designer. Generate exactly 1 NEW discussion prompt for a couple discussing face-to-face.
+
+The activity is: "${activityTitle}" — ${activityDescription}
+
+These questions have ALREADY been asked — do NOT repeat or rephrase any of them:
+${existingList}
+
+The new prompt should:
+- Be completely different from the existing questions above
+- Be thought-provoking yet intuitive — easy to understand and interesting to answer
+- Spark genuine curiosity and personal sharing between partners
+- Avoid complex, academic, or overly analytical questions
+- Feel like something a close friend would ask over coffee
+
+${FORMATTING_RULES}
+
+Also provide a brief guidance/hint (2-3 sentences) with relatable examples.`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: onePromptSystem },
+            { role: "user", content: `Generate 1 new discussion prompt for: "${activityTitle}"` },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "return_prompt",
+                description: "Return exactly 1 discussion prompt with question and guidance.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    question: { type: "string", description: "The discussion question" },
+                    guidance: { type: "string", description: "A 2-3 sentence hint/guidance for answering" },
+                  },
+                  required: ["question", "guidance"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "return_prompt" } },
+        }),
+      });
+
+      if (!response.ok) {
+        return new Response(JSON.stringify({ error: "Failed to generate prompt" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        const parsed = JSON.parse(toolCall.function.arguments);
+        return new Response(JSON.stringify(parsed), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ error: "No prompt generated" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ---------- validate_answer: non-streaming, lightweight model ----------
     if (conversationType === "validate_answer") {
       const validatePrompt = `You are evaluating whether a user's response meaningfully engages with the question that was asked.
