@@ -483,7 +483,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setIsSending(false);
       setIsWaitingForAI(false);
     }
-  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted, getLastAIQuestion, completionReached, continueAnyway, triggerPreClosure]);
+  }, [input, isSending, conversation, user, dbMessages, activityTitle, activityDescription, queryClient, markCompleted, completionReached, continueAnyway, triggerPreClosure]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
