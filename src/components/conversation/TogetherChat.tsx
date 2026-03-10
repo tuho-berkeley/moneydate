@@ -517,8 +517,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
   useEffect(() => {
     if (textareaRef.current) {
       const el = textareaRef.current;
-      el.style.height = "0";
-      el.style.overflow = "hidden";
+      el.style.height = "auto";
       const newHeight = Math.min(el.scrollHeight, 120);
       el.style.height = `${newHeight}px`;
       el.style.overflow = newHeight >= 120 ? "auto" : "hidden";

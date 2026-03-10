@@ -233,9 +233,9 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
   useEffect(() => {
     if (textareaRef.current) {
       const el = textareaRef.current;
-      // Use scrollHeight without collapsing to avoid layout thrash
-      el.style.height = "0";
-      el.style.overflow = "hidden";
+      // Temporarily set to auto so scrollHeight reflects true content height
+      // without collapsing to 0 (which causes scroll jitter)
+      el.style.height = "auto";
       const newHeight = Math.min(el.scrollHeight, 120);
       el.style.height = `${newHeight}px`;
       el.style.overflow = newHeight >= 120 ? "auto" : "hidden";
