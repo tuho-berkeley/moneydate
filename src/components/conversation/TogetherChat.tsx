@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Send, Loader2, Users, RotateCcw, Clock, Share2, Sparkles, MessageCircle } from "lucide-react";
+import { useActivities } from "@/hooks/useActivities";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import { AIMessageLabel, getAILabelType, highlightQuestions } from "@/components/conversation/AIMessageLabel";
 import TypewriterText from "@/components/conversation/TypewriterText";
