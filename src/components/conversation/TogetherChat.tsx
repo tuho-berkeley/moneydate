@@ -649,9 +649,17 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
         </button>
         <div className="flex-1">
           <h1 className="font-semibold text-foreground text-sm">{activityTitle}</h1>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Users className="w-3 h-3" />
-            Together Chat
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Users className="w-3 h-3" />
+              Together Chat
+            </div>
+            {completionReached && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-success">
+                <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
+                Completed
+              </span>
+            )}
           </div>
         </div>
         <button
