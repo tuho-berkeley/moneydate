@@ -166,7 +166,7 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
         </button>
       </div>
 
-      <button onClick={onSkip} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors">
+      <button onClick={onSkip} className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors uppercase">
         Skip for now
       </button>
     </div>

@@ -83,10 +83,10 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
             maxLength={8} />
           
             <div className="flex gap-2">
-              <Button onClick={handleJoin} size="sm" className="flex-1 rounded-full" disabled={!joinCode.trim() || joining}>
-                {joining ? "Connecting..." : "Connect"}
+              <Button onClick={handleJoin} size="sm" className="flex-1 rounded-full uppercase" disabled={!joinCode.trim() || joining}>
+                {joining ? "CONNECTING..." : "CONNECT"}
               </Button>
-              <Button onClick={() => setShowJoin(false)} variant="ghost" size="sm" className="rounded-full">
+              <Button onClick={() => setShowJoin(false)} variant="ghost" size="sm" className="rounded-full uppercase">
                 Cancel
               </Button>
             </div>
