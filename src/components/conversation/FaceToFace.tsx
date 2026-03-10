@@ -240,7 +240,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     }
 
     // Validate transcript quality using AI
-    const currentQuestion = defaultPrompts[currentPrompt].question;
+    const currentQuestion = prompts[currentPrompt].question;
     const quality = await isQualityAnswer(currentQuestion, transcript);
 
     if (!quality) {
