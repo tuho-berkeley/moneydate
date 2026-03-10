@@ -309,28 +309,23 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       onDone: async () => {
         if (fullResponse && conversation) {
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
-          const insertedIds: string[] = [];
           for (const segment of segments) {
-            const { data } = await supabase.from("messages").insert({
+            await supabase.from("messages").insert({
               conversation_id: conversation.id,
               sender_id: null,
               role: "ai",
               content: segment,
-            }).select("id").single();
-            if (data) insertedIds.push(data.id);
-          }
-          // Track the last pre-closure message to trigger button display
-          if (insertedIds.length > 0) {
-            closureMessageIdRef.current = insertedIds[insertedIds.length - 1];
+            });
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
         setIsWaitingForAI(false);
+        // Show closure buttons after pre-closure completes
+        setShowClosureButtons(true);
       },
       onError: (error) => {
         toast.error(error);
         setIsWaitingForAI(false);
-        // Show buttons anyway on error
         setShowClosureButtons(true);
       },
     });
