@@ -212,6 +212,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setSummaryText(null);
     setRevealedSegments(new Set());
     setFreshSegments(new Set());
+    setExtraPrompts([]);
     await resetCompletion();
     queryClient.removeQueries({ queryKey: ["face-to-face-prompts", activityId] });
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
