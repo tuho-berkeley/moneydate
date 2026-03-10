@@ -21,7 +21,7 @@ import ProfilePartnerSection from "@/components/profile/ProfilePartnerSection";
 const settings = [
   { icon: Bell, label: "Notifications", toggle: true, active: true },
   { icon: Heart, label: "Weekly Money Date Reminders", toggle: true, active: true },
-  { icon: FileText, label: "AI Conversation Summaries", toggle: true, active: true },
+  { icon: FileText, label: "AI Conversation Summaries", toggle: true, active: false },
   { icon: Eye, label: "Shared Vault Access", toggle: true, active: true },
 ];
 
