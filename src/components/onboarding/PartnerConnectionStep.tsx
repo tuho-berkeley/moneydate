@@ -102,8 +102,8 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
     return (
       <div className="w-full max-w-sm space-y-6 animate-fade-in">
         <div className="text-center space-y-3">
-          <h2 className="font-display text-2xl font-bold text-foreground text-pretty uppercase">Join your partner</h2>
-          <p className="text-muted-foreground text-sm text-pretty uppercase">
+          <h2 className="font-display text-2xl font-bold text-foreground text-pretty">Join your partner</h2>
+          <p className="text-muted-foreground text-sm text-pretty">
             Enter the code your partner shared with you.
           </p>
         </div>
@@ -111,14 +111,14 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
           placeholder="ENTER INVITE CODE"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-          className="text-center text-lg font-mono tracking-widest"
+          className="text-center text-lg font-mono tracking-widest uppercase"
           maxLength={8}
         />
         <div className="space-y-3">
-          <Button onClick={handleJoin} className="w-full rounded-full uppercase" size="lg" disabled={!joinCode.trim()}>
+          <Button onClick={handleJoin} className="w-full rounded-full" size="lg" disabled={!joinCode.trim()}>
             Connect
           </Button>
-          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full uppercase">Back</Button>
+          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full">Back</Button>
         </div>
       </div>
     );
