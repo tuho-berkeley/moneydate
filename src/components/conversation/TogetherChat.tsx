@@ -167,6 +167,23 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     };
   }, [conversation?.id, queryClient]);
 
+  // Seed quality counts from existing messages on load
+  const qualitySeededRef = useRef(false);
+  useEffect(() => {
+    if (qualitySeededRef.current || !messagesLoaded || dbMessages.length === 0 || !user) return;
+    qualitySeededRef.current = true;
+    const myMsgs = dbMessages.filter(m => m.role === "user" && m.sender_id === user.id);
+    const partnerMsgs = dbMessages.filter(m => m.role === "partner" || (m.role === "user" && m.sender_id !== user.id));
+    myQualityCountRef.current = myMsgs.filter(m => passesPreFilter(m.content)).length;
+    partnerQualityCountRef.current = partnerMsgs.filter(m => passesPreFilter(m.content)).length;
+    console.log(`[TogetherChat] Seeded quality: me=${myQualityCountRef.current}, partner=${partnerQualityCountRef.current}`);
+    if (myQualityCountRef.current >= 3 && partnerQualityCountRef.current >= 3) {
+      setCompletionReached(true);
+      setShowClosureButtons(true);
+      markCompleted();
+    }
+  }, [messagesLoaded, dbMessages, user, markCompleted]);
+
   // Determine turn state
   const partnerId = partnerProfile?.id;
   const partnerName = partnerProfile?.display_name || "Partner";
