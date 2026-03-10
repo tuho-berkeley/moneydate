@@ -82,7 +82,7 @@ const TypewriterText = ({ content, speed = 18, onComplete }: TypewriterTextProps
   }, [content, speed]);
 
   return (
-    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+    <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:font-semibold">
       {/* Hidden: ReactMarkdown renders full content to get proper HTML */}
       <div
         ref={hiddenRef}

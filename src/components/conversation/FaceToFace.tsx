@@ -378,7 +378,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                         onComplete={() => handleSegmentTypewriterComplete(idx)}
                       />
                     ) : (
-                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 text-foreground">
+                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:font-semibold text-foreground">
                         <ReactMarkdown>{segment}</ReactMarkdown>
                       </div>
                     )}
