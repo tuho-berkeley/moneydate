@@ -145,6 +145,10 @@
   .question-highlight {
     @apply border-l-[3px] border-primary bg-primary/5;
   }
+
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+  }
 }
 
 @keyframes thinking-bounce {
