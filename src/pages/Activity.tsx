@@ -15,19 +15,19 @@ const typeConfig: Record<ActivityType, {label: string;icon: typeof MessageCircle
 };
 
 const Activity = () => {
-  const { id } = useParams<{id: string;}>();
+  const { slug } = useParams<{slug: string;}>();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const { data: activity, isLoading } = useQuery({
-    queryKey: ["activity", id],
+    queryKey: ["activity", slug],
     queryFn: async () => {
-      if (!id) throw new Error("No activity ID");
-      const { data, error } = await supabase.from("activities").select("*").eq("id", id).single();
+      if (!slug) throw new Error("No activity slug");
+      const { data, error } = await supabase.from("activities").select("*").eq("slug", slug as any).single();
       if (error) throw error;
       return data;
     },
-    enabled: !!id
+    enabled: !!slug
   });
 
   // Check which conversation types have been completed for this activity
@@ -42,6 +42,7 @@ const Activity = () => {
     enabled: !!user,
   });
 
+  const id = activity?.id;
   const { data: completedTypes } = useQuery({
     queryKey: ["completed-conversation-types", id, user?.id, profile?.couple_id],
     queryFn: async () => {
@@ -97,13 +98,13 @@ const Activity = () => {
     queryKey: ["lesson-completed", id, user?.id],
     queryFn: async () => {
       if (!id || !user) return false;
-      const { data } = await supabase.
-      from("user_activities").
-      select("status").
-      eq("activity_id", id).
-      eq("user_id", user.id).
-      in("status", ["completed", "insights_generated"]).
-      maybeSingle();
+      const { data } = await supabase
+        .from("user_activities")
+        .select("status")
+        .eq("activity_id", id)
+        .eq("user_id", user.id)
+        .in("status", ["completed", "insights_generated"])
+        .maybeSingle();
       return !!data;
     },
     enabled: !!id && !!user
@@ -133,7 +134,7 @@ const Activity = () => {
   const Icon = config.icon;
 
   const handleStartConversation = (mode: "solo" | "together" | "face_to_face") => {
-    navigate(`/conversation/${activity.id}?mode=${mode}`);
+    navigate(`/conversation/${(activity as any).slug}?mode=${mode}`);
   };
 
   return (
@@ -233,7 +234,7 @@ const Activity = () => {
               <p className="text-sm text-muted-foreground mb-4 text-pretty">
                 {activity.description || "This lesson will teach you important concepts about managing finances as a couple."}
               </p>
-              <Button className="w-full rounded-xl" onClick={() => navigate(`/lesson/${id}`)}>
+              <Button className="w-full rounded-xl" onClick={() => navigate(`/lesson/${slug}`)}>
                 {lessonCompleted ? "Review Lesson" : "Start Lesson"}
               </Button>
             </div>

@@ -66,7 +66,7 @@ const ActivityPath = () => {
       startActivity.mutate(activity.id);
     }
 
-    navigate(`/activity/${activity.id}`);
+    navigate(`/activity/${(activity as any).slug}`);
   };
 
   if (isLoading) {

@@ -34,9 +34,9 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/activity/:id" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
-            <Route path="/conversation/:activityId" element={<ProtectedRoute><Conversation /></ProtectedRoute>} />
-            <Route path="/lesson/:id" element={<ProtectedRoute><Lesson /></ProtectedRoute>} />
+            <Route path="/activity/:slug" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
+            <Route path="/conversation/:slug" element={<ProtectedRoute><Conversation /></ProtectedRoute>} />
+            <Route path="/lesson/:slug" element={<ProtectedRoute><Lesson /></ProtectedRoute>} />
             <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
             <Route path="/plan" element={<ProtectedRoute><Plan /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

@@ -10,23 +10,23 @@ import type { Database } from "@/integrations/supabase/types";
 type ConversationType = Database["public"]["Enums"]["conversation_type"];
 
 const Conversation = () => {
-  const { activityId } = useParams<{ activityId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const mode = (searchParams.get("mode") || "solo") as ConversationType;
 
   const { data: activity, isLoading } = useQuery({
-    queryKey: ["activity", activityId],
+    queryKey: ["activity", slug],
     queryFn: async () => {
-      if (!activityId) throw new Error("No activity ID");
+      if (!slug) throw new Error("No activity slug");
       const { data, error } = await supabase
         .from("activities")
         .select("*")
-        .eq("id", activityId)
+        .eq("slug", slug as any)
         .single();
       if (error) throw error;
       return data;
     },
-    enabled: !!activityId,
+    enabled: !!slug,
   });
 
   if (isLoading || !activity) {

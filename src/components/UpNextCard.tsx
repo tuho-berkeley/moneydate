@@ -29,7 +29,7 @@ const UpNextCard = () => {
       startActivity.mutate(current.id);
     }
 
-    navigate(`/activity/${current.id}`);
+    navigate(`/activity/${(current as any).slug}`);
   };
 
   // All activities completed

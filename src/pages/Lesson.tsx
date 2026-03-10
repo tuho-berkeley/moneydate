@@ -22,21 +22,23 @@ function getYouTubeEmbedUrl(url: string): string | null {
 }
 
 const Lesson = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { markCompleted } = useConversationCompletion(id || "");
 
   const { data: activity, isLoading } = useQuery({
-    queryKey: ["activity", id],
+    queryKey: ["activity", slug],
     queryFn: async () => {
-      if (!id) throw new Error("No activity ID");
-      const { data, error } = await supabase.from("activities").select("*").eq("id", id).single();
+      if (!slug) throw new Error("No activity slug");
+      const { data, error } = await supabase.from("activities").select("*").eq("slug", slug as any).single();
       if (error) throw error;
       return data;
     },
-    enabled: !!id,
+    enabled: !!slug,
   });
+
+  const id = activity?.id;
+  const { markCompleted } = useConversationCompletion(id || "");
 
   // Check completion status
   const { data: isCompleted } = useQuery({
