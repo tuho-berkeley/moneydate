@@ -64,11 +64,11 @@ const ProfilePartnerSection = ({ inviteCode, onShare }: Props) => {
 
         {!showJoin ?
         <div className="flex gap-2">
-            <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5">
+            <Button onClick={onShare} variant="default" size="sm" className="flex-1 rounded-full gap-1.5 uppercase">
               <Share2 className="w-3.5 h-3.5" />
               Share Invite
             </Button>
-            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5">
+            <Button onClick={() => setShowJoin(true)} variant="outline" size="sm" className="flex-1 rounded-full gap-1.5 uppercase">
               <ArrowRight className="w-3.5 h-3.5" />
               Join with Code
             </Button>
