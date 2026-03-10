@@ -505,7 +505,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                         onComplete={() => handleTypewriterComplete(msg.id)}
                       />
                     ) : (
-                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:font-semibold">
                         <ReactMarkdown>{displayContent}</ReactMarkdown>
                       </div>
                     )
