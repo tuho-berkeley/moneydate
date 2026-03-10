@@ -17,6 +17,88 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    // ---------- generate_prompts: non-streaming, structured output ----------
+    if (conversationType === "generate_prompts") {
+      const generatePromptsPrompt = `You are a relationship and financial conversation designer. Given an activity topic, generate exactly 5 discussion prompts for a couple to discuss face-to-face.
+
+The activity is: "${activityTitle}" — ${activityDescription}
+
+Each prompt should:
+- Be a thought-provoking question tailored specifically to this topic
+- Help the couple explore their values, experiences, and perspectives related to this topic
+- Progress naturally from lighter/introductory to deeper/more reflective
+- Be open-ended and encourage personal sharing
+
+For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps the couple understand what kind of answer is expected and gives examples of things they might discuss.`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: generatePromptsPrompt },
+            { role: "user", content: `Generate 5 discussion prompts for the topic: "${activityTitle}"` },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "return_prompts",
+                description: "Return exactly 5 discussion prompts with questions and guidance hints.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    prompts: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          question: { type: "string", description: "The discussion question" },
+                          guidance: { type: "string", description: "A 2-3 sentence hint/guidance for answering" },
+                        },
+                        required: ["question", "guidance"],
+                        additionalProperties: false,
+                      },
+                      minItems: 5,
+                      maxItems: 5,
+                    },
+                  },
+                  required: ["prompts"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "return_prompts" } },
+        }),
+      });
+
+      if (!response.ok) {
+        return new Response(JSON.stringify({ error: "Failed to generate prompts" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        const parsed = JSON.parse(toolCall.function.arguments);
+        return new Response(JSON.stringify(parsed.prompts), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ error: "No prompts generated" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ---------- validate_answer: non-streaming, lightweight model ----------
     if (conversationType === "validate_answer") {
       const validatePrompt = `You are evaluating whether a user's response meaningfully engages with the question that was asked.

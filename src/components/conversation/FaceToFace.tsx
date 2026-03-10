@@ -73,6 +73,29 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Fetch dynamic prompts based on activity
+  const { data: prompts = defaultPrompts, isLoading: isLoadingPrompts } = useQuery({
+    queryKey: ["face-to-face-prompts", activityId],
+    queryFn: async () => {
+      const resp = await supabase.functions.invoke("chat", {
+        body: {
+          messages: [],
+          activityTitle,
+          activityDescription,
+          conversationType: "generate_prompts",
+        },
+      });
+      if (resp.error) throw resp.error;
+      const data = resp.data as Prompt[];
+      if (Array.isArray(data) && data.length === 5 && data[0]?.question && data[0]?.guidance) {
+        return data;
+      }
+      return defaultPrompts;
+    },
+    staleTime: Infinity,
+    retry: 1,
+  });
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
