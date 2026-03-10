@@ -73,6 +73,29 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Fetch dynamic prompts based on activity
+  const { data: prompts = defaultPrompts, isLoading: isLoadingPrompts } = useQuery({
+    queryKey: ["face-to-face-prompts", activityId],
+    queryFn: async () => {
+      const resp = await supabase.functions.invoke("chat", {
+        body: {
+          messages: [],
+          activityTitle,
+          activityDescription,
+          conversationType: "generate_prompts",
+        },
+      });
+      if (resp.error) throw resp.error;
+      const data = resp.data as Prompt[];
+      if (Array.isArray(data) && data.length === 5 && data[0]?.question && data[0]?.guidance) {
+        return data;
+      }
+      return defaultPrompts;
+    },
+    staleTime: Infinity,
+    retry: 1,
+  });
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
@@ -217,7 +240,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     }
 
     // Validate transcript quality using AI
-    const currentQuestion = defaultPrompts[currentPrompt].question;
+    const currentQuestion = prompts[currentPrompt].question;
     const quality = await isQualityAnswer(currentQuestion, transcript);
 
     if (!quality) {
@@ -265,7 +288,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setIsGeneratingSummary(true);
     setShowSummary(true);
     setSummaryText(null);
-    const formattedResponses = defaultPrompts.map((prompt, i) => {
+    const formattedResponses = prompts.map((prompt, i) => {
       const a = getResponse(i, "partner_a");
       const b = getResponse(i, "partner_b");
       return `Question: ${prompt.question}\nPartner A: ${a?.transcript || "(no response)"}\nPartner B: ${b?.transcript || "(no response)"}`;
@@ -429,6 +452,15 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     );
   }
 
+  if (isLoadingPrompts) {
+    return (
+      <div className="h-[100dvh] bg-background flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Preparing questions...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
@@ -468,7 +500,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           </AlertDialogContent>
         </AlertDialog>
         <span className="text-xs text-muted-foreground font-medium">
-          {currentPrompt + 1}/{defaultPrompts.length}
+          {currentPrompt + 1}/{prompts.length}
         </span>
       </div>
 
@@ -486,7 +518,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             <ChevronLeft className="w-4 h-4" /> Previous
           </Button>
 
-          {currentPrompt < defaultPrompts.length - 1 && (
+          {currentPrompt < prompts.length - 1 && (
             <Button
               variant="ghost"
               size="sm"
@@ -507,14 +539,14 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
               <h2 className="font-display text-xl font-semibold leading-snug text-pretty">
-                {defaultPrompts[currentPrompt].question}
+                {prompts[currentPrompt].question}
               </h2>
               <p className="text-xs">&nbsp;</p>
             </div>
             <div className="invisible p-8 space-y-4 [grid-area:1/1]">
               <p className="text-xs">&nbsp;</p>
               <p className="text-sm leading-relaxed">
-                {defaultPrompts[currentPrompt].guidance}
+                {prompts[currentPrompt].guidance}
               </p>
               <p className="text-xs">&nbsp;</p>
             </div>
@@ -529,7 +561,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 Discuss Together
               </p>
               <h2 className="font-display text-xl font-semibold text-foreground leading-snug text-pretty">
-                {defaultPrompts[currentPrompt].question}
+                {prompts[currentPrompt].question}
               </h2>
               <button
                 className="inline-flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
@@ -546,7 +578,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 Hint
               </div>
               <p className="text-sm text-foreground leading-relaxed text-left">
-                {defaultPrompts[currentPrompt].guidance}
+                {prompts[currentPrompt].guidance}
               </p>
               <p className="text-xs text-muted-foreground mt-2">Tap to flip back</p>
             </div>
