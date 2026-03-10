@@ -57,6 +57,15 @@ const ActivityPath = () => {
     });
   };
 
+  // Find the "up next" activity (first available or in_progress)
+  let upNextId: string | undefined;
+  for (const stage of stages || []) {
+    const found = stage.activities.find(
+      (a) => a.userStatus === "in_progress" || a.userStatus === "available"
+    );
+    if (found) { upNextId = found.id; break; }
+  }
+
   const handleStartActivity = (activity: ActivityWithProgress) => {
     if (activity.userStatus === "locked") return;
 
@@ -120,7 +129,8 @@ const ActivityPath = () => {
           stageNumber={index + 1}
           isOpen={isStageOpen(stage.id)}
           onToggle={() => toggleStage(stage.id)}
-          onActivityClick={handleStartActivity} />
+          onActivityClick={handleStartActivity}
+          upNextId={upNextId} />
 
         )}
       </div>
@@ -134,9 +144,10 @@ interface StageCardProps {
   isOpen: boolean;
   onToggle: () => void;
   onActivityClick: (activity: ActivityWithProgress) => void;
+  upNextId?: string;
 }
 
-const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick }: StageCardProps) => {
+const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick, upNextId }: StageCardProps) => {
   const isComplete = stage.completedCount === stage.totalCount && stage.totalCount > 0;
   const progressPercent = stage.totalCount > 0 ? stage.completedCount / stage.totalCount * 100 : 0;
 
@@ -192,6 +203,7 @@ const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick }: St
             <ActivityItem
               key={activity.id}
               activity={activity}
+              isUpNext={activity.id === upNextId}
               onClick={() => onActivityClick(activity)} />
 
             )}
@@ -204,10 +216,11 @@ const StageCard = ({ stage, stageNumber, isOpen, onToggle, onActivityClick }: St
 
 interface ActivityItemProps {
   activity: ActivityWithProgress;
+  isUpNext: boolean;
   onClick: () => void;
 }
 
-const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
+const ActivityItem = ({ activity, isUpNext, onClick }: ActivityItemProps) => {
   const config = typeConfig[activity.type];
   const Icon = activity.userStatus === "completed" ?
   Check :
@@ -216,7 +229,7 @@ const ActivityItem = ({ activity, onClick }: ActivityItemProps) => {
   config.icon;
 
   const isClickable = activity.userStatus !== "locked";
-  const showStartButton = activity.userStatus === "available" || activity.userStatus === "in_progress";
+  const showStartButton = isUpNext;
 
   return (
     <div
