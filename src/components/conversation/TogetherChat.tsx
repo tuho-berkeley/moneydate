@@ -719,7 +719,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
                   </p>
                 )}
                 <div
-                  className={`rounded-2xl p-4 ${
+                  className={`rounded-2xl p-4 overflow-hidden ${
                     msg.role === "ai"
                       ? "bg-secondary/50 text-foreground"
                       : "bg-primary text-primary-foreground"
