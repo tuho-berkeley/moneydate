@@ -549,6 +549,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
     myQualityCountRef.current = 0;
     partnerQualityCountRef.current = 0;
     completionReachedRef.current = false;
+    lastCheckedLengthRef.current = 0;
     setCompletionReached(false);
     setShowClosureButtons(false);
     setContinueAnyway(false);
