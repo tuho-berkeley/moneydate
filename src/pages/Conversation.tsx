@@ -21,7 +21,7 @@ const Conversation = () => {
       const { data, error } = await supabase
         .from("activities")
         .select("*")
-        .eq("slug" as any, slug)
+        .eq("slug", slug as any)
         .single();
       if (error) throw error;
       return data;

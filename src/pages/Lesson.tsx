@@ -30,7 +30,7 @@ const Lesson = () => {
     queryKey: ["activity", slug],
     queryFn: async () => {
       if (!slug) throw new Error("No activity slug");
-      const { data, error } = await supabase.from("activities").select("*").eq("slug" as any, slug).single();
+      const { data, error } = await supabase.from("activities").select("*").eq("slug", slug as any).single();
       if (error) throw error;
       return data;
     },
