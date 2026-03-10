@@ -91,8 +91,8 @@ const PartnerConnectionStep = ({ onNext, onSkip, initialCode }: Props) => {
           </button>
         </div>
         <div className="space-y-3">
-          <Button onClick={onNext} className="w-full rounded-full" size="lg">Continue</Button>
-          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full">Back</Button>
+          <Button onClick={onNext} className="w-full rounded-full uppercase" size="lg">Continue</Button>
+          <Button onClick={() => setMode("choose")} variant="ghost" className="w-full rounded-full uppercase">Back</Button>
         </div>
       </div>
     );
