@@ -354,6 +354,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
+          // Strip any sentences ending with "?" as a safety net
+          fullResponse = fullResponse.replace(/[^.!?\n]*\?/g, "").trim();
+          if (!fullResponse) fullResponse = "Thank you both for sharing so openly. 💛";
+
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
           for (const segment of segments) {
             await supabase.from("messages").insert({
