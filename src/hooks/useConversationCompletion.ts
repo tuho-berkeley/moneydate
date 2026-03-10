@@ -1,17 +1,28 @@
 import { useRef, useCallback } from "react";
-import { useCompleteActivity } from "@/hooks/useActivities";
+import { useCompleteActivity, useActivities } from "@/hooks/useActivities";
 import { toast } from "sonner";
 
 /**
  * Hook to auto-mark an activity as completed when conversation criteria are met.
- * Ensures completion is only triggered once per session.
+ * Ensures completion is only triggered once per session and skips if already completed.
  */
 export function useConversationCompletion(activityId: string) {
   const completeActivity = useCompleteActivity();
+  const { data: activitiesData } = useActivities();
   const completedRef = useRef(false);
 
   const markCompleted = useCallback(() => {
     if (completedRef.current || completeActivity.isPending) return;
+
+    // Check if already completed in database — skip toast if so
+    const alreadyCompleted = activitiesData?.some(
+      (a) => a.id === activityId && a.userStatus === "completed"
+    );
+    if (alreadyCompleted) {
+      completedRef.current = true;
+      return;
+    }
+
     completedRef.current = true;
 
     completeActivity.mutate(activityId, {
@@ -22,7 +33,7 @@ export function useConversationCompletion(activityId: string) {
         completedRef.current = false;
       },
     });
-  }, [activityId, completeActivity]);
+  }, [activityId, completeActivity, activitiesData]);
 
   return { markCompleted };
 }
