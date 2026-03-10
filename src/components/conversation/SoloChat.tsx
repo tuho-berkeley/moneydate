@@ -369,6 +369,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
           }
           await queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
         }
+        markInsightsGenerated();
         setIsWaitingForAI(false);
         setIsGeneratingInsights(false);
       },
