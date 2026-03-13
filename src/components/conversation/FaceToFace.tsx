@@ -443,6 +443,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
             queryClient.invalidateQueries({ queryKey: ["activities"] });
             queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+            queryClient.invalidateQueries({ queryKey: ["activity-status"] });
           });
       }
     }
