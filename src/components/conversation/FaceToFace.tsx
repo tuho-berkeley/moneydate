@@ -374,7 +374,23 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         try {
           const parsed = JSON.parse(msg.content);
           if (typeof parsed.promptIndex === "number" && parsed.transcript) {
-            const partner: Partner = msg.role === "partner" ? "partner_b" : "partner_a";
+            // Determine perspective: "self" means the recorder's own answer,
+            // "partner" means recorded on behalf of the other person.
+            // If sender is me + for=self → You tab (partner_a)
+            // If sender is me + for=partner → Your Partner tab (partner_b)
+            // If sender is not me + for=self → Your Partner tab (partner_b)
+            // If sender is not me + for=partner → You tab (partner_a)
+            // Backward compat: old messages without "for" field use role-based logic
+            const senderIsMe = msg.sender_id === user?.id;
+            const recordedFor = parsed.for as string | undefined;
+            let partner: Partner;
+            if (recordedFor) {
+              const isForMe = (senderIsMe && recordedFor === "self") || (!senderIsMe && recordedFor === "partner");
+              partner = isForMe ? "partner_a" : "partner_b";
+            } else {
+              // Legacy: fall back to role-based assignment
+              partner = msg.role === "partner" ? "partner_b" : (senderIsMe ? "partner_a" : "partner_b");
+            }
             const quality = typeof parsed.quality === "boolean"
               ? parsed.quality
               : passesPreFilter(parsed.transcript);
