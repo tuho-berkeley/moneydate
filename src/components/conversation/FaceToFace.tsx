@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +8,7 @@ import { AIMessageLabel } from "@/components/conversation/AIMessageLabel";
 import AIThinkingBubble from "@/components/conversation/AIThinkingBubble";
 import TypewriterText from "@/components/conversation/TypewriterText";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
-import { isQualityAnswer } from "@/lib/isQualityAnswer";
+import { isQualityAnswer, passesPreFilter } from "@/lib/isQualityAnswer";
 import ReactMarkdown from "react-markdown";
 import { useConversationCompletion } from "@/hooks/useConversationCompletion";
 
@@ -66,7 +67,8 @@ interface PromptResponse {
   promptIndex: number;
   partner: Partner;
   transcript: string;
-  messageId?: string; // DB message id for deletion
+  quality: boolean;
+  messageId?: string;
 }
 
 const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFaceProps) => {
@@ -139,7 +141,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   });
 
   // Load all saved messages on mount
-  const { data: savedMessages = [] } = useQuery({
+  const { data: savedMessages = [], isSuccess: messagesLoaded } = useQuery({
     queryKey: ["messages", conversation?.id],
     queryFn: async () => {
       if (!conversation) return [];
@@ -175,24 +177,31 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     return () => { supabase.removeChannel(channel); };
   }, [conversation?.id, queryClient]);
 
-  // Check for saved prompts in messages
-  const savedPromptsMessage = savedMessages.find(m => {
-    if (m.role !== "ai") return false;
-    try {
-      const parsed = JSON.parse(m.content);
-      return parsed.type === "prompts" && Array.isArray(parsed.data);
-    } catch { return false; }
-  });
+  // ─── 1) PROMPT PERSISTENCE: DB-first, race-safe ───────────────────────
 
-  const savedPrompts: Prompt[] | null = savedPromptsMessage
-    ? (() => { try { return JSON.parse(savedPromptsMessage.content).data; } catch { return null; } })()
-    : null;
+  // Find the canonical (oldest) saved prompts message from DB
+  const savedPromptsMessage = useMemo(() => {
+    const promptMsgs = savedMessages.filter(m => {
+      if (m.role !== "ai") return false;
+      try {
+        const parsed = JSON.parse(m.content);
+        return parsed.type === "prompts" && Array.isArray(parsed.data);
+      } catch { return false; }
+    });
+    // Return oldest (first by created_at since messages are ordered asc)
+    return promptMsgs.length > 0 ? promptMsgs[0] : null;
+  }, [savedMessages]);
 
-  // Fetch/generate prompts — use saved ones if available
+  const savedPrompts: Prompt[] | null = useMemo(() => {
+    if (!savedPromptsMessage) return null;
+    try { return JSON.parse(savedPromptsMessage.content).data; } catch { return null; }
+  }, [savedPromptsMessage]);
+
+  // Gate prompt generation behind messagesLoaded (not just conversation existing)
   const { data: prompts = defaultPrompts, isLoading: isLoadingPrompts } = useQuery({
     queryKey: ["face-to-face-prompts", activityId, conversation?.id],
     queryFn: async () => {
-      // If we already have saved prompts, use them
+      // Use saved prompts from DB if they exist
       if (savedPrompts) return savedPrompts;
 
       const resp = await supabase.functions.invoke("chat", {
@@ -206,14 +215,42 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       if (resp.error) throw resp.error;
       const data = resp.data as Prompt[];
       if (Array.isArray(data) && data.length === 5 && data[0]?.question && data[0]?.guidance) {
-        // Save prompts to DB
+        // Race-condition check: re-query DB for existing prompts before inserting
         if (conversation) {
-          await supabase.from("messages").insert({
-            conversation_id: conversation.id,
-            sender_id: null,
-            role: "ai",
-            content: JSON.stringify({ type: "prompts", data }),
+          const { data: existingMsgs } = await supabase
+            .from("messages")
+            .select("content")
+            .eq("conversation_id", conversation.id)
+            .eq("role", "ai")
+            .order("created_at", { ascending: true });
+
+          const alreadySaved = existingMsgs?.some(m => {
+            try {
+              const p = JSON.parse(m.content);
+              return p.type === "prompts" && Array.isArray(p.data);
+            } catch { return false; }
           });
+
+          if (!alreadySaved) {
+            await supabase.from("messages").insert({
+              conversation_id: conversation.id,
+              sender_id: null,
+              role: "ai",
+              content: JSON.stringify({ type: "prompts", data }),
+            });
+            queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+          } else {
+            // Another device already saved prompts — use those instead
+            const canonical = existingMsgs?.find(m => {
+              try {
+                const p = JSON.parse(m.content);
+                return p.type === "prompts" && Array.isArray(p.data);
+              } catch { return false; }
+            });
+            if (canonical) {
+              try { return JSON.parse(canonical.content).data; } catch { /* fall through */ }
+            }
+          }
         }
         return data;
       }
@@ -221,7 +258,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     },
     staleTime: Infinity,
     retry: 1,
-    enabled: !!conversation,
+    // KEY FIX: Only run when messages have loaded so we can check for saved prompts first
+    enabled: !!conversation && messagesLoaded,
   });
 
   const [extraPrompts, setExtraPrompts] = useState<Prompt[]>([]);
@@ -263,7 +301,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       if (resp.error) throw resp.error;
       const data = resp.data as Prompt;
       if (data?.question && data?.guidance) {
-        // Save extra prompt to DB
         if (conversation) {
           await supabase.from("messages").insert({
             conversation_id: conversation.id,
@@ -290,32 +327,37 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [responses, setResponses] = useState<PromptResponse[]>([]);
-  const [lastTranscript, setLastTranscript] = useState<{ text: string; partner: Partner; promptIndex: number; accepted: boolean } | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-  const { markCompleted, resetCompletion } = useConversationCompletion(activityId);
+  const { markCompleted, markInsightsGenerated, resetCompletion } = useConversationCompletion(activityId);
+  const completionTriggeredRef = useRef(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef("");
 
-  // Restore saved responses from messages on mount (multiple per question)
+  // ─── 2) RESTORE RESPONSES WITH QUALITY FIELD ──────────────────────────
+
   useEffect(() => {
-    if (savedMessages.length === 0) return;
+    if (savedMessages.length === 0 || !user) return;
     const restored: PromptResponse[] = [];
     for (const msg of savedMessages) {
       if (msg.role === "user" || msg.role === "partner") {
         try {
           const parsed = JSON.parse(msg.content);
           if (typeof parsed.promptIndex === "number" && parsed.transcript) {
-            // Determine partner based on sender_id
-            const partner: Partner = msg.sender_id === user?.id ? "partner_a" : "partner_b";
+            const partner: Partner = msg.sender_id === user.id ? "partner_a" : "partner_b";
+            // Backward compat: if no quality field, infer with passesPreFilter
+            const quality = typeof parsed.quality === "boolean"
+              ? parsed.quality
+              : passesPreFilter(parsed.transcript);
             restored.push({
               promptIndex: parsed.promptIndex,
               partner,
               transcript: parsed.transcript,
+              quality,
               messageId: msg.id,
             });
           }
@@ -327,16 +369,35 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     }
   }, [savedMessages, user?.id]);
 
+  // ─── 3) DETERMINISTIC COMPLETION LOGIC ────────────────────────────────
+
+  // Derive completion state from responses
+  const isCompleted = useMemo(() => {
+    const partnerAQuestions = new Set(responses.filter(r => r.partner === "partner_a").map(r => r.promptIndex));
+    const partnerBQuestions = new Set(responses.filter(r => r.partner === "partner_b").map(r => r.promptIndex));
+    return partnerAQuestions.size >= 2 && partnerBQuestions.size >= 2;
+  }, [responses]);
+
+  // Trigger markCompleted when threshold reached (once per session)
+  useEffect(() => {
+    if (isCompleted && !completionTriggeredRef.current) {
+      completionTriggeredRef.current = true;
+      markCompleted();
+    }
+  }, [isCompleted, markCompleted]);
+
+  // Gate insights button: both partners must have at least one response
+  const canGenerateInsights = isCompleted;
+
   // If returning to a completed conversation, show the saved summary
   useEffect(() => {
     const aiMessages = savedMessages.filter(m => {
       if (m.role !== "ai") return false;
       try {
         const parsed = JSON.parse(m.content);
-        // Skip prompt storage messages
         return parsed.type !== "prompts" && parsed.type !== "extra_prompt";
       } catch {
-        return true; // non-JSON AI messages are summary segments
+        return true;
       }
     });
     if (aiMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
@@ -359,7 +420,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return;
     }
     setResponses([]);
-    setLastTranscript(null);
     setCurrentPrompt(0);
     setIsFlipped(false);
     setShowSummary(false);
@@ -367,6 +427,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     setRevealedSegments(new Set());
     setFreshSegments(new Set());
     setExtraPrompts([]);
+    completionTriggeredRef.current = false;
     await resetCompletion();
     queryClient.removeQueries({ queryKey: ["face-to-face-prompts", activityId, conversation.id] });
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
@@ -413,6 +474,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     }
   }, []);
 
+  // ─── 2) STOP RECORDING: ALWAYS SAVE, TAG QUALITY ─────────────────────
+
   const stopRecording = useCallback(async () => {
     setRecordingState("transcribing");
     if (recognitionRef.current) recognitionRef.current.stop();
@@ -431,26 +494,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     const currentQuestion = allPrompts[currentPrompt].question;
     const quality = await isQualityAnswer(currentQuestion, transcript);
 
-    if (!quality) {
-      setLastTranscript({ text: transcript, partner: activePartner, promptIndex: currentPrompt, accepted: false });
-      toast.error("Could you try again?", {
-        description: "Share a more detailed response.",
-      });
-      setRecordingState("idle");
-      return;
-    }
-
-    // Save to DB — always save quality recordings
+    // Always save to DB regardless of quality
     let messageId: string | undefined;
     if (conversation) {
-      // Determine role: if current user is partner_a, role=user; if partner_b check if it's current user or partner
       const role = activePartner === "partner_a" ? "user" : "partner";
       const senderId = activePartner === "partner_a" ? user?.id : (partnerProfile?.id || user?.id);
       const { data: inserted } = await supabase.from("messages").insert({
         conversation_id: conversation.id,
         sender_id: senderId || null,
         role: role as any,
-        content: JSON.stringify({ promptIndex: currentPrompt, transcript }),
+        content: JSON.stringify({ promptIndex: currentPrompt, transcript, quality }),
       }).select("id").single();
       messageId = inserted?.id;
     }
@@ -459,24 +512,21 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       promptIndex: currentPrompt,
       partner: activePartner,
       transcript,
+      quality,
       messageId,
     };
 
-    setLastTranscript({ text: transcript, partner: activePartner, promptIndex: currentPrompt, accepted: true });
-
-    setResponses((prev) => {
-      const updated = [...prev, newResponse];
-      // Count unique questions with at least one recording per partner
-      const partnerAQuestions = new Set(updated.filter(r => r.partner === "partner_a").map(r => r.promptIndex));
-      const partnerBQuestions = new Set(updated.filter(r => r.partner === "partner_b").map(r => r.promptIndex));
-      if (partnerAQuestions.size >= 2 && partnerBQuestions.size >= 2) {
-        markCompleted();
-      }
-      return updated;
-    });
+    setResponses((prev) => [...prev, newResponse]);
     setRecordingState("idle");
-    toast.success(`${activePartner === "partner_a" ? "Your" : "Your Partner's"} response recorded!`);
-  }, [currentPrompt, activePartner, markCompleted, conversation, user, allPrompts, partnerProfile]);
+
+    if (quality) {
+      toast.success(`${activePartner === "partner_a" ? "Your" : "Your Partner's"} response recorded!`);
+    } else {
+      toast("Response saved", {
+        description: "Try adding more detail for better insights.",
+      });
+    }
+  }, [currentPrompt, activePartner, conversation, user, allPrompts, partnerProfile]);
 
   // Get all responses for a (promptIdx, partner)
   const getResponses = (promptIdx: number, partner: Partner) => {
@@ -487,34 +537,36 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     return getResponses(promptIdx, partner).length > 0;
   };
 
-  // Combined text for a (promptIdx, partner)
-  const getCombinedResponse = (promptIdx: number, partner: Partner) => {
-    return getResponses(promptIdx, partner).map(r => r.transcript).join(" ");
+  // Combined text for a (promptIdx, partner) — quality only for insights
+  const getCombinedQualityResponse = (promptIdx: number, partner: Partner) => {
+    return getResponses(promptIdx, partner)
+      .filter(r => r.quality)
+      .map(r => r.transcript)
+      .join(" ");
   };
 
   const deleteResponse = useCallback(async (response: PromptResponse) => {
-    // Delete from DB
     if (response.messageId) {
       await supabase.from("messages").delete().eq("id", response.messageId);
     }
     setResponses(prev => prev.filter(r => r !== response));
   }, []);
 
-  const bothResponded = hasResponse(currentPrompt, "partner_a") && hasResponse(currentPrompt, "partner_b");
-  const canGenerateInsights =
-    responses.some((r) => r.partner === "partner_a") &&
-    responses.some((r) => r.partner === "partner_b");
+  // ─── 4) INSIGHTS: QUALITY-ONLY INPUT ──────────────────────────────────
 
   const generateSummary = useCallback(async () => {
     if (!conversation || !user) return;
     setIsGeneratingSummary(true);
     setShowSummary(true);
     setSummaryText(null);
+
+    // Build formatted responses using only quality transcripts
     const formattedResponses = allPrompts.map((prompt, i) => {
-      const a = getCombinedResponse(i, "partner_a");
-      const b = getCombinedResponse(i, "partner_b");
-      return `Question: ${prompt.question}\nPartner A: ${a || "(no response)"}\nPartner B: ${b || "(no response)"}`;
+      const a = getCombinedQualityResponse(i, "partner_a");
+      const b = getCombinedQualityResponse(i, "partner_b");
+      return `Question: ${prompt.question}\nPartner A: ${a || "(no quality response)"}\nPartner B: ${b || "(no quality response)"}`;
     }).join("\n\n");
+
     let fullResponse = "";
     await streamChat({
       messages: [
@@ -543,13 +595,15 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         }
         setSummaryText(fullResponse);
         setIsGeneratingSummary(false);
+        // Mark insights generated for activity progress
+        markInsightsGenerated();
       },
       onError: (error) => {
         toast.error(error);
         setIsGeneratingSummary(false);
       },
     });
-  }, [conversation, user, responses, activityTitle, activityDescription, allPrompts]);
+  }, [conversation, user, responses, activityTitle, activityDescription, allPrompts, markInsightsGenerated]);
 
   // Split summary into segments for staggered display
   const summarySegments = summaryText
@@ -672,6 +726,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
   const loadingPrompts = isLoadingPrompts;
   const currentResponses = getResponses(currentPrompt, activePartner);
+  const bothResponded = hasResponse(currentPrompt, "partner_a") && hasResponse(currentPrompt, "partner_b");
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
@@ -684,7 +739,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           <h1 className="font-semibold text-foreground text-sm text-pretty">{activityTitle}</h1>
           <div className="flex items-center gap-2">
             <p className="text-xs text-muted-foreground">Face-to-Face</p>
-            {showSummary && (
+            {isCompleted && (
               <span className="flex items-center gap-1 text-[10px] font-semibold text-success">
                 <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
                 Completed
@@ -823,7 +878,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               </div>
             </div>
 
-            {/* Multiple recordings list */}
+            {/* ─── 2) RESPONSES LIST WITH QUALITY BADGES ─────────────── */}
             {currentResponses.length > 0 && (
               <div className="w-full max-w-sm mt-4 space-y-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -835,7 +890,14 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                       key={response.messageId || idx}
                       className="bg-secondary/50 rounded-xl p-3 flex items-start gap-2 animate-fade-in"
                     >
-                      <p className="text-sm text-foreground flex-1">{response.transcript}</p>
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm text-foreground">{response.transcript}</p>
+                        {!response.quality && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">
+                            Say a bit more...
+                          </Badge>
+                        )}
+                      </div>
                       <button
                         onClick={() => deleteResponse(response)}
                         className="text-muted-foreground hover:text-destructive transition-colors shrink-0 mt-0.5"
@@ -845,21 +907,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Show rejected transcript */}
-            {lastTranscript &&
-              !lastTranscript.accepted &&
-              lastTranscript.promptIndex === currentPrompt &&
-              lastTranscript.partner === activePartner && (
-              <div className="w-full max-w-sm mt-4 bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-destructive mb-1">
-                  Last attempt — try again
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {lastTranscript.text}
-                </p>
               </div>
             )}
           </>
@@ -928,7 +975,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </button>
           </div>
 
-          {/* Get Insights */}
+          {/* Get Insights — gated by completion */}
           {canGenerateInsights && (
             <Button
               onClick={generateSummary}
