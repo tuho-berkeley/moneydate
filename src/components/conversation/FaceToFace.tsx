@@ -404,8 +404,29 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   }, [conversation, user, responses, activityTitle, activityDescription]);
 
   const handleRecordAgain = useCallback(() => {
+    // Delete the old response message from the database
+    if (conversation) {
+      const roleToDelete = activePartner === "partner_a" ? "user" : "partner";
+      // Find and delete matching message
+      supabase
+        .from("messages")
+        .select("id, content")
+        .eq("conversation_id", conversation.id)
+        .eq("role", roleToDelete as any)
+        .then(({ data }) => {
+          const match = data?.find((m) => {
+            try {
+              const parsed = JSON.parse(m.content);
+              return parsed.promptIndex === currentPrompt;
+            } catch { return false; }
+          });
+          if (match) {
+            supabase.from("messages").delete().eq("id", match.id).then();
+          }
+        });
+    }
     setResponses((prev) => prev.filter((r) => !(r.promptIndex === currentPrompt && r.partner === activePartner)));
-  }, [currentPrompt, activePartner]);
+  }, [currentPrompt, activePartner, conversation]);
 
   // Split summary into segments for staggered display
   const summarySegments = summaryText
