@@ -990,16 +990,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       {/* Fixed bottom controls */}
       <div className="shrink-0 px-6 pb-6 pt-3 bg-background border-t border-border">
         <div className="w-full max-w-sm mx-auto space-y-3">
-          {canGenerateInsights && (
-            <Button
-              onClick={generateSummary}
-              disabled={isGeneratingSummary}
-              variant="secondary"
-              className="w-full gap-2 rounded-xl"
-            >
-              <Sparkles className="w-4 h-4" /> Get Insights
-            </Button>
-          )}
           {/* Recording controls */}
           {recordingState === "idle" && (
             <Button
