@@ -420,6 +420,10 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
           completionReachedRef.current = true;
           setCompletionReached(true);
           markCompleted();
+          if (conversation) {
+            supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+            queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+          }
         }
       }
     }
