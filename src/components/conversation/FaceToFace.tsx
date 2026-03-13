@@ -597,9 +597,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     if (quality) {
       toast.success(`${activePartner === "partner_a" ? "Your" : "Your Partner's"} response recorded!`);
     } else {
-      toast("Response saved", {
-        description: "Try adding more detail for better insights.",
-      });
+      toast.info("Response saved. Try adding more detail for better insights.");
     }
   }, [currentPrompt, activePartner, conversation, user, allPrompts, partnerProfile]);
 
