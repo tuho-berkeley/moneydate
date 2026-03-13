@@ -341,7 +341,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return updated;
     });
     setRecordingState("idle");
-    toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
+    toast.success(`${activePartner === "partner_a" ? "Your" : "Your Partner's"} response recorded!`);
   }, [currentPrompt, activePartner, markCompleted, conversation, user]);
 
   const hasResponse = (promptIdx: number, partner: Partner) => {
@@ -704,7 +704,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             {hasResponse(currentPrompt, activePartner) && (
               <div className="w-full max-w-sm mt-4 bg-secondary/50 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                  {activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response
+                  {activePartner === "partner_a" ? "Your" : "Your Partner's"} response
                 </p>
                 <p className="text-sm text-foreground">
                   {getResponse(currentPrompt, activePartner)?.transcript}
@@ -782,7 +782,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 activePartner === "partner_a" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              Partner A {hasResponse(currentPrompt, "partner_a") && "✓"}
+              You {hasResponse(currentPrompt, "partner_a") && "✓"}
             </button>
             <button
               onClick={() => setActivePartner("partner_b")}
@@ -790,7 +790,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 activePartner === "partner_b" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              Partner B {hasResponse(currentPrompt, "partner_b") && "✓"}
+              Your Partner {hasResponse(currentPrompt, "partner_b") && "✓"}
             </button>
           </div>
 
