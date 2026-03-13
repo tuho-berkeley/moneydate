@@ -340,8 +340,34 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
   // ─── 2) RESTORE RESPONSES WITH QUALITY FIELD ──────────────────────────
 
+  const hadMessagesRef = useRef(false);
+
   useEffect(() => {
-    if (savedMessages.length === 0 || !user) return;
+    if (!user) return;
+
+    // Track whether we ever had messages
+    if (savedMessages.length > 0) {
+      hadMessagesRef.current = true;
+    }
+
+    // Detect partner-side restart: messages went from non-empty to empty
+    if (savedMessages.length === 0 && hadMessagesRef.current && messagesLoaded) {
+      hadMessagesRef.current = false;
+      setResponses([]);
+      setCurrentPrompt(0);
+      setIsFlipped(false);
+      setShowSummary(false);
+      setSummaryText(null);
+      setRevealedSegments(new Set());
+      setFreshSegments(new Set());
+      setExtraPrompts([]);
+      completionTriggeredRef.current = false;
+      queryClient.removeQueries({ queryKey: ["face-to-face-prompts", activityId, conversation?.id] });
+      return;
+    }
+
+    if (savedMessages.length === 0) return;
+
     const restored: PromptResponse[] = [];
     for (const msg of savedMessages) {
       if (msg.role === "user" || msg.role === "partner") {
@@ -349,7 +375,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           const parsed = JSON.parse(msg.content);
           if (typeof parsed.promptIndex === "number" && parsed.transcript) {
             const partner: Partner = msg.role === "partner" ? "partner_b" : "partner_a";
-            // Backward compat: if no quality field, infer with passesPreFilter
             const quality = typeof parsed.quality === "boolean"
               ? parsed.quality
               : passesPreFilter(parsed.transcript);
@@ -364,10 +389,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         } catch { /* skip */ }
       }
     }
-    if (restored.length > 0) {
-      setResponses(restored);
-    }
-  }, [savedMessages, user?.id]);
+    setResponses(restored);
+  }, [savedMessages, user?.id, messagesLoaded]);
 
   // ─── 3) DETERMINISTIC COMPLETION LOGIC ────────────────────────────────
 
