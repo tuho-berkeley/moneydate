@@ -426,33 +426,35 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       completionTriggeredRef.current = true;
       markCompleted();
       if (conversation) {
-        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
-        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+        (async () => {
+          await supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+          queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+        })();
       }
     } else if (!isCompleted && completionTriggeredRef.current) {
       // User deleted a quality answer — revert status back to in_progress
       completionTriggeredRef.current = false;
-      if (conversation) {
-        supabase.from("conversations").update({ completed: false } as any).eq("id", conversation.id);
-      }
-      if (user) {
-        supabase
-          .from("user_activities")
-          .upsert(
-            {
-              user_id: user.id,
-              activity_id: activityId,
-              status: "in_progress" as any,
-            },
-            { onConflict: "user_id,activity_id" }
-          )
-          .then(() => {
-            queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
-            queryClient.invalidateQueries({ queryKey: ["activities"] });
-            queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
-            queryClient.invalidateQueries({ queryKey: ["activity-status"] });
-          });
-      }
+      (async () => {
+        if (conversation) {
+          await supabase.from("conversations").update({ completed: false } as any).eq("id", conversation.id);
+        }
+        if (user) {
+          await supabase
+            .from("user_activities")
+            .upsert(
+              {
+                user_id: user.id,
+                activity_id: activityId,
+                status: "in_progress" as any,
+              },
+              { onConflict: "user_id,activity_id" }
+            );
+          queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
+          queryClient.invalidateQueries({ queryKey: ["activities"] });
+          queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+          queryClient.invalidateQueries({ queryKey: ["activity-status"] });
+        }
+      })();
     }
   }, [isCompleted, markCompleted, user, activityId, queryClient, conversation]);
 
