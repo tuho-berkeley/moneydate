@@ -654,6 +654,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       activityTitle,
       activityDescription: activityDescription || "",
       conversationType: "face_to_face",
+      userName: profile?.display_name,
+      partnerName: partnerProfile?.display_name,
       onDelta: (chunk) => {
         fullResponse += chunk;
       },
