@@ -265,7 +265,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [extraPrompts, setExtraPrompts] = useState<Prompt[]>([]);
   const [isGeneratingMore, setIsGeneratingMore] = useState(false);
 
-  // Load extra prompts from saved messages
+  // Load extra prompts from saved messages (always sync to pick up partner-generated prompts)
   useEffect(() => {
     if (savedMessages.length === 0) return;
     const extras: Prompt[] = [];
@@ -278,9 +278,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         }
       } catch { /* skip */ }
     }
-    if (extras.length > 0 && extraPrompts.length === 0) {
-      setExtraPrompts(extras);
-    }
+    // Always update to stay in sync with DB (handles partner adding new prompts)
+    setExtraPrompts(extras);
   }, [savedMessages]);
 
   const allPrompts = [...prompts, ...extraPrompts];
@@ -417,13 +416,33 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     return partnerAQuestions.size >= 2 && partnerBQuestions.size >= 2;
   }, [responses]);
 
-  // Trigger markCompleted when threshold reached (once per session)
+  // Trigger markCompleted when threshold reached, revert when it drops below
   useEffect(() => {
     if (isCompleted && !completionTriggeredRef.current) {
       completionTriggeredRef.current = true;
       markCompleted();
+    } else if (!isCompleted && completionTriggeredRef.current) {
+      // User deleted a quality answer — revert status back to in_progress
+      completionTriggeredRef.current = false;
+      if (user) {
+        supabase
+          .from("user_activities")
+          .upsert(
+            {
+              user_id: user.id,
+              activity_id: activityId,
+              status: "in_progress" as any,
+            },
+            { onConflict: "user_id,activity_id" }
+          )
+          .then(() => {
+            queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
+            queryClient.invalidateQueries({ queryKey: ["activities"] });
+            queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+          });
+      }
     }
-  }, [isCompleted, markCompleted]);
+  }, [isCompleted, markCompleted, user, activityId, queryClient]);
 
   // Gate insights button: both partners must have at least one response
   const canGenerateInsights = isCompleted;
