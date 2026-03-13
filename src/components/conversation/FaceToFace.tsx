@@ -967,25 +967,24 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               </div>
             )}
 
-            {/* Get Insights — gated by completion */}
-            {canGenerateInsights && (
-              <div className="w-full max-w-sm mt-4">
-                <Button
-                  onClick={generateSummary}
-                  disabled={isGeneratingSummary}
-                  variant="secondary"
-                  className="w-full gap-2 rounded-xl"
-                >
-                  <Sparkles className="w-4 h-4" /> Get Insights
-                </Button>
-              </div>
-            )}
           </>
         )}
       </div>
 
       {/* Fixed bottom controls */}
       <div className="shrink-0 px-6 pb-6 pt-3 bg-background border-t border-border">
+        <div className="w-full max-w-sm mx-auto space-y-3">
+          {/* Get Insights — floating above recording */}
+          {canGenerateInsights && (
+            <Button
+              onClick={generateSummary}
+              disabled={isGeneratingSummary}
+              variant="secondary"
+              className="w-full gap-2 rounded-xl"
+            >
+              <Sparkles className="w-4 h-4" /> Get Insights
+            </Button>
+          )}
         <div className="w-full max-w-sm mx-auto space-y-3">
           {/* Recording controls */}
           {recordingState === "idle" && (
