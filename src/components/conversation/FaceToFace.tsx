@@ -134,6 +134,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [responses, setResponses] = useState<PromptResponse[]>([]);
+  const [lastTranscript, setLastTranscript] = useState<{ text: string; partner: Partner; promptIndex: number; accepted: boolean } | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -206,6 +207,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return;
     }
     setResponses([]);
+    setLastTranscript(null);
     setCurrentPrompt(0);
     setIsFlipped(false);
     setShowSummary(false);
@@ -274,9 +276,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return;
     }
 
-    // Validate transcript quality using AI
+    // Always show the transcript
     const currentQuestion = allPrompts[currentPrompt].question;
     const quality = await isQualityAnswer(currentQuestion, transcript);
+
+    setLastTranscript({ text: transcript, partner: activePartner, promptIndex: currentPrompt, accepted: quality });
 
     if (!quality) {
       toast.error("Could you try again?", {
@@ -293,7 +297,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     };
     setResponses((prev) => {
       const updated = [...prev, newResponse];
-      // Face-to-face completion: each partner recorded at least 2 quality responses
       const partnerAQualityCount = updated.filter(r => r.partner === "partner_a").length;
       const partnerBQualityCount = updated.filter(r => r.partner === "partner_b").length;
       if (partnerAQualityCount >= 2 && partnerBQualityCount >= 2) {
@@ -640,6 +643,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </div>
 
             {/* Transcript area */}
+            {/* Show accepted response */}
             {hasResponse(currentPrompt, activePartner) && (
               <div className="w-full max-w-sm mt-4 bg-secondary/50 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
@@ -647,6 +651,22 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 </p>
                 <p className="text-sm text-foreground">
                   {getResponse(currentPrompt, activePartner)?.transcript}
+                </p>
+              </div>
+            )}
+
+            {/* Show rejected transcript */}
+            {!hasResponse(currentPrompt, activePartner) &&
+              lastTranscript &&
+              !lastTranscript.accepted &&
+              lastTranscript.promptIndex === currentPrompt &&
+              lastTranscript.partner === activePartner && (
+              <div className="w-full max-w-sm mt-4 bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-destructive mb-1">
+                  Last attempt — try again
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {lastTranscript.text}
                 </p>
               </div>
             )}
