@@ -37,6 +37,10 @@ interface Prompt {
   guidance: string;
 }
 
+/** Convert inline bullet chars (•, ‣, ⁃) into markdown list items with line breaks */
+const normalizeBullets = (text: string): string =>
+  text.replace(/(?:^|\s)[•‣⁃]\s*/gm, '\n- ');
+
 const defaultPrompts: Prompt[] = [
   {
     question: "How did your family usually talk about money when you were growing up?",
