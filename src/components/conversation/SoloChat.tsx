@@ -461,6 +461,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       // Mark completed and trigger pre-closure
       setCompletionReached(true);
       markCompleted();
+      if (conversation) {
+        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+      }
       setIsSending(false);
 
       // Trigger pre-closure AI message (no question, just reflection)
