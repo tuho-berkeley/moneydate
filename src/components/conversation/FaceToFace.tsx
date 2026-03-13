@@ -642,6 +642,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             </div>
 
             {/* Transcript area */}
+            {/* Show accepted response */}
             {hasResponse(currentPrompt, activePartner) && (
               <div className="w-full max-w-sm mt-4 bg-secondary/50 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
@@ -649,6 +650,22 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 </p>
                 <p className="text-sm text-foreground">
                   {getResponse(currentPrompt, activePartner)?.transcript}
+                </p>
+              </div>
+            )}
+
+            {/* Show rejected transcript */}
+            {!hasResponse(currentPrompt, activePartner) &&
+              lastTranscript &&
+              !lastTranscript.accepted &&
+              lastTranscript.promptIndex === currentPrompt &&
+              lastTranscript.partner === activePartner && (
+              <div className="w-full max-w-sm mt-4 bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-left animate-fade-in overflow-y-auto max-h-40">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-destructive mb-1">
+                  Last attempt — try again
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {lastTranscript.text}
                 </p>
               </div>
             )}
