@@ -275,9 +275,11 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return;
     }
 
-    // Validate transcript quality using AI
+    // Always show the transcript
     const currentQuestion = allPrompts[currentPrompt].question;
     const quality = await isQualityAnswer(currentQuestion, transcript);
+
+    setLastTranscript({ text: transcript, partner: activePartner, promptIndex: currentPrompt, accepted: quality });
 
     if (!quality) {
       toast.error("Could you try again?", {
@@ -294,7 +296,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     };
     setResponses((prev) => {
       const updated = [...prev, newResponse];
-      // Face-to-face completion: each partner recorded at least 2 quality responses
       const partnerAQualityCount = updated.filter(r => r.partner === "partner_a").length;
       const partnerBQualityCount = updated.filter(r => r.partner === "partner_b").length;
       if (partnerAQualityCount >= 2 && partnerBQualityCount >= 2) {
