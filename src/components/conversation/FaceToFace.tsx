@@ -1073,7 +1073,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 activePartner === "partner_b" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              {partnerProfile?.display_name || "Your Partner"} {hasResponse(currentPrompt, "partner_b") && "✓"}
+              Your Partner {hasResponse(currentPrompt, "partner_b") && "✓"}
             </button>
           </div>
         </div>
