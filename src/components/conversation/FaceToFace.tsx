@@ -207,6 +207,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return;
     }
     setResponses([]);
+    setLastTranscript(null);
     setCurrentPrompt(0);
     setIsFlipped(false);
     setShowSummary(false);
