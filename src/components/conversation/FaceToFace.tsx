@@ -945,7 +945,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {activePartner === "partner_a" ? "Your" : "Your Partner's"} responses ({currentResponses.length})
                 </p>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="space-y-2 max-h-64 overflow-y-auto">
                   {currentResponses.map((response, idx) => (
                     <div
                       key={response.messageId || idx}
