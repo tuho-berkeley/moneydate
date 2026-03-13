@@ -61,6 +61,7 @@ export type Database = {
       conversations: {
         Row: {
           activity_id: string | null
+          completed: boolean
           couple_id: string | null
           created_at: string
           id: string
@@ -69,6 +70,7 @@ export type Database = {
         }
         Insert: {
           activity_id?: string | null
+          completed?: boolean
           couple_id?: string | null
           created_at?: string
           id?: string
@@ -77,6 +79,7 @@ export type Database = {
         }
         Update: {
           activity_id?: string | null
+          completed?: boolean
           couple_id?: string | null
           created_at?: string
           id?: string

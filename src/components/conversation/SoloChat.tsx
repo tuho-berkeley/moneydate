@@ -128,6 +128,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     if (count >= 3) {
       setCompletionReached(true);
       markCompleted();
+      if (conversation) {
+        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+      }
       // If insights already generated, show post-insights state
       if (currentActivityStatus === "insights_generated") {
         setShowInsights(true);
@@ -304,7 +308,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
     await resetCompletion();
+    if (conversation) {
+      await supabase.from("conversations").update({ completed: false } as any).eq("id", conversation.id);
+    }
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient, resetCompletion]);
 
@@ -457,6 +465,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       // Mark completed and trigger pre-closure
       setCompletionReached(true);
       markCompleted();
+      if (conversation) {
+        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+      }
       setIsSending(false);
 
       // Trigger pre-closure AI message (no question, just reflection)
