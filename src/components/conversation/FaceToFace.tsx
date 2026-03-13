@@ -279,8 +279,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     const quality = await isQualityAnswer(currentQuestion, transcript);
 
     if (!quality) {
-      toast.error("Didn't quite get your message — could you try again?", {
-        description: "Please share a more detailed response to the question.",
+      toast.error("Could you try again?", {
+        description: "Share a more detailed response.",
       });
       setRecordingState("idle");
       return;
