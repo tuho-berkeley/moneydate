@@ -425,9 +425,16 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     if (isCompleted && !completionTriggeredRef.current) {
       completionTriggeredRef.current = true;
       markCompleted();
+      if (conversation) {
+        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+      }
     } else if (!isCompleted && completionTriggeredRef.current) {
       // User deleted a quality answer — revert status back to in_progress
       completionTriggeredRef.current = false;
+      if (conversation) {
+        supabase.from("conversations").update({ completed: false } as any).eq("id", conversation.id);
+      }
       if (user) {
         supabase
           .from("user_activities")
@@ -447,7 +454,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           });
       }
     }
-  }, [isCompleted, markCompleted, user, activityId, queryClient]);
+  }, [isCompleted, markCompleted, user, activityId, queryClient, conversation]);
 
   // Gate insights button: both partners must have at least one response
   const canGenerateInsights = isCompleted;
