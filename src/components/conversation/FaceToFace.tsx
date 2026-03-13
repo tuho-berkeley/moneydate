@@ -341,7 +341,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       return updated;
     });
     setRecordingState("idle");
-    toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
+    toast.success(`${activePartner === "partner_a" ? "Your" : "Your Partner's"} response recorded!`);
   }, [currentPrompt, activePartner, markCompleted, conversation, user]);
 
   const hasResponse = (promptIdx: number, partner: Partner) => {
