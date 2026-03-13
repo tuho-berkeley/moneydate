@@ -973,7 +973,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
       {/* Get Insights — above the recording area */}
       {canGenerateInsights && (
-        <div className="shrink-0 px-6 pt-3">
+        <div className="shrink-0 px-6 pt-3 pb-3">
           <div className="w-full max-w-sm mx-auto">
             <Button
               onClick={generateSummary}
