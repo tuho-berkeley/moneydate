@@ -91,21 +91,7 @@ const Activity = () => {
     enabled: !!id && !!user && isActivityCompleted && profile !== undefined
   });
 
-  const { data: lessonCompleted } = useQuery({
-    queryKey: ["lesson-completed", id, user?.id],
-    queryFn: async () => {
-      if (!id || !user) return false;
-      const { data } = await supabase
-        .from("user_activities")
-        .select("status")
-        .eq("activity_id", id)
-        .eq("user_id", user.id)
-        .in("status", ["completed", "insights_generated"])
-        .maybeSingle();
-      return !!data;
-    },
-    enabled: !!id && !!user
-  });
+  const lessonCompleted = isActivityCompleted;
 
   if (isLoading) {
     return (
