@@ -43,72 +43,55 @@ const Activity = () => {
   });
 
   const id = activity?.id;
-  const { data: completedTypes } = useQuery({
-    queryKey: ["completed-conversation-types", id, user?.id, profile?.couple_id],
+
+  // Check if activity is completed/insights_generated via user_activities
+  const { data: activityStatus } = useQuery({
+    queryKey: ["activity-status", id, user?.id],
     queryFn: async () => {
-      if (!id || !user) return new Set<string>();
-
-      // Get solo/face_to_face conversations by this user
-      const { data: ownConvos } = await supabase
-        .from("conversations")
-        .select("id, type")
-        .eq("activity_id", id)
-        .eq("user_id", user.id);
-
-      // Get together conversations by couple_id
-      const { data: coupleConvos } = profile?.couple_id
-        ? await supabase
-            .from("conversations")
-            .select("id, type")
-            .eq("activity_id", id)
-            .eq("couple_id", profile.couple_id)
-            .eq("type", "together")
-        : { data: [] };
-
-      // Merge and deduplicate
-      const allConvos = new Map<string, { id: string; type: string }>();
-      [...(ownConvos || []), ...(coupleConvos || [])].forEach(c => allConvos.set(c.id, c));
-      const conversations = [...allConvos.values()];
-
-      const completed = new Set<string>();
-
-      // Check per-conversation: count user messages to determine if that specific
-      // conversation type was actually completed (not just any type)
-      for (const conv of conversations) {
-        const { count } = await supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true })
-          .eq("conversation_id", conv.id)
-          .neq("role", "ai");
-
-        // Solo/face_to_face: 3+ user messages = completed
-        // Together: 6+ user messages (3 per partner) = completed
-        const threshold = conv.type === "together" ? 6 : 3;
-        if ((count || 0) >= threshold) {
-          completed.add(conv.type);
-        }
-      }
-
-      return completed;
-    },
-    enabled: !!id && !!user && profile !== undefined
-  });
-
-  const { data: lessonCompleted } = useQuery({
-    queryKey: ["lesson-completed", id, user?.id],
-    queryFn: async () => {
-      if (!id || !user) return false;
+      if (!id || !user) return null;
       const { data } = await supabase
         .from("user_activities")
         .select("status")
         .eq("activity_id", id)
         .eq("user_id", user.id)
-        .in("status", ["completed", "insights_generated"])
         .maybeSingle();
-      return !!data;
+      return data;
     },
     enabled: !!id && !!user
   });
+
+  const isActivityCompleted = activityStatus?.status === "completed" || activityStatus?.status === "insights_generated";
+
+  // Only fetch conversation types if activity is completed — single query
+  const { data: completedTypes } = useQuery({
+    queryKey: ["completed-conversation-types", id, user?.id, profile?.couple_id, isActivityCompleted],
+    queryFn: async () => {
+      if (!id || !user || !isActivityCompleted) return new Set<string>();
+
+      // Get all conversations for this activity (own + couple)
+      const { data: ownConvos } = await supabase
+        .from("conversations")
+        .select("type")
+        .eq("activity_id", id)
+        .eq("user_id", user.id);
+
+      const { data: coupleConvos } = profile?.couple_id
+        ? await supabase
+            .from("conversations")
+            .select("type")
+            .eq("activity_id", id)
+            .eq("couple_id", profile.couple_id)
+            .eq("type", "together")
+        : { data: [] };
+
+      const types = new Set<string>();
+      [...(ownConvos || []), ...(coupleConvos || [])].forEach(c => types.add(c.type));
+      return types;
+    },
+    enabled: !!id && !!user && isActivityCompleted && profile !== undefined
+  });
+
+  const lessonCompleted = isActivityCompleted;
 
   if (isLoading) {
     return (
