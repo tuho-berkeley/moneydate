@@ -954,9 +954,10 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                       <div className="flex-1 space-y-1">
                         <p className="text-sm text-foreground">{response.transcript}</p>
                         {!response.quality && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">
+                          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <Lightbulb className="w-3 h-3" />
                             Say a bit more...
-                          </Badge>
+                          </span>
                         )}
                       </div>
                       <button
