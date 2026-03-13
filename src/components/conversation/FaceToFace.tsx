@@ -520,13 +520,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     // Always save to DB regardless of quality
     let messageId: string | undefined;
     if (conversation) {
-      const role = activePartner === "partner_a" ? "user" : "partner";
-      const senderId = activePartner === "partner_a" ? (user?.id || null) : null;
+      const recordedFor = activePartner === "partner_a" ? "self" : "partner";
       const { data: inserted } = await supabase.from("messages").insert({
         conversation_id: conversation.id,
-        sender_id: senderId || null,
-        role: role as any,
-        content: JSON.stringify({ promptIndex: currentPrompt, transcript, quality }),
+        sender_id: user?.id || null,
+        role: "user" as any,
+        content: JSON.stringify({ promptIndex: currentPrompt, transcript, quality, for: recordedFor }),
       }).select("id").single();
       messageId = inserted?.id;
     }
