@@ -265,7 +265,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [extraPrompts, setExtraPrompts] = useState<Prompt[]>([]);
   const [isGeneratingMore, setIsGeneratingMore] = useState(false);
 
-  // Load extra prompts from saved messages
+  // Load extra prompts from saved messages (always sync to pick up partner-generated prompts)
   useEffect(() => {
     if (savedMessages.length === 0) return;
     const extras: Prompt[] = [];
@@ -278,9 +278,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         }
       } catch { /* skip */ }
     }
-    if (extras.length > 0 && extraPrompts.length === 0) {
-      setExtraPrompts(extras);
-    }
+    // Always update to stay in sync with DB (handles partner adding new prompts)
+    setExtraPrompts(extras);
   }, [savedMessages]);
 
   const allPrompts = [...prompts, ...extraPrompts];
