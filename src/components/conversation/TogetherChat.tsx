@@ -855,8 +855,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
             <div className="px-4 pt-3">
               <Button
                 onClick={handleGenerateInsights}
-                variant="outline"
-                className="w-full rounded-xl gap-2 border-primary/30 text-primary hover:bg-primary/5"
+                variant="secondary"
+                className="w-full rounded-xl gap-2"
                 disabled={isGeneratingInsights || isSending}
               >
                 <Sparkles className="w-4 h-4" />
