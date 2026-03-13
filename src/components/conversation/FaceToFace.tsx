@@ -498,7 +498,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     let messageId: string | undefined;
     if (conversation) {
       const role = activePartner === "partner_a" ? "user" : "partner";
-      const senderId = activePartner === "partner_a" ? user?.id : (partnerProfile?.id || user?.id);
+      const senderId = activePartner === "partner_a" ? (user?.id || null) : null;
       const { data: inserted } = await supabase.from("messages").insert({
         conversation_id: conversation.id,
         sender_id: senderId || null,
