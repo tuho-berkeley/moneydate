@@ -37,6 +37,10 @@ interface Prompt {
   guidance: string;
 }
 
+/** Convert inline bullet chars (•, ‣, ⁃) into markdown list items with line breaks */
+const normalizeBullets = (text: string): string =>
+  text.replace(/(?:^|\s)[•‣⁃]\s*/gm, '\n- ');
+
 const defaultPrompts: Prompt[] = [
   {
     question: "How did your family usually talk about money when you were growing up?",
@@ -737,12 +741,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                   <div className="bg-secondary/50 rounded-2xl p-4">
                     {isFresh ? (
                       <TypewriterText
-                        content={segment}
+                        content={normalizeBullets(segment)}
                         onComplete={() => handleSegmentTypewriterComplete(idx)}
                       />
                     ) : (
                       <div className="text-sm prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-2 prose-ul:pl-4 prose-li:my-1 prose-li:leading-relaxed prose-strong:font-semibold prose-strong:text-foreground text-foreground">
-                        <ReactMarkdown>{segment}</ReactMarkdown>
+                        <ReactMarkdown>{normalizeBullets(segment)}</ReactMarkdown>
                       </div>
                     )}
                   </div>
