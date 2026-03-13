@@ -211,8 +211,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
   // If returning to a completed conversation, show the saved summary
   useEffect(() => {
-    if (savedMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
-      const combined = savedMessages.map(m => m.content).join("\n---\n");
+    const aiMessages = savedMessages.filter(m => m.role === "ai");
+    if (aiMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
+      const combined = aiMessages.map(m => m.content).join("\n---\n");
       setSummaryText(combined);
       setShowSummary(true);
       const segments = combined.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
