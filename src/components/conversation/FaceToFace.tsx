@@ -168,7 +168,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     enabled: !!user,
   });
 
-  // Load existing AI messages (saved summary) on mount
+  // Load all saved messages (responses + AI summary) on mount
   const { data: savedMessages = [] } = useQuery({
     queryKey: ["messages", conversation?.id],
     queryFn: async () => {
@@ -177,7 +177,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         .from("messages")
         .select("*")
         .eq("conversation_id", conversation.id)
-        .eq("role", "ai")
         .order("created_at", { ascending: true });
       if (error) throw error;
       return data;
@@ -185,10 +184,36 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     enabled: !!conversation,
   });
 
+  // Restore saved responses from messages on mount
+  useEffect(() => {
+    if (savedMessages.length === 0) return;
+    const restored: PromptResponse[] = [];
+    for (const msg of savedMessages) {
+      if (msg.role === "user" || msg.role === "partner") {
+        try {
+          const parsed = JSON.parse(msg.content);
+          if (typeof parsed.promptIndex === "number" && parsed.transcript) {
+            restored.push({
+              promptIndex: parsed.promptIndex,
+              partner: msg.role === "user" ? "partner_a" : "partner_b",
+              transcript: parsed.transcript,
+            });
+          }
+        } catch {
+          // skip non-JSON messages
+        }
+      }
+    }
+    if (restored.length > 0 && responses.length === 0) {
+      setResponses(restored);
+    }
+  }, [savedMessages]);
+
   // If returning to a completed conversation, show the saved summary
   useEffect(() => {
-    if (savedMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
-      const combined = savedMessages.map(m => m.content).join("\n---\n");
+    const aiMessages = savedMessages.filter(m => m.role === "ai");
+    if (aiMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
+      const combined = aiMessages.map(m => m.content).join("\n---\n");
       setSummaryText(combined);
       setShowSummary(true);
       const segments = combined.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
@@ -295,6 +320,17 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       partner: activePartner,
       transcript,
     };
+
+    // Persist response to database
+    if (conversation) {
+      supabase.from("messages").insert({
+        conversation_id: conversation.id,
+        sender_id: user?.id || null,
+        role: activePartner === "partner_a" ? "user" : "partner" as any,
+        content: JSON.stringify({ promptIndex: currentPrompt, transcript }),
+      }).then();
+    }
+
     setResponses((prev) => {
       const updated = [...prev, newResponse];
       const partnerAQualityCount = updated.filter(r => r.partner === "partner_a").length;
@@ -306,7 +342,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     });
     setRecordingState("idle");
     toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
-  }, [currentPrompt, activePartner, markCompleted]);
+  }, [currentPrompt, activePartner, markCompleted, conversation, user]);
 
   const hasResponse = (promptIdx: number, partner: Partner) => {
     return responses.some((r) => r.promptIndex === promptIdx && r.partner === partner);
@@ -368,8 +404,29 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   }, [conversation, user, responses, activityTitle, activityDescription]);
 
   const handleRecordAgain = useCallback(() => {
+    // Delete the old response message from the database
+    if (conversation) {
+      const roleToDelete = activePartner === "partner_a" ? "user" : "partner";
+      // Find and delete matching message
+      supabase
+        .from("messages")
+        .select("id, content")
+        .eq("conversation_id", conversation.id)
+        .eq("role", roleToDelete as any)
+        .then(({ data }) => {
+          const match = data?.find((m) => {
+            try {
+              const parsed = JSON.parse(m.content);
+              return parsed.promptIndex === currentPrompt;
+            } catch { return false; }
+          });
+          if (match) {
+            supabase.from("messages").delete().eq("id", match.id).then();
+          }
+        });
+    }
     setResponses((prev) => prev.filter((r) => !(r.promptIndex === currentPrompt && r.partner === activePartner)));
-  }, [currentPrompt, activePartner]);
+  }, [currentPrompt, activePartner, conversation]);
 
   // Split summary into segments for staggered display
   const summarySegments = summaryText
