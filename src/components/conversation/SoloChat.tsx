@@ -129,8 +129,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setCompletionReached(true);
       markCompleted();
       if (conversation) {
-        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
-        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+        (async () => {
+          await supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+          queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+        })();
       }
       // If insights already generated, show post-insights state
       if (currentActivityStatus === "insights_generated") {
