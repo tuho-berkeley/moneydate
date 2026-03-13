@@ -981,7 +981,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               className="w-full rounded-xl gap-2"
             >
               <Mic className="w-5 h-5" />
-              Record
+              {currentResponses.length > 0 ? "Continue Recording" : "Record"}
             </Button>
           )}
           {recordingState === "recording" && (
