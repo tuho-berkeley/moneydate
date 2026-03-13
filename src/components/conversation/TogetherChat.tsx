@@ -832,7 +832,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
               disabled={isGeneratingInsights}
             >
               <Sparkles className="w-4 h-4" />
-              Generate Insights
+              Get Insights
             </Button>
             <Button
               onClick={handleContinueConversation}
