@@ -128,6 +128,10 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     if (count >= 3) {
       setCompletionReached(true);
       markCompleted();
+      if (conversation) {
+        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+      }
       // If insights already generated, show post-insights state
       if (currentActivityStatus === "insights_generated") {
         setShowInsights(true);
