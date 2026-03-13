@@ -168,7 +168,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     enabled: !!user,
   });
 
-  // Load existing AI messages (saved summary) on mount
+  // Load all saved messages (responses + AI summary) on mount
   const { data: savedMessages = [] } = useQuery({
     queryKey: ["messages", conversation?.id],
     queryFn: async () => {
@@ -177,13 +177,37 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         .from("messages")
         .select("*")
         .eq("conversation_id", conversation.id)
-        .eq("role", "ai")
         .order("created_at", { ascending: true });
       if (error) throw error;
       return data;
     },
     enabled: !!conversation,
   });
+
+  // Restore saved responses from messages on mount
+  useEffect(() => {
+    if (savedMessages.length === 0) return;
+    const restored: PromptResponse[] = [];
+    for (const msg of savedMessages) {
+      if (msg.role === "user" || msg.role === "partner") {
+        try {
+          const parsed = JSON.parse(msg.content);
+          if (typeof parsed.promptIndex === "number" && parsed.transcript) {
+            restored.push({
+              promptIndex: parsed.promptIndex,
+              partner: msg.role === "user" ? "partner_a" : "partner_b",
+              transcript: parsed.transcript,
+            });
+          }
+        } catch {
+          // skip non-JSON messages
+        }
+      }
+    }
+    if (restored.length > 0 && responses.length === 0) {
+      setResponses(restored);
+    }
+  }, [savedMessages]);
 
   // If returning to a completed conversation, show the saved summary
   useEffect(() => {
