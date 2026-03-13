@@ -30,18 +30,6 @@ const Activity = () => {
     enabled: !!slug
   });
 
-  // Check which conversation types have been completed for this activity
-  // Get user's couple_id for together conversation lookup
-  const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data } = await supabase.from("profiles").select("couple_id").eq("id", user.id).single();
-      return data;
-    },
-    enabled: !!user,
-  });
-
   const id = activity?.id;
 
   // Check if activity is completed/insights_generated via user_activities
@@ -62,33 +50,19 @@ const Activity = () => {
 
   const isActivityCompleted = activityStatus?.status === "completed" || activityStatus?.status === "insights_generated";
 
-  // Only fetch conversation types if activity is completed — single query
+  // Per-mode completion badges — uses conversations.completed flag
   const { data: completedTypes } = useQuery({
-    queryKey: ["completed-conversation-types", id, user?.id, profile?.couple_id, isActivityCompleted],
+    queryKey: ["completed-conversation-types", id, user?.id],
     queryFn: async () => {
-      if (!id || !user || !isActivityCompleted) return new Set<string>();
-
-      // Get all conversations for this activity (own + couple)
-      const { data: ownConvos } = await supabase
+      if (!id || !user) return new Set<string>();
+      const { data } = await supabase
         .from("conversations")
-        .select("type")
+        .select("type, completed")
         .eq("activity_id", id)
-        .eq("user_id", user.id);
-
-      const { data: coupleConvos } = profile?.couple_id
-        ? await supabase
-            .from("conversations")
-            .select("type")
-            .eq("activity_id", id)
-            .eq("couple_id", profile.couple_id)
-            .eq("type", "together")
-        : { data: [] };
-
-      const types = new Set<string>();
-      [...(ownConvos || []), ...(coupleConvos || [])].forEach(c => types.add(c.type));
-      return types;
+        .eq("completed", true);
+      return new Set((data || []).map(c => c.type));
     },
-    enabled: !!id && !!user && isActivityCompleted && profile !== undefined
+    enabled: !!id && !!user
   });
 
   const lessonCompleted = isActivityCompleted;

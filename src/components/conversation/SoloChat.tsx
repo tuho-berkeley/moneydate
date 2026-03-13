@@ -308,7 +308,11 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
     setFreshIds(new Set());
     prevMessageIdsRef.current = new Set();
     await resetCompletion();
+    if (conversation) {
+      await supabase.from("conversations").update({ completed: false } as any).eq("id", conversation.id);
+    }
     queryClient.invalidateQueries({ queryKey: ["messages", conversation.id] });
+    queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
     toast.success("Chat restarted");
   }, [conversation, isSending, queryClient, resetCompletion]);
 
