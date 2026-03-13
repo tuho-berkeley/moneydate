@@ -961,7 +961,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             {currentResponses.length > 0 && (
               <div className="w-full max-w-sm mt-4 space-y-2 min-h-0 flex-1 flex flex-col">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {activePartner === "partner_a" ? "Your" : "Your Partner's"} responses ({currentResponses.length})
+                  {activePartner === "partner_a" ? "Your" : `${partnerProfile?.display_name || "Your Partner"}'s`} responses ({currentResponses.length})
                 </p>
                 <div className="space-y-2 overflow-y-auto min-h-0 flex-1">
                   {currentResponses.map((response, idx) => (
