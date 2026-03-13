@@ -322,7 +322,7 @@ Never provide specific investment, tax, or legal advice.`,
 
 The current topic is: "${activityTitle}" — ${activityDescription}
 
-You will receive transcribed voice responses from both partners (Partner A and Partner B) across 5 discussion prompts.
+You will receive transcribed voice responses from both partners (${userName || "Partner A"} and ${partnerName || "Partner B"}) across 5 discussion prompts. Always refer to them by their names, never as "Partner A" or "Partner B".
 
 RESPONSE FORMAT — CRITICAL:
 - Use --- on a line by itself to separate distinct sections into separate chat bubbles

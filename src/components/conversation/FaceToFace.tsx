@@ -635,9 +635,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
     // Build formatted responses using only quality transcripts
     const formattedResponses = allPrompts.map((prompt, i) => {
+      const myName = profile?.display_name || "Partner A";
+      const theirName = partnerProfile?.display_name || "Partner B";
       const a = getCombinedQualityResponse(i, "partner_a");
       const b = getCombinedQualityResponse(i, "partner_b");
-      return `Question: ${prompt.question}\nPartner A: ${a || "(no quality response)"}\nPartner B: ${b || "(no quality response)"}`;
+      return `Question: ${prompt.question}\n${myName}: ${a || "(no quality response)"}\n${theirName}: ${b || "(no quality response)"}`;
+
     }).join("\n\n");
 
     let fullResponse = "";
@@ -651,6 +654,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       activityTitle,
       activityDescription: activityDescription || "",
       conversationType: "face_to_face",
+      userName: profile?.display_name,
+      partnerName: partnerProfile?.display_name,
       onDelta: (chunk) => {
         fullResponse += chunk;
       },
@@ -961,7 +966,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             {currentResponses.length > 0 && (
               <div className="w-full max-w-sm mt-4 space-y-2 min-h-0 flex-1 flex flex-col">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {activePartner === "partner_a" ? "Your" : "Your Partner's"} responses ({currentResponses.length})
+                  {activePartner === "partner_a" ? "Your" : `${partnerProfile?.display_name || "Your Partner"}'s`} responses ({currentResponses.length})
                 </p>
                 <div className="space-y-2 overflow-y-auto min-h-0 flex-1">
                   {currentResponses.map((response, idx) => (
@@ -1068,7 +1073,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 activePartner === "partner_b" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              Your Partner {hasResponse(currentPrompt, "partner_b") && "✓"}
+              {partnerProfile?.display_name || "Your Partner"} {hasResponse(currentPrompt, "partner_b") && "✓"}
             </button>
           </div>
         </div>
