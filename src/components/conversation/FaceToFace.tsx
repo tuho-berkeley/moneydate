@@ -348,7 +348,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
         try {
           const parsed = JSON.parse(msg.content);
           if (typeof parsed.promptIndex === "number" && parsed.transcript) {
-            const partner: Partner = msg.sender_id === user.id ? "partner_a" : "partner_b";
+            const partner: Partner = msg.role === "partner" ? "partner_b" : "partner_a";
             // Backward compat: if no quality field, infer with passesPreFilter
             const quality = typeof parsed.quality === "boolean"
               ? parsed.quality
