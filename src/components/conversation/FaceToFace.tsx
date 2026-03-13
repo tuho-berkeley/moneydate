@@ -966,6 +966,20 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
                 </div>
               </div>
             )}
+
+            {/* Get Insights — gated by completion */}
+            {canGenerateInsights && (
+              <div className="w-full max-w-sm mt-4">
+                <Button
+                  onClick={generateSummary}
+                  disabled={isGeneratingSummary}
+                  variant="secondary"
+                  className="w-full gap-2 rounded-xl"
+                >
+                  <Sparkles className="w-4 h-4" /> Get Insights
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -1031,17 +1045,6 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
               Your Partner {hasResponse(currentPrompt, "partner_b") && "✓"}
             </button>
           </div>
-
-          {/* Get Insights — gated by completion */}
-          {canGenerateInsights && (
-            <Button
-              onClick={generateSummary}
-              disabled={isGeneratingSummary}
-              className="w-full gap-2 rounded-xl"
-            >
-              <Sparkles className="w-4 h-4" /> Get Insights
-            </Button>
-          )}
         </div>
       </div>
     </div>
