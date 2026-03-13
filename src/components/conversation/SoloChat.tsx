@@ -468,7 +468,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       setCompletionReached(true);
       markCompleted();
       if (conversation) {
-        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        await supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
         queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
       }
       setIsSending(false);
