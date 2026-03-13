@@ -134,6 +134,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
   const [activePartner, setActivePartner] = useState<Partner>("partner_a");
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [responses, setResponses] = useState<PromptResponse[]>([]);
+  const [lastTranscript, setLastTranscript] = useState<{ text: string; partner: Partner; promptIndex: number; accepted: boolean } | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
