@@ -53,6 +53,8 @@ export function useConversationCompletion(activityId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
       queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["activity-status"] });
+      queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
     },
   });
 
@@ -73,6 +75,8 @@ export function useConversationCompletion(activityId: string) {
 
     queryClient.invalidateQueries({ queryKey: ["stages-with-activities"] });
     queryClient.invalidateQueries({ queryKey: ["activities"] });
+    queryClient.invalidateQueries({ queryKey: ["activity-status"] });
+    queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
   }, [activityId, user, queryClient]);
 
   return { markCompleted, markInsightsGenerated, resetCompletion };
