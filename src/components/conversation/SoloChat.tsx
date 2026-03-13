@@ -656,7 +656,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
                 disabled={isGeneratingInsights || isSending}
               >
                 <Sparkles className="w-4 h-4" />
-                Generate Insights
+                Get Insights
               </Button>
             </div>
           )}
