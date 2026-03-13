@@ -291,8 +291,12 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       completionReachedRef.current = true;
       setCompletionReached(true);
       markCompleted();
+      if (conversation) {
+        supabase.from("conversations").update({ completed: true } as any).eq("id", conversation.id);
+        queryClient.invalidateQueries({ queryKey: ["completed-conversation-types"] });
+      }
     }
-  }, [user, completionReached, continueAnyway, markCompleted]);
+  }, [user, completionReached, continueAnyway, markCompleted, conversation, queryClient]);
 
   const triggerAI = useCallback(async (historyForAI: { role: "user" | "assistant"; content: string }[]) => {
     if (!conversation || isAIResponding || completionReachedRef.current) return;
