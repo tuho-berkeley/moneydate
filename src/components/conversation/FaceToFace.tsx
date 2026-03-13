@@ -320,6 +320,17 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       partner: activePartner,
       transcript,
     };
+
+    // Persist response to database
+    if (conversation) {
+      supabase.from("messages").insert({
+        conversation_id: conversation.id,
+        sender_id: user?.id || null,
+        role: activePartner === "partner_a" ? "user" : "partner" as any,
+        content: JSON.stringify({ promptIndex: currentPrompt, transcript }),
+      }).then();
+    }
+
     setResponses((prev) => {
       const updated = [...prev, newResponse];
       const partnerAQualityCount = updated.filter(r => r.partner === "partner_a").length;
@@ -331,7 +342,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
     });
     setRecordingState("idle");
     toast.success(`${activePartner === "partner_a" ? "Partner A" : "Partner B"}'s response recorded!`);
-  }, [currentPrompt, activePartner, markCompleted]);
+  }, [currentPrompt, activePartner, markCompleted, conversation, user]);
 
   const hasResponse = (promptIdx: number, partner: Partner) => {
     return responses.some((r) => r.promptIndex === promptIdx && r.partner === partner);
