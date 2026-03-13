@@ -635,9 +635,12 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
 
     // Build formatted responses using only quality transcripts
     const formattedResponses = allPrompts.map((prompt, i) => {
+      const myName = profile?.display_name || "Partner A";
+      const theirName = partnerProfile?.display_name || "Partner B";
       const a = getCombinedQualityResponse(i, "partner_a");
       const b = getCombinedQualityResponse(i, "partner_b");
-      return `Question: ${prompt.question}\nPartner A: ${a || "(no quality response)"}\nPartner B: ${b || "(no quality response)"}`;
+      return `Question: ${prompt.question}\n${myName}: ${a || "(no quality response)"}\n${theirName}: ${b || "(no quality response)"}`;
+
     }).join("\n\n");
 
     let fullResponse = "";
