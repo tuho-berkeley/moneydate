@@ -984,8 +984,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
             >
               <Sparkles className="w-4 h-4" /> Get Insights
             </Button>
-          )}
-        <div className="w-full max-w-sm mx-auto space-y-3">
+          )
           {/* Recording controls */}
           {recordingState === "idle" && (
             <Button
