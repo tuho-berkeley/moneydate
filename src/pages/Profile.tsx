@@ -23,7 +23,7 @@ const settings = [
   { icon: Bell, label: "Notifications", toggle: true, active: true },
   { icon: Heart, label: "Weekly Money Date Reminders", toggle: true, active: true },
   { icon: FileText, label: "AI Conversation Summaries", toggle: true, active: true },
-  { icon: Eye, label: "Shared Vault Access", toggle: true, active: false },
+  
 ];
 
 const Profile = () => {
