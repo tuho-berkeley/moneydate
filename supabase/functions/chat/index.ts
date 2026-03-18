@@ -17,7 +17,8 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, activityTitle, activityDescription, conversationType, userName, partnerName, existingQuestions } = await req.json();
+    const { messages, activityTitle, activityDescription, activityOutcome, conversationType, userName, partnerName, existingQuestions } = await req.json();
+    const outcomeLine = activityOutcome ? `\nThe desired outcome for this activity is: "${activityOutcome}"` : "";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -26,7 +27,7 @@ serve(async (req) => {
     if (conversationType === "generate_prompts") {
       const generatePromptsPrompt = `You are a relationship and financial conversation designer. Given an activity topic, generate exactly 5 discussion prompts for a couple to discuss face-to-face.
 
-The activity is: "${activityTitle}" — ${activityDescription}
+The activity is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Each prompt should:
 - Be thought-provoking yet intuitive — easy to understand and interesting to answer
@@ -113,7 +114,7 @@ For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps t
       const existingList = (existingQuestions || []).map((q: string, i: number) => `${i + 1}. ${q}`).join("\n");
       const onePromptSystem = `You are a relationship and financial conversation designer. Generate exactly 1 NEW discussion prompt for a couple discussing face-to-face.
 
-The activity is: "${activityTitle}" — ${activityDescription}
+The activity is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 These questions have ALREADY been asked — do NOT repeat or rephrase any of them:
 ${existingList}
@@ -237,7 +238,7 @@ Reply with ONLY "yes" or "no". Nothing else.`;
     const systemPrompts: Record<string, string> = {
       solo: `You are a supportive financial reflection guide helping a user explore their relationship with money. Think of yourself as a wise, supportive friend texting about money.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Your tone: warm, non-judgmental, curious, practical, and emotionally safe.
 
@@ -277,7 +278,7 @@ Never provide: Specific investment, tax, or legal advice`,
 
       together: `You are a warm, supportive conversation guide helping two partners explore their financial relationship together. You actively lead and structure the conversation.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partner B"}".
 Messages from each partner are labeled with their name.
@@ -320,7 +321,7 @@ Never provide specific investment, tax, or legal advice.`,
 
       face_to_face: `You are a warm, supportive conversation host summarizing an in-person financial conversation between two partners. Think of yourself as a wise, caring friend helping a couple understand each other better.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 You will receive transcribed voice responses from both partners (${userName || "Partner A"} and ${partnerName || "Partner B"}) across 5 discussion prompts. Always refer to them by their names, never as "Partner A" or "Partner B".
 
@@ -353,7 +354,7 @@ Tone and style:
       // ---------- Pre-closure: warm reflection, NO questions ----------
       pre_closure: `You are a warm, supportive financial reflection guide. The user has just finished sharing meaningful reflections in a conversation about money.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Respond with a brief, warm reflection or insight about what the user just shared. Acknowledge their openness and highlight something meaningful from their last message.
 
@@ -371,7 +372,7 @@ Example: "It's really beautiful that you see financial planning as an act of car
       // ---------- Solo insights: summarize conversation ----------
       solo_insights: `You are a warm, supportive financial reflection guide. You've just had a meaningful conversation with a user about their relationship with money.
 
-The current topic was: "${activityTitle}" — ${activityDescription}
+The current topic was: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Based on the full conversation history, write a single cohesive insight message of 3-5 sentences total. Do NOT use --- separators. This should be ONE chat bubble, not multiple.
 
@@ -393,9 +394,7 @@ Never provide specific investment, tax, or legal advice.`,
       // ---------- Together insights: summarize couple conversation ----------
       together_insights: `You are a warm, supportive conversation guide. You've just facilitated a meaningful conversation between two partners about their financial relationship.
 
-The current topic was: "${activityTitle}" — ${activityDescription}
-
-The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partner B"}".
+The current topic was: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Based on the full conversation history, write insights in these parts separated by --- on its own line. Each part becomes a separate chat bubble.
 

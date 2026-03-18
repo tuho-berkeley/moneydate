@@ -20,6 +20,7 @@ export type Database = {
           icon: string
           id: string
           order_index: number
+          outcome: string | null
           slug: string
           stage_id: string | null
           title: string
@@ -31,6 +32,7 @@ export type Database = {
           icon?: string
           id?: string
           order_index?: number
+          outcome?: string | null
           slug: string
           stage_id?: string | null
           title: string
@@ -42,6 +44,7 @@ export type Database = {
           icon?: string
           id?: string
           order_index?: number
+          outcome?: string | null
           slug?: string
           stage_id?: string | null
           title?: string

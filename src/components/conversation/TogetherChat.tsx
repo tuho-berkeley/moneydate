@@ -34,9 +34,10 @@ interface TogetherChatProps {
   activityId: string;
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
 }
 
-const TogetherChat = ({ activityId, activityTitle, activityDescription }: TogetherChatProps) => {
+const TogetherChat = ({ activityId, activityTitle, activityDescription, activityOutcome }: TogetherChatProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -309,6 +310,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "together",
       userName: myName,
       partnerName,
@@ -369,6 +371,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "pre_closure",
       userName: myName,
       partnerName,
@@ -638,6 +641,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription }: Togeth
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "together_insights",
       userName: myName,
       partnerName,

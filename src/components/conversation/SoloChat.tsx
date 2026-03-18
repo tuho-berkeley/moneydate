@@ -34,6 +34,7 @@ interface SoloChatProps {
   activityId: string;
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
 }
 
 interface ChatMessage {
@@ -42,7 +43,7 @@ interface ChatMessage {
   content: string;
 }
 
-const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatProps) => {
+const SoloChat = ({ activityId, activityTitle, activityDescription, activityOutcome }: SoloChatProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -156,6 +157,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       messages: [],
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "solo",
       onDelta: (chunk) => {
         fullResponse += chunk;
@@ -339,6 +341,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "pre_closure",
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
@@ -395,6 +398,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "solo_insights",
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
@@ -498,6 +502,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatPr
         messages: historyForAI,
         activityTitle,
         activityDescription: activityDescription || "",
+        activityOutcome,
         conversationType: "solo",
         onDelta: (chunk) => {
           fullResponse += chunk;

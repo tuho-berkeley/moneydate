@@ -30,6 +30,7 @@ interface FaceToFaceProps {
   activityId: string;
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
 }
 
 interface Prompt {
@@ -75,7 +76,7 @@ interface PromptResponse {
   messageId?: string;
 }
 
-const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFaceProps) => {
+const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOutcome }: FaceToFaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -213,6 +214,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           messages: [],
           activityTitle,
           activityDescription,
+          activityOutcome,
           conversationType: "generate_prompts",
         },
       });
@@ -297,6 +299,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
           messages: [],
           activityTitle,
           activityDescription,
+          activityOutcome,
           conversationType: "generate_one_prompt",
           existingQuestions: currentAll.map(p => p.question),
         },
@@ -653,6 +656,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFa
       ],
       activityTitle,
       activityDescription: activityDescription || "",
+      activityOutcome,
       conversationType: "face_to_face",
       userName: profile?.display_name,
       partnerName: partnerProfile?.display_name,
