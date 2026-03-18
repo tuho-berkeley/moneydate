@@ -34,6 +34,7 @@ interface SoloChatProps {
   activityId: string;
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
 }
 
 interface ChatMessage {
