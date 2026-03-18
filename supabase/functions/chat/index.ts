@@ -27,7 +27,7 @@ serve(async (req) => {
     if (conversationType === "generate_prompts") {
       const generatePromptsPrompt = `You are a relationship and financial conversation designer. Given an activity topic, generate exactly 5 discussion prompts for a couple to discuss face-to-face.
 
-The activity is: "${activityTitle}" — ${activityDescription}
+The activity is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Each prompt should:
 - Be thought-provoking yet intuitive — easy to understand and interesting to answer
