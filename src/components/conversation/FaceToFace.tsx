@@ -656,7 +656,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOu
       ],
       activityTitle,
       activityDescription: activityDescription || "",
-      conversationType: "face_to_face",
+      activityOutcome,
       userName: profile?.display_name,
       partnerName: partnerProfile?.display_name,
       onDelta: (chunk) => {

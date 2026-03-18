@@ -639,7 +639,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
-      conversationType: "together_insights",
+      activityOutcome,
       userName: myName,
       partnerName,
       onDelta: (chunk) => { fullResponse += chunk; },
