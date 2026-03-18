@@ -399,6 +399,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription, activityOutc
       activityTitle,
       activityDescription: activityDescription || "",
       activityOutcome,
+      conversationType: "solo_insights",
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
