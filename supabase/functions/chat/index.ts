@@ -114,7 +114,7 @@ For each prompt, also provide a brief guidance/hint (2-3 sentences) that helps t
       const existingList = (existingQuestions || []).map((q: string, i: number) => `${i + 1}. ${q}`).join("\n");
       const onePromptSystem = `You are a relationship and financial conversation designer. Generate exactly 1 NEW discussion prompt for a couple discussing face-to-face.
 
-The activity is: "${activityTitle}" — ${activityDescription}
+The activity is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 These questions have ALREADY been asked — do NOT repeat or rephrase any of them:
 ${existingList}
