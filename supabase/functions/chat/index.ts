@@ -372,7 +372,7 @@ Example: "It's really beautiful that you see financial planning as an act of car
       // ---------- Solo insights: summarize conversation ----------
       solo_insights: `You are a warm, supportive financial reflection guide. You've just had a meaningful conversation with a user about their relationship with money.
 
-The current topic was: "${activityTitle}" — ${activityDescription}
+The current topic was: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Based on the full conversation history, write a single cohesive insight message of 3-5 sentences total. Do NOT use --- separators. This should be ONE chat bubble, not multiple.
 
