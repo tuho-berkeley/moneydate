@@ -299,6 +299,7 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOu
           messages: [],
           activityTitle,
           activityDescription,
+          activityOutcome,
           conversationType: "generate_one_prompt",
           existingQuestions: currentAll.map(p => p.question),
         },
