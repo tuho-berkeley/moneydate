@@ -370,7 +370,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
-      conversationType: "pre_closure",
+      activityOutcome,
       userName: myName,
       partnerName,
       onDelta: (chunk) => { fullResponse += chunk; },
