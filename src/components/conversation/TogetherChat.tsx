@@ -310,7 +310,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
-      conversationType: "together",
+      activityOutcome,
       userName: myName,
       partnerName,
       onDelta: (chunk) => {
