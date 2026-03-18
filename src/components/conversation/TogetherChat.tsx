@@ -311,6 +311,7 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       activityTitle,
       activityDescription: activityDescription || "",
       activityOutcome,
+      conversationType: "together",
       userName: myName,
       partnerName,
       onDelta: (chunk) => {
