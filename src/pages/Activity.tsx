@@ -177,6 +177,7 @@ const Activity = () => {
                     }
                       <p className="font-semibold text-foreground">Face-to-Face</p>
                       <p className="text-xs text-muted-foreground text-pretty">In-person with voice recording</p>
+                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5"><Clock className="w-3 h-3" />20–30 min</p>
                     </div>
                   </Button>
                 </div>
