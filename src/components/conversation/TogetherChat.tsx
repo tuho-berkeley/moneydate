@@ -376,6 +376,9 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       userName: myName,
       partnerName,
       onDelta: (chunk) => { fullResponse += chunk; },
+      onDone: async () => {
+        if (fullResponse && conversation) {
+          // Strip any sentences ending with "?" as a safety net
           fullResponse = fullResponse.replace(/[^.!?\n]*\?/g, "").trim();
           if (!fullResponse) fullResponse = "Thank you both for sharing so openly. 💛";
 
