@@ -238,7 +238,7 @@ Reply with ONLY "yes" or "no". Nothing else.`;
     const systemPrompts: Record<string, string> = {
       solo: `You are a supportive financial reflection guide helping a user explore their relationship with money. Think of yourself as a wise, supportive friend texting about money.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Your tone: warm, non-judgmental, curious, practical, and emotionally safe.
 
