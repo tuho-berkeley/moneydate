@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MessageCircle, BookOpen, PiggyBank, Loader2 } from "lucide-react";
+import { ArrowLeft, MessageCircle, BookOpen, PiggyBank, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
@@ -142,6 +142,7 @@ const Activity = () => {
                     }
                       <p className="font-semibold text-foreground">Self Discovery</p>
                       <p className="text-xs text-muted-foreground text-pretty">Reflect on your own first</p>
+                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5"><Clock className="w-3 h-3" />~15 min</p>
                     </div>
                   </Button>
 
@@ -159,6 +160,7 @@ const Activity = () => {
                     }
                       <p className="font-semibold text-foreground">Chat Together</p>
                       <p className="text-xs text-muted-foreground text-pretty">Have a guided conversation together</p>
+                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5"><Clock className="w-3 h-3" />~20 min</p>
                     </div>
                   </Button>
 
@@ -175,6 +177,7 @@ const Activity = () => {
                     }
                       <p className="font-semibold text-foreground">Face-to-Face</p>
                       <p className="text-xs text-muted-foreground text-pretty">In-person with voice recording</p>
+                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5"><Clock className="w-3 h-3" />20–30 min</p>
                     </div>
                   </Button>
                 </div>
