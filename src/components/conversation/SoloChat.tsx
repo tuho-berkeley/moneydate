@@ -342,10 +342,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription, activityOutc
       activityTitle,
       activityDescription: activityDescription || "",
       activityOutcome,
-      onDelta: (chunk) => { fullResponse += chunk; },
-      onDone: async () => {
-        if (fullResponse && conversation) {
-          // Strip any sentences ending with "?" as a safety net
+      conversationType: "pre_closure",
           fullResponse = fullResponse.replace(/[^.!?\n]*\?/g, "").trim();
           if (!fullResponse) fullResponse = "Thank you for sharing so openly. 💛";
 
