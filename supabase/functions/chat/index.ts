@@ -17,7 +17,8 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, activityTitle, activityDescription, conversationType, userName, partnerName, existingQuestions } = await req.json();
+    const { messages, activityTitle, activityDescription, activityOutcome, conversationType, userName, partnerName, existingQuestions } = await req.json();
+    const outcomeLine = activityOutcome ? `\nThe desired outcome for this activity is: "${activityOutcome}"` : "";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");

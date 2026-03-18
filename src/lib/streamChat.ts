@@ -6,6 +6,7 @@ export async function streamChat({
   messages,
   activityTitle,
   activityDescription,
+  activityOutcome,
   conversationType,
   userName,
   partnerName,
@@ -17,6 +18,7 @@ export async function streamChat({
   messages: Msg[];
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
   conversationType: string;
   userName?: string;
   partnerName?: string;
@@ -38,6 +40,7 @@ export async function streamChat({
       })),
       activityTitle,
       activityDescription,
+      activityOutcome,
       conversationType,
       userName,
       partnerName,

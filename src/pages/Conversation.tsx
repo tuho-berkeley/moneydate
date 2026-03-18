@@ -41,6 +41,7 @@ const Conversation = () => {
     activityId: activity.id,
     activityTitle: activity.title,
     activityDescription: activity.description || "",
+    activityOutcome: (activity as any).outcome || "",
   };
 
   const content = (() => {
