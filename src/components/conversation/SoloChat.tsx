@@ -339,7 +339,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription, activityOutc
       messages: historyForAI,
       activityTitle,
       activityDescription: activityDescription || "",
-      conversationType: "pre_closure",
+      activityOutcome,
       onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
