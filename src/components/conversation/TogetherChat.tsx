@@ -34,6 +34,7 @@ interface TogetherChatProps {
   activityId: string;
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
 }
 
 const TogetherChat = ({ activityId, activityTitle, activityDescription }: TogetherChatProps) => {
