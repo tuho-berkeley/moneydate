@@ -43,7 +43,7 @@ interface ChatMessage {
   content: string;
 }
 
-const SoloChat = ({ activityId, activityTitle, activityDescription }: SoloChatProps) => {
+const SoloChat = ({ activityId, activityTitle, activityDescription, activityOutcome }: SoloChatProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();

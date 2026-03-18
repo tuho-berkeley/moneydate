@@ -76,7 +76,7 @@ interface PromptResponse {
   messageId?: string;
 }
 
-const FaceToFace = ({ activityId, activityTitle, activityDescription }: FaceToFaceProps) => {
+const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOutcome }: FaceToFaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();

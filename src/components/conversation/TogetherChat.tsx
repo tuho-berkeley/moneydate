@@ -37,7 +37,7 @@ interface TogetherChatProps {
   activityOutcome?: string;
 }
 
-const TogetherChat = ({ activityId, activityTitle, activityDescription }: TogetherChatProps) => {
+const TogetherChat = ({ activityId, activityTitle, activityDescription, activityOutcome }: TogetherChatProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();

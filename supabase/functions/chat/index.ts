@@ -394,9 +394,7 @@ Never provide specific investment, tax, or legal advice.`,
       // ---------- Together insights: summarize couple conversation ----------
       together_insights: `You are a warm, supportive conversation guide. You've just facilitated a meaningful conversation between two partners about their financial relationship.
 
-The current topic was: "${activityTitle}" — ${activityDescription}
-
-The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partner B"}".
+The current topic was: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Based on the full conversation history, write insights in these parts separated by --- on its own line. Each part becomes a separate chat bubble.
 
