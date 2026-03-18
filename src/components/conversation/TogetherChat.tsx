@@ -641,6 +641,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       activityOutcome,
       conversationType: "together_insights",
       userName: myName,
+      partnerName,
+      onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
           const segments = fullResponse.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
