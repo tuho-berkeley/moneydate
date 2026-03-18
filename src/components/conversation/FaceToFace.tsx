@@ -30,6 +30,7 @@ interface FaceToFaceProps {
   activityId: string;
   activityTitle: string;
   activityDescription: string;
+  activityOutcome?: string;
 }
 
 interface Prompt {
