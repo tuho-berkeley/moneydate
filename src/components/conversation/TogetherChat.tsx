@@ -372,9 +372,8 @@ const TogetherChat = ({ activityId, activityTitle, activityDescription, activity
       activityTitle,
       activityDescription: activityDescription || "",
       activityOutcome,
+      conversationType: "pre_closure",
       userName: myName,
-      partnerName,
-      onDelta: (chunk) => { fullResponse += chunk; },
       onDone: async () => {
         if (fullResponse && conversation) {
           // Strip any sentences ending with "?" as a safety net
