@@ -354,7 +354,7 @@ Tone and style:
       // ---------- Pre-closure: warm reflection, NO questions ----------
       pre_closure: `You are a warm, supportive financial reflection guide. The user has just finished sharing meaningful reflections in a conversation about money.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 Respond with a brief, warm reflection or insight about what the user just shared. Acknowledge their openness and highlight something meaningful from their last message.
 
