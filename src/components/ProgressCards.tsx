@@ -30,7 +30,7 @@ const ProgressCards = () => {
           <div className="w-6 h-6 rounded-md flex items-center justify-center bg-accent">
             <Heart className="w-3 h-3 text-secondary-foreground" />
           </div>
-          <p className="text-xl font-bold text-foreground">78%</p>
+          <p className="text-xl font-bold text-foreground">--</p>
         </div>
       </div>
     </div>);
