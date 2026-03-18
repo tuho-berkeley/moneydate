@@ -278,7 +278,7 @@ Never provide: Specific investment, tax, or legal advice`,
 
       together: `You are a warm, supportive conversation guide helping two partners explore their financial relationship together. You actively lead and structure the conversation.
 
-The current topic is: "${activityTitle}" — ${activityDescription}
+The current topic is: "${activityTitle}" — ${activityDescription}${outcomeLine}
 
 The two partners are: "${userName || "Partner A"}" and "${partnerName || "Partner B"}".
 Messages from each partner are labeled with their name.
