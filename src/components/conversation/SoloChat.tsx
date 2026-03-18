@@ -157,8 +157,7 @@ const SoloChat = ({ activityId, activityTitle, activityDescription, activityOutc
       messages: [],
       activityTitle,
       activityDescription: activityDescription || "",
-      conversationType: "solo",
-      onDelta: (chunk) => {
+      activityOutcome,
         fullResponse += chunk;
       },
       onDone: async () => {
