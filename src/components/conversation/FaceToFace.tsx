@@ -464,7 +464,8 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOu
   // Gate insights button: both partners must have at least one response
   const canGenerateInsights = isCompleted;
 
-  // If returning to a completed conversation, show the saved summary
+  // If returning to a completed conversation, preload the saved summary
+  // but default to showing the flashcard/conversation screen (not the summary).
   useEffect(() => {
     const aiMessages = savedMessages.filter(m => {
       if (m.role !== "ai") return false;
@@ -475,10 +476,9 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOu
         return true;
       }
     });
-    if (aiMessages.length > 0 && !showSummary && !isGeneratingSummary && !summaryText) {
+    if (aiMessages.length > 0 && !isGeneratingSummary && !summaryText) {
       const combined = aiMessages.map(m => m.content).join("\n---\n");
       setSummaryText(combined);
-      setShowSummary(true);
       const segments = combined.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
       setRevealedSegments(new Set(segments.map((_, i) => i)));
     }
