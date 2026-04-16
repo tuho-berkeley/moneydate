@@ -130,7 +130,7 @@ const Activity = () => {
                 <div className="space-y-3">
                   <Button
                   variant="outline"
-                  className="w-full justify-start h-auto p-4 rounded-xl"
+                  className="w-full justify-start h-auto p-4 rounded-xl [@media(hover:none)]:hover:bg-background [@media(hover:none)]:hover:text-foreground"
                   onClick={() => handleStartConversation("solo")}>
                   
                     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
@@ -148,7 +148,7 @@ const Activity = () => {
 
                   <Button
                   variant="outline"
-                  className="w-full justify-start h-auto p-4 rounded-xl"
+                  className="w-full justify-start h-auto p-4 rounded-xl [@media(hover:none)]:hover:bg-background [@media(hover:none)]:hover:text-foreground"
                   onClick={() => handleStartConversation("together")}>
                   
                     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
@@ -165,7 +165,7 @@ const Activity = () => {
                   </Button>
 
                   <Button variant="outline"
-                className="w-full justify-start h-auto p-4 rounded-xl"
+                className="w-full justify-start h-auto p-4 rounded-xl [@media(hover:none)]:hover:bg-background [@media(hover:none)]:hover:text-foreground"
                 onClick={() => handleStartConversation("face_to_face")}>
                   
                     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mr-3">
