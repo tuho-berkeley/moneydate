@@ -786,25 +786,13 @@ const FaceToFace = ({ activityId, activityTitle, activityDescription, activityOu
               <Button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="w-full rounded-xl">
                 Complete
               </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="w-full rounded-xl gap-2">
-                    <RotateCcw className="w-4 h-4" /> Start Over
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Start over?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will clear the summary and all recorded responses. You'll start fresh with the first question.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleRestart}>Start Over</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button
+                variant="outline"
+                className="w-full rounded-xl gap-2"
+                onClick={() => setShowSummary(false)}
+              >
+                <ChevronLeft className="w-4 h-4" /> View Conversation
+              </Button>
             </div>
           )}
         </div>
